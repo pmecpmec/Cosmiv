@@ -1,0 +1,11 @@
+fastapi
+uvicorn[standard]
+python-multipart
+moviepy
+opencv-python-headless
+numpy
+scenedetect
+ffmpeg-python
+aiofiles
+python-dotenv
+tqdm

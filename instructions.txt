@@ -1,0 +1,228 @@
+🎬 AI Highlight Editor — Project Overview
+🔥 Vision
+
+The AI Highlight Editor is a web application that automatically edits highlight videos from raw gameplay or media clips.
+Users can upload a .zip folder containing their unedited clips (e.g. Counter-Strike, Valorant, IRL footage), and the system will detect highlight moments, apply an editing style, and render a complete video — all automatically.
+
+In short:
+
+“Upload raw clips → get a finished, stylized highlight video.”
+
+🎯 Core Features
+Feature	Description
+🎞️ Upload ZIP of Clips	Users drag-and-drop a .zip with raw .mp4 / .mov clips.
+🧠 AI Highlight Detection	Analyzes video + audio to find high-action or emotional moments (based on motion, sound peaks, faces, etc.).
+✂️ Auto Scene Selection	Automatically selects the best scenes up to a target duration (e.g. 60 seconds).
+🧩 Automatic Editing	Cuts, trims, adds transitions, and composes a coherent video.
+🎵 Theme System	User can select a “theme” (e.g., Cinematic, Esports Fast-Cut, Chill Montage), affecting pacing, transitions, color grading, and background music.
+🌈 Automatic Effects (future)	Integration with generative video tools like Runway / Pika / Sora for color grading, camera motion, or stylized effects.
+🚀 Full Rendering Pipeline	Returns the final .mp4 video ready to share on YouTube, TikTok, or Twitter.
+🧱 Architecture Overview
+Frontend
+
+Framework: Next.js (React)
+
+Styling: Tailwind CSS + shadcn/ui components
+
+Functionality:
+
+File upload with progress bar
+
+Theme selector (dropdown)
+
+Render job status view
+
+Preview player & download link
+
+Backend
+
+Framework: FastAPI (Python)
+
+Media Tools: FFmpeg, MoviePy
+
+AI / ML Libraries: OpenCV, PySceneDetect, Whisper (optional), TorchVision
+
+Job Queue: Redis + RQ or Celery (for async processing)
+
+Storage: S3-compatible (AWS, DigitalOcean Spaces, or MinIO)
+
+Database: PostgreSQL (user accounts, job tracking)
+
+Pipeline Summary
+
+Upload → Extraction: User uploads a ZIP of clips → server extracts to temp folder.
+
+Transcode: Converts all clips to consistent format (H.264, 1080p, 30 fps).
+
+Analysis:
+
+Scene detection (PySceneDetect)
+
+Audio peak detection (FFmpeg RMS energy)
+
+Motion intensity (OpenCV frame differencing)
+
+Optional: ASR with Whisper to detect emotional speech or commentary.
+
+Scoring:
+
+Combines audio + motion + optional face/activity presence.
+
+Each scene gets a highlight score.
+
+Selection:
+
+Selects top scenes until target duration is reached.
+
+Assembly:
+
+Concatenates selected scenes, applies transitions, adds background music & LUT (color grade).
+
+Optional overlays (logos, subtitles).
+
+Export:
+
+Renders final video with FFmpeg → returns downloadable MP4.
+
+Themes:
+
+Each theme changes pacing, transition types, color look, and audio mix style.
+
+⚙️ Tech Stack
+Layer	Technology	Purpose
+Frontend	Next.js (React)	UI, upload, preview
+Backend	FastAPI (Python)	Core API, routing
+Worker	Celery / RQ	Async video jobs
+AI / CV	OpenCV, PySceneDetect, Whisper	Scene & highlight detection
+Media Engine	FFmpeg, MoviePy	Editing, rendering
+Storage	AWS S3 / MinIO	File storage
+Database	PostgreSQL	Users, jobs, metadata
+Infra	Docker + Nginx	Deployment
+Auth (later)	JWT or OAuth2	User sessions
+🧩 Example Flow (User Perspective)
+
+User visits the site → logs in (optional).
+
+Uploads a ZIP with raw clips → selects theme “Cinematic” and sets duration to 60 s.
+
+Backend extracts, analyzes, scores scenes, and assembles a 60 s highlight reel.
+
+User sees job progress in dashboard → receives finished highlight.mp4.
+
+(Optional) User applies generative effects (e.g., color grade or slow-motion from Runway).
+
+📦 MVP (Step 1 — Local Prototype)
+
+Upload .zip
+
+Extract first video → detect scenes → score by audio + motion → pick top 60s → export
+
+Built with:
+
+FastAPI
+
+MoviePy
+
+OpenCV
+
+PySceneDetect
+
+FFmpeg
+
+Returns highlight.mp4 directly in response
+
+This MVP runs locally in VS Code using uvicorn.
+It’s the foundation for later expansion (themes, async jobs, frontend, etc.).
+
+🧠 Planned Next Steps
+
+Background Job System
+
+Offload heavy video analysis & rendering to workers (Redis + RQ/Celery).
+
+Add job queue, status polling, and retry handling.
+
+Multi-clip Handling
+
+Analyze all uploaded videos instead of the first one.
+
+Combine scenes from different files into one highlight.
+
+Theme & Style Engine
+
+Pre-built themes (Cinematic, Esports, Chill).
+
+Each theme defines transition templates, pacing, music style, color LUT.
+
+Frontend Integration
+
+Build Next.js interface with upload progress and preview player.
+
+User Accounts & Storage
+
+Allow users to log in, save previous renders, manage files.
+
+AI Enhancement Integration (Phase 2)
+
+Hook into Runway / Pika / Sora APIs for AI-powered effects.
+
+Add automatic captioning and camera movement generation.
+
+Cloud Deployment
+
+Dockerized services (frontend, backend, worker, Redis, DB).
+
+Deploy on AWS / Fly.io / Render with persistent storage.
+
+💡 Long-Term Vision
+
+Allow creators, streamers, and gamers to upload hours of content and instantly generate highlight reels.
+
+Eventually add editing intelligence — pacing, music syncing, captions, and motion graphics driven by LLM + CV models.
+
+Make video editing as simple as describing the vibe:
+
+“Make me a 1-minute cinematic highlight of my best Valorant plays, dark blue theme, high-energy music.”
+
+🧰 Current Repository (Status)
+File	Purpose
+src/main.py	FastAPI entry point & upload endpoint
+src/media_processing.py	Core pipeline: unzip → transcode → detect → score → edit
+requirements.txt	Dependencies
+README.md	Setup instructions
+tests/ (future)	Unit tests for highlight detection & scoring
+frontend/ (future)	Next.js web client
+🧑‍💻 Local Dev Setup
+# 1. Clone repo
+git clone https://github.com/yourname/ai-highlight-editor
+cd ai-highlight-editor
+
+# 2. Create virtualenv
+python -m venv .venv
+source .venv/bin/activate
+
+# 3. Install deps
+pip install -r requirements.txt
+
+# 4. Run local API
+cd src
+uvicorn main:app --reload
+
+# 5. Test with a zip upload
+curl -X POST "http://127.0.0.1:8000/upload" \
+  -F "file=@/path/to/clips.zip" \
+  -F "target_duration=60" \
+  --output highlight.mp4
+
+📅 Project Stage Tracking
+Stage	Status	Notes
+Local MVP (FFmpeg + PySceneDetect)	✅ Done	Runs locally in VS Code
+Multi-video support	⏳ Planned	Combine clips
+Async workers	⏳ Planned	Redis + RQ
+Frontend	⏳ Planned	Next.js upload UI
+Themes & presets	⏳ Planned	Style config
+AI enhancements	🔮 Future	Runway / Pika integration
+Cloud deploy	🔮 Future	Docker / AWS
+🧩 Key Goal
+
+To make professional-quality highlight videos possible without manual editing, powered by AI detection, automated scene selection, and dynamic style templates.
