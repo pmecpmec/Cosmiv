@@ -95,7 +95,7 @@ async def create_job(files: List[UploadFile] = File(...), target_duration: int =
 
     render_job.delay(jid, target_duration)
 
-    return {"job_id": jid, "status": JobStatus.PENDING}
+    return {"job_id": jid, "status": JobStatus.PENDING, "stage": job.stage, "progress": job.progress}
 
 @app.get("/jobs/{job_id}/status")
 def job_status(job_id: str):
@@ -107,6 +107,11 @@ def job_status(job_id: str):
             "job_id": job.job_id,
             "status": job.status,
             "error": job.error,
+            "stage": job.stage,
+            "progress": job.progress,
+            "started_at": job.started_at.isoformat() if job.started_at else None,
+            "finished_at": job.finished_at.isoformat() if job.finished_at else None,
+            "updated_at": job.updated_at.isoformat() if job.updated_at else None,
         }
 
 @app.get("/jobs/{job_id}/download")

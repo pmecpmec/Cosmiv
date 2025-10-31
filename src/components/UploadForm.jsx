@@ -143,9 +143,13 @@ export default function UploadForm() {
         attempts++;
         const st = await fetch(`/api/v2/jobs/${data.job_id}/status`);
         const stData = await st.json();
+        if (typeof stData.progress === "number") {
+          setProgress(Math.min(95, Math.max(10, stData.progress)));
+        } else {
+          setProgress((prev) => Math.min(90, Math.max(prev, 10 + attempts)));
+        }
         if (stData.status === "SUCCESS") break;
         if (stData.status === "FAILED") throw new Error(stData.error || "Job failed");
-        setProgress(Math.min(90, 10 + attempts));
       }
 
       // Fetch download URL for selected format

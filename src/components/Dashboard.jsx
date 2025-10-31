@@ -70,7 +70,9 @@ export default function Dashboard() {
             <div key={j.job_id} className="flex items-center justify-between text-sm text-gray-300 bg-white/5 rounded-lg p-3">
               <div className="flex-1">
                 <div className="text-white font-mono text-xs">{j.job_id}</div>
-                <div>Status: <span className={j.status==="SUCCESS"?"text-green-400":"text-yellow-300"}>{j.status}</span></div>
+                <div>Status: <span className={j.status==="SUCCESS"?"text-green-400":j.status==="FAILED"?"text-red-400":"text-yellow-300"}>{j.status}</span></div>
+                <div className="text-xs text-gray-400">Stage: {j.stage || "-"}</div>
+                <div className="text-xs text-gray-400">Progress: {typeof j.progress === "number" ? `${j.progress}%` : "-"}</div>
               </div>
               <div className="flex gap-2">
                 {["landscape","portrait"].map((fmt)=> (

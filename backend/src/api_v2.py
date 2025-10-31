@@ -40,7 +40,12 @@ async def create_job_v2(
 
     render_job.delay(jid, target_duration)
 
-    return {"job_id": jid, "status": JobStatus.PENDING}
+    return {
+        "job_id": jid,
+        "status": JobStatus.PENDING,
+        "stage": job.stage,
+        "progress": job.progress,
+    }
 
 @router.get("/jobs")
 def list_jobs(limit: int = 20):
@@ -53,6 +58,10 @@ def list_jobs(limit: int = 20):
                 "job_id": j.job_id,
                 "status": j.status,
                 "target_duration": j.target_duration,
+                "stage": j.stage,
+                "progress": j.progress,
+                "started_at": j.started_at.isoformat() if j.started_at else None,
+                "finished_at": j.finished_at.isoformat() if j.finished_at else None,
                 "renders": [{"format": r.format, "path": r.output_path} for r in renders],
             })
         return {"jobs": result}
@@ -63,7 +72,16 @@ def job_status_v2(job_id: str):
         job = session.exec(select(Job).where(Job.job_id == job_id)).first()
         if not job:
             return JSONResponse({"error": "job not found"}, status_code=404)
-        return {"job_id": job.job_id, "status": job.status, "error": job.error}
+        return {
+            "job_id": job.job_id,
+            "status": job.status,
+            "error": job.error,
+            "stage": job.stage,
+            "progress": job.progress,
+            "started_at": job.started_at.isoformat() if job.started_at else None,
+            "finished_at": job.finished_at.isoformat() if job.finished_at else None,
+            "updated_at": job.updated_at.isoformat() if job.updated_at else None,
+        }
 
 @router.get("/jobs/{job_id}/download")
 def job_download_v2(job_id: str, format: str = Query("landscape", enum=["landscape","portrait"])):
