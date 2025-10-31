@@ -1,33 +1,204 @@
-# Auto-Editor MVP — Step 1
+# 🎬 Aiditor - AI Highlight Editor
 
-## Prereqs (local dev)
+An AI-powered web application that automatically edits highlight videos from raw gameplay or media clips.
 
-- Python 3.10+ (recommended)
-- ffmpeg installed and on PATH (`ffmpeg` CLI)
-  - Ubuntu/Debian: `sudo apt install ffmpeg`
-  - macOS (Homebrew): `brew install ffmpeg`
+## 🚀 Quick Start
 
-## Install
+### Prerequisites
 
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
+- **Backend**: Docker and Docker Compose
+- **Frontend**: Node.js 18+ and npm
 
-## Run (development)
+### Backend Setup (Docker)
 
-cd src
-uvicorn main:app --reload --host 127.0.0.1 --port 8000
+```powershell
+cd backend
+docker-compose up -d
+```
 
-## Test (curl)
+The API will be available at `http://localhost:8000`
 
-curl -X POST "http://127.0.0.1:8000/upload" \
- -F "file=@/path/to/your/clips.zip" \
- -F "target_duration=60" \
- --output highlight.mp4
+### Frontend Setup
 
-## Notes
+```powershell
+# Install dependencies
+npm install
 
-- This MVP is synchronous and intended for local testing. For production:
-  - Move heavy processing to isolated worker containers (Celery/RQ/etc.)
-  - Use S3 for storage, and async job status endpoints.
-  - Improve scoring model and add theme presets, music ducking, transitions, overlays.
+# Start development server
+npm run dev
+```
+
+The frontend will be available at `http://localhost:3000`
+
+## 📁 Project Structure
+
+```
+Aiditor/
+├── backend/                 # Python FastAPI backend
+│   ├── src/
+│   │   ├── main.py         # API endpoints
+│   │   ├── media_processing.py  # Video processing pipeline
+│   │   ├── requirements.txt
+│   │   └── Dockerfile
+│   ├── docker-compose.yml
+│   └── README.md
+├── frontend/                # React + Vite frontend
+│   └── src/
+│       ├── App.jsx
+│       ├── index.jsx
+│       └── components/
+│           ├── UploadForm.jsx
+│           └── ProgressBar.jsx
+├── src/                     # Main frontend files
+│   ├── App.jsx
+│   ├── index.jsx
+│   ├── index.css
+│   └── components/
+├── package.json
+├── vite.config.js
+├── tailwind.config.js
+└── README.md
+```
+
+## 🎯 Features
+
+- 🎞️ **Upload ZIP of Clips**: Drag-and-drop your raw video clips
+- 🧠 **AI Highlight Detection**: Automatically finds high-action moments
+- ✂️ **Smart Scene Selection**: Selects best scenes up to target duration
+- 🎵 **Multiple Themes**: Choose from Cinematic, Esports, or Chill styles
+- 🚀 **Full Rendering Pipeline**: Returns final MP4 ready to download
+
+## 🛠️ Technology Stack
+
+### Backend
+
+- FastAPI (Python)
+- FFmpeg
+- PySceneDetect
+- OpenCV
+- MoviePy
+- Docker
+
+### Frontend
+
+- React 18
+- Vite
+- Tailwind CSS
+- Modern, responsive UI
+
+## 📝 Usage
+
+1. Start the backend: `cd backend && docker-compose up -d`
+2. Start the frontend: `npm run dev`
+3. Open `http://localhost:3000` in your browser
+4. Upload a ZIP file containing your video clips
+5. Select a theme and target duration
+6. Click "Generate Highlight Reel"
+7. Download your finished highlight video!
+
+## 🔧 Development
+
+### Backend
+
+```powershell
+# View logs
+docker-compose -f backend/docker-compose.yml logs -f
+
+# Rebuild container
+docker-compose -f backend/docker-compose.yml build --no-cache
+
+# Stop container
+docker-compose -f backend/docker-compose.yml down
+```
+
+### Frontend
+
+```powershell
+# Development mode with hot reload
+npm run dev
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+```
+
+## 📡 API Endpoints
+
+- `POST /upload` - Upload a ZIP file and generate highlights
+  - Parameters: `file` (ZIP), `target_duration` (seconds)
+  - Returns: MP4 video file
+
+## 🐛 Troubleshooting
+
+### Backend Issues
+
+**Container won't start:**
+
+```powershell
+docker logs backend-backend-1
+docker-compose -f backend/docker-compose.yml restart
+```
+
+**Port already in use:**
+Edit `backend/docker-compose.yml` to change the port mapping.
+
+### Frontend Issues
+
+**Port 3000 in use:**
+Edit `vite.config.js` to use a different port.
+
+**Can't connect to backend:**
+Make sure the backend is running: `docker-compose -f backend/docker-compose.yml ps`
+
+## 🎨 Themes
+
+- **Cinematic**: Slow, dramatic cuts with movie-like quality
+- **Esports Fast-Cut**: Fast-paced, energetic for gaming highlights
+- **Chill Montage**: Relaxed, smooth transitions
+
+## 📚 Next Steps
+
+- [ ] Implement real theme-specific processing
+- [ ] Add background music integration
+- [ ] Multi-clip processing
+- [ ] User authentication
+- [ ] Cloud storage integration
+- [ ] AI-powered enhancements (Runway/Sora)
+
+## 📄 License
+
+MIT
+
+## 🤝 Contributing
+
+Contributions welcome! Please open an issue or pull request.
+
+## v2 Async Flow (Jobs)
+
+- Create a job (async render): frontend uses POST `/v2/jobs` with files and target duration
+- Poll status: GET `/v2/jobs/{job_id}/status`
+- Download URL: GET `/v2/jobs/{job_id}/download?format=landscape|portrait`
+
+## Multi-aspect Exports
+
+- The renderer outputs both `final_landscape.mp4` and `final_portrait.mp4`
+- If object storage is enabled, the API returns a presigned URL; otherwise a local path/URL is returned
+
+## GPU Acceleration (optional)
+
+- The pipeline attempts NVENC (`h264_nvenc`) and falls back to `libx264`
+- Ensure host supports NVIDIA drivers for NVENC to take effect
+
+## Billing (mock)
+
+- GET `/v2/billing/plans`
+- POST `/v2/billing/checkout` — returns mocked checkout URL
+- POST `/v2/billing/entitlements` — test-only to set plan (free/pro)
+- GET `/v2/billing/entitlements?user_id=...`
+
+## Dashboard
+
+- Frontend Dashboard shows analytics summary and recent jobs
+- Uses `/analytics/summary` and `/v2/jobs` to display system status

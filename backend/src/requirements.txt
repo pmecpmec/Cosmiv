@@ -9,3 +9,7 @@ ffmpeg-python
 aiofiles
 python-dotenv
 tqdm
+sqlmodel
+celery[redis]
+redis
+pydantic-settings
