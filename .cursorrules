@@ -1,0 +1,54 @@
+# AIDIT Cursor Rules - Secrets Management
+
+## Environment Variables & Secrets
+
+### NEVER
+- ❌ Display raw secret values in responses
+- ❌ Commit `.env` files to git
+- ❌ Hardcode secrets in source code
+- ❌ Share secrets in chat or logs
+- ❌ Use production secrets in development
+
+### ALWAYS
+- ✅ Use `.env.example` templates with placeholders
+- ✅ Mask secret values when displaying (e.g., `sk_test_****...****1234`)
+- ✅ Validate secrets before deployment
+- ✅ Categorize secrets correctly (User vs Team)
+- ✅ Keep documentation synchronized
+
+## Secret Categories
+
+### User Secrets (Personal)
+Store in: Cursor Settings → User Secrets
+- Gaming platform APIs (Steam, Xbox, PSN, Nintendo)
+- Personal AI/ML API keys (OpenAI)
+- Personal analytics tokens
+
+### Team Secrets (Shared)
+Store in: Cursor Settings → Team Secrets
+- Database credentials (PostgreSQL)
+- Redis connection strings
+- Object storage keys (S3/MinIO)
+- Payment processing (Stripe)
+- Security keys (JWT, Session)
+- Email service credentials (SMTP)
+- Monitoring services (Sentry)
+
+## Validation
+Before any deployment or major change:
+```bash
+cd backend
+python validate_secrets.py
+```
+
+## Documentation
+- Full guide: `SECRETS_MANAGEMENT.md`
+- Cursor setup: `CURSOR_SECRETS_GUIDE.md`
+- Quick reference: `SECRETS_QUICK_REFERENCE.md`
+
+## When Adding New Secrets
+1. Add to `config.py` with proper typing
+2. Add to `.env.example` with placeholder
+3. Update documentation
+4. Categorize as User or Team Secret
+5. Notify team if Team Secret

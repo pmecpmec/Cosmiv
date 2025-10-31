@@ -23,10 +23,26 @@ dist-ssr
 *.sln
 *.sw?
 
-# Environment variables
+# Environment variables - NEVER commit secrets!
 .env
 .env.local
 .env.*.local
+.env.production
+.env.staging
+.env.development
+backend/.env
+backend/.env.*
+!backend/.env.example
+!.env.example
+
+# Secret files
+secrets/
+*.key
+*.pem
+*.p12
+*.pfx
+*.secret
+.secrets
 
 # Python
 __pycache__/
