@@ -19,17 +19,37 @@ from api_billing_v2 import router as billing_v2_router
 
 app = FastAPI(title="Auto-Editor MVP")
 
-# CORS for local dev
+# CORS configuration from settings
+allowed_origins = settings.ALLOWED_ORIGINS.split(",")
+
+# Security validation for production
+if settings.ENVIRONMENT == "production":
+    if any("localhost" in origin or "127.0.0.1" in origin for origin in allowed_origins):
+        raise ValueError("Localhost origins not allowed in production CORS configuration")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-    ],
+    allow_origins=allowed_origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],  # Explicit methods only
+    allow_headers=["Content-Type", "Authorization", "X-CSRF-Token"],  # Explicit headers only
+    max_age=3600,  # Cache preflight requests for 1 hour
 )
+
+# Security headers middleware
+@app.middleware("http")
+async def add_security_headers(request, call_next):
+    response = await call_next(request)
+    # Prevent MIME type sniffing
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    # Prevent clickjacking
+    response.headers["X-Frame-Options"] = "DENY"
+    # XSS protection
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    # HSTS for production
+    if settings.ENVIRONMENT == "production":
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    return response
 
 @app.on_event("startup")
 def on_startup():

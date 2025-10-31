@@ -13,3 +13,8 @@ sqlmodel
 celery[redis]
 redis
 pydantic-settings
+python-jose[cryptography]>=3.3.0
+passlib[bcrypt]>=1.7.4
+cryptography>=41.0.0
+slowapi>=0.1.9
+httpx>=0.24.0
