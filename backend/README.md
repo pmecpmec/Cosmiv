@@ -83,6 +83,7 @@ backend/
 - ✂️ Intelligent highlight selection up to target duration
 - 🎵 Video concatenation and rendering with FFmpeg
 - 🐳 Containerized with Docker for easy deployment
+- 📈 Job progress tracking with retry-aware Celery workers
 
 ## Development
 
@@ -128,6 +129,8 @@ ports:
 
 - `REDIS_URL` (default `redis://redis:6379/0`)
 - `DB_PATH` (default `/app/storage/db.sqlite3`)
+- `HIGHLIGHT_DETECTOR` (`heuristic` by default; hook for future detectors)
+- `ENABLE_NVENC` (toggle NVENC render attempts)
 
 ## API
 
@@ -227,6 +230,21 @@ Models:
 - `User`, `UserAuth`, `DiscoveredClip`
 
 Note: For production, replace mocks with real provider SDK/API integrations and secure OAuth flows.
+
+## Observability & Reliability
+
+- Celery render tasks now record `stage` and `progress` for each job.
+- Transient FFmpeg errors automatically trigger retries with exponential backoff.
+- `/jobs/{job_id}/status` (and v2 equivalent) responds with progress, stage, and timing metadata.
+
+## Testing
+
+Run the backend unit tests (highlight detector heuristics, job progress persistence, error handling):
+
+```bash
+cd backend
+pytest
+```
 
 ## Highlight Detection 2.0 (model-ready)
 

@@ -1,5 +1,6 @@
 from sqlmodel import SQLModel, create_engine, Session
 from config import settings
+from models import Job
 import os
 
 if settings.USE_POSTGRES:
@@ -11,7 +12,32 @@ else:
 
 def init_db():
     SQLModel.metadata.create_all(engine)
+    _apply_migrations()
 
 
 def get_session() -> Session:
     return Session(engine)
+
+
+def _apply_migrations() -> None:
+    """Lightweight migrations for existing deployments."""
+    if engine.dialect.name == "sqlite":
+        _ensure_sqlite_columns(
+            table=Job.__tablename__ if hasattr(Job, "__tablename__") else "job",
+            columns={
+                "stage": "TEXT DEFAULT 'queued'",
+                "progress": "INTEGER DEFAULT 0",
+                "started_at": "DATETIME",
+                "finished_at": "DATETIME",
+                "last_error_at": "DATETIME",
+            },
+        )
+
+
+def _ensure_sqlite_columns(table: str, columns: dict) -> None:
+    with engine.begin() as conn:
+        existing = conn.exec_driver_sql(f"PRAGMA table_info({table})").fetchall()
+        existing_cols = {row[1] for row in existing}
+        for name, ddl in columns.items():
+            if name not in existing_cols:
+                conn.exec_driver_sql(f"ALTER TABLE {table} ADD COLUMN {name} {ddl}")

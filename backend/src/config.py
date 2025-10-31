@@ -6,10 +6,14 @@ class Settings(BaseSettings):
     USE_POSTGRES: bool = False
     USE_OBJECT_STORAGE: bool = False
     USE_HIGHLIGHT_MODEL: bool = False
+    HIGHLIGHT_DETECTOR: str = "heuristic"
 
     # Freemium
     FREEMIUM_MAX_DURATION: int = 60
     WATERMARK_TEXT: str = "Aiditor Free"
+
+    # Rendering
+    ENABLE_NVENC: bool = True
 
     # DB
     POSTGRES_DSN: str = "postgresql+psycopg://postgres:postgres@postgres:5432/aiditor"

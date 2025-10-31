@@ -5,6 +5,7 @@ from datetime import datetime
 class JobStatus:
     PENDING = "PENDING"
     PROCESSING = "PROCESSING"
+    RETRYING = "RETRYING"
     SUCCESS = "SUCCESS"
     FAILED = "FAILED"
 
@@ -16,6 +17,11 @@ class Job(SQLModel, table=True):
     status: str = Field(default=JobStatus.PENDING)
     target_duration: int = Field(default=60)
     error: Optional[str] = None
+    stage: str = Field(default="queued")
+    progress: int = Field(default=0)
+    started_at: Optional[datetime] = None
+    finished_at: Optional[datetime] = None
+    last_error_at: Optional[datetime] = None
 
 class Clip(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)

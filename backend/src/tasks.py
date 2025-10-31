@@ -1,26 +1,25 @@
+import logging
 import os
+from datetime import datetime
+from typing import List
+
 from celery import Celery
 from db import get_session
-from models import Job, JobStatus, Render, UserAuth, DiscoveredClip
+from models import DiscoveredClip, Job, JobStatus, Render, UserAuth
 from storage import job_upload_dir, job_export_dir
 from sqlmodel import select
-from typing import List, Tuple
-from pipeline.preprocess import preprocess_clips
-from pipeline.highlight_detection import detect_scenes_seconds, motion_score
-from pipeline.editing import write_ffconcat, render_from_concat
-from pipeline.music import generate_music_bed
-from pipeline.censor import build_censor_filter_chain
-from services.clip_discovery import mock_fetch_recent_clips, MOCK_PROVIDERS
-from config import settings
-try:
-    from ml.highlights.model import get_model
-except Exception:
-    get_model = None
 
-from services.storage_adapters import get_storage
-from pipeline.editing import render_matrix
-from services.stt.whisper_stub import transcribe_audio
+from config import settings
 from pipeline.censor import build_profanity_mute_filters
+from pipeline.editing import render_with_fallback, write_ffconcat
+from pipeline.highlight_detection import SceneSlice, get_highlight_detector
+from pipeline.music import generate_music_bed
+from pipeline.preprocess import preprocess_clips
+from pipeline.utils.ffmpeg import FFmpegExecutionError, run_ffmpeg
+from services.clip_discovery import mock_fetch_recent_clips
+from services.job_state import update_job_state
+from services.storage_adapters import get_storage
+from services.stt.whisper_stub import transcribe_audio
 
 REDIS_URL = os.getenv("REDIS_URL", "redis://redis:6379/0")
 CELERY_BROKER_URL = REDIS_URL
@@ -32,6 +31,8 @@ celery_app = Celery(
     backend=CELERY_RESULT_BACKEND,
 )
 
+logger = logging.getLogger(__name__)
+
 # Beat schedule: every 30 minutes sync user clips (mock)
 celery_app.conf.beat_schedule = {
     "sync-user-clips-every-30m": {
@@ -39,6 +40,43 @@ celery_app.conf.beat_schedule = {
         "schedule": 1800.0,
     }
 }
+
+
+class RenderPipelineError(Exception):
+    """Non-retryable error raised when the pipeline cannot recover."""
+
+
+class RetryableRenderError(Exception):
+    """Raised for transient errors that should trigger a Celery retry."""
+
+
+TRANSIENT_ERROR_KEYWORDS = (
+    "resource temporarily unavailable",
+    "server returned 5",
+    "timed out",
+    "i/o error",
+    "connection reset",
+    "connection refused",
+    "temporarily unavailable",
+)
+
+
+def _classify_ffmpeg_error(exc: FFmpegExecutionError) -> Exception:
+    stderr = (exc.stderr or "").lower()
+    if any(keyword in stderr for keyword in TRANSIENT_ERROR_KEYWORDS):
+        return RetryableRenderError(str(exc))
+    return RenderPipelineError(str(exc))
+
+
+VIDEO_EXTENSIONS = (".mp4", ".mov", ".mkv", ".webm", ".avi", ".m4v")
+
+
+def _list_uploaded_clips(upload_dir: str) -> List[str]:
+    try:
+        names = sorted(os.listdir(upload_dir))
+    except FileNotFoundError:
+        return []
+    return [os.path.join(upload_dir, name) for name in names if name.lower().endswith(VIDEO_EXTENSIONS)]
 
 @celery_app.task(name="sync_all_users_clips")
 def sync_all_users_clips():
@@ -71,153 +109,184 @@ def sync_user_clips(user_id: str):
                 ))
         session.commit()
 
-@celery_app.task(name="render_job")
-def render_job(job_id: str, target_duration: int):
+def _mux_with_music(video_path: str, music_path: str, output_path: str, mute_chain: str) -> None:
+    filters = []
+    if mute_chain and mute_chain != "anull":
+        filters.append(f"[0:a]{mute_chain}[a_clean]")
+        voice_src = "[a_clean]"
+    else:
+        voice_src = "[0:a]"
+    filters.append(f"{voice_src}volume=1.0[a0]")
+    filters.append("[1:a]volume=0.2[a1]")
+    filters.append("[a0][a1]amix=inputs=2:duration=shortest[aout]")
+
+    filter_complex_parts = [";".join(filters)]
+    video_map = "0:v"
+    video_codec_args = ["-c:v", "copy"]
+
+    if settings.WATERMARK_TEXT:
+        escaped = settings.WATERMARK_TEXT.replace("'", "\\'").replace(":", "\\:")
+        filter_complex_parts.append(
+            f"[0:v]drawtext=text='{escaped}':fontcolor=white:fontsize=24:x=w-tw-20:y=h-th-20:alpha=0.5[vout]"
+        )
+        video_map = "[vout]"
+        video_codec_args = ["-c:v", "libx264", "-preset", "veryfast", "-crf", "20"]
+
+    filter_complex = ";".join(filter_complex_parts)
+    cmd = [
+        "ffmpeg",
+        "-y",
+        "-i",
+        video_path,
+        "-i",
+        music_path,
+        "-filter_complex",
+        filter_complex,
+        "-map",
+        video_map,
+        "-map",
+        "[aout]",
+        *video_codec_args,
+        "-c:a",
+        "aac",
+        "-b:a",
+        "192k",
+        "-shortest",
+        output_path,
+    ]
+    run_ffmpeg(cmd)
+
+
+@celery_app.task(
+    bind=True,
+    name="render_job",
+    autoretry_for=(RetryableRenderError,),
+    retry_backoff=True,
+    retry_backoff_max=600,
+    retry_jitter=True,
+    retry_kwargs={"max_retries": 3},
+)
+def render_job(self, job_id: str, target_duration: int):
     export_dir = job_export_dir(job_id)
     upload_dir = job_upload_dir(job_id)
 
-    from sqlmodel import Session  # local import to avoid circular issues
-    with get_session() as session:
-        job = session.exec(select(Job).where(Job.job_id == job_id)).first()
-        if not job:
-            return
-        job.status = JobStatus.PROCESSING
-        session.add(job)
-        session.commit()
+    logger.info("Render job %s started (attempt %s)", job_id, self.request.retries + 1)
+    max_attempts = (getattr(self, "max_retries", 3) or 3) + 1
+    update_job_state(job_id, status=JobStatus.PROCESSING, stage="preparing", progress=5, mark_started=True)
+
+    video_files = _list_uploaded_clips(upload_dir)
+    if not video_files:
+        raise RenderPipelineError("No uploaded clips found for job")
 
     try:
-        # Collect uploaded clips
-        video_files: List[str] = []
-        for name in os.listdir(upload_dir):
-            if name.lower().endswith((".mp4", ".mov", ".mkv", ".webm", ".avi", ".m4v")):
-                video_files.append(os.path.join(upload_dir, name))
-        if not video_files:
-            raise ValueError("No uploaded clips found for job")
-
-        # 1) Preprocess
+        update_job_state(job_id, stage="preprocessing", progress=15)
         preprocessed = preprocess_clips(video_files, export_dir)
 
-        # 2) Detect scenes across files and score
-        candidates: List[Tuple[str, float, float, float]] = []  # (path, start, dur, score)
-        if settings.USE_HIGHLIGHT_MODEL and get_model:
-            model = get_model()
-            for vp in preprocessed:
-                events = model.detect_events(vp)
-                # Boost scenes near detected events
-                scenes = detect_scenes_seconds(vp)
-                for (s, e) in scenes:
-                    dur = max(0.5, e - s)
-                    mot = motion_score(vp, s, min(dur, 10.0))
-                    proximity_boost = 0.0
-                    for ev in events:
-                        if abs(ev["time"] - (s + dur / 2)) < 3.0:
-                            proximity_boost = max(proximity_boost, ev["confidence"] * 10.0)
-                    score = mot + proximity_boost
-                    candidates.append((vp, s, dur, score))
-        else:
-            for vp in preprocessed:
-                scenes = detect_scenes_seconds(vp)
-                for (s, e) in scenes:
-                    dur = max(0.5, e - s)
-                    mot = motion_score(vp, s, min(dur, 10.0))
-                    score = mot
-                    candidates.append((vp, s, dur, score))
+        update_job_state(job_id, stage="analysis", progress=35)
+        detector = get_highlight_detector()
+        slices: List[SceneSlice] = detector.detect(preprocessed, target_duration)
+        if not slices:
+            raise RenderPipelineError("Highlight detector returned no slices")
 
-        # Sort by score desc and pick until target_duration
-        candidates.sort(key=lambda x: x[3], reverse=True)
-        selected: List[Tuple[str, float, float]] = []
-        total = 0.0
-        for (vp, s, dur, score) in candidates:
-            if total >= target_duration:
-                break
-            take = min(dur, max(1.0, min(4.0, target_duration - total)))
-            selected.append((vp, s, take))
-            total += take
+        selected = [(s.video_path, s.start, s.duration) for s in slices]
+        total_duration = sum(s.duration for s in slices)
 
-        if not selected:
-            # Fallback: take from first file
-            selected = [(preprocessed[0], 0.0, float(target_duration))]
-
-        # 3) Build concat and renders (landscape + portrait)
+        update_job_state(job_id, stage="rendering", progress=55)
         concat_path = os.path.join(export_dir, "concat.txt")
         write_ffconcat(concat_path, selected)
+
         variants = ["landscape", "portrait"]
-        from pipeline.editing import render_with_fallback
         video_outputs = {}
-        for v in variants:
-            out_path = os.path.join(export_dir, f"video_{v}.mp4")
-            render_with_fallback(concat_path, out_path, preset=v)
-            video_outputs[v] = out_path
+        for idx, variant in enumerate(variants):
+            update_job_state(job_id, stage=f"rendering:{variant}", progress=60 + idx * 5)
+            out_path = os.path.join(export_dir, f"video_{variant}.mp4")
+            try:
+                render_with_fallback(concat_path, out_path, preset=variant)
+            except FFmpegExecutionError as exc:
+                raise _classify_ffmpeg_error(exc)
+            video_outputs[variant] = out_path
 
-        # 4) Generate simple music bed
+        update_job_state(job_id, stage="music", progress=75)
         music_path = os.path.join(export_dir, "music.mp3")
-        generate_music_bed(total or target_duration, music_path, freq=220)
+        try:
+            generate_music_bed(total_duration or target_duration, music_path, freq=220)
+        except FFmpegExecutionError as exc:
+            raise _classify_ffmpeg_error(exc)
 
-        # STT transcription for profanity mute spans (stub)
         transcript = transcribe_audio(preprocessed[0])
         mute_chain = build_profanity_mute_filters(transcript.get("profanity", []))
 
-        # 5) Mix music into each variant with mute + optional watermark
-        import subprocess
+        update_job_state(job_id, stage="mixdown", progress=85)
         final_outputs = {}
-        for v, vid in video_outputs.items():
-            final_path = os.path.join(export_dir, f"final_{v}.mp4")
-            # Base audio chain: mute profanities then amix music
-            af = f"[0:a]{mute_chain}[aclean];[aclean]volume=1.0[a0];[1:a]volume=0.2[a1];[a0][a1]amix=inputs=2:duration=shortest[aout]"
-            vf_overlay = "null"
-            if settings.WATERMARK_TEXT:
-                # Simple drawtext watermark bottom-right
-                pos = "x=w-tw-20:y=h-th-20"
-                vf_overlay = f"drawtext=text='{settings.WATERMARK_TEXT}':fontcolor=white:fontsize=24:{pos}:alpha=0.5"
-            cmd = [
-                "ffmpeg","-y","-i", vid, "-i", music_path,
-                "-filter_complex", af + (";[0:v]"+vf_overlay+"[vout]" if vf_overlay!="null" else ""),
-                "-map", "0:v" if vf_overlay=="null" else "[vout]",
-                "-map","[aout]",
-                "-c:v","copy" if vf_overlay=="null" else "libx264","-preset","veryfast","-crf","20",
-                "-c:a","aac","-b:a","192k","-shortest", final_path
-            ]
-            subprocess.run(cmd, check=True)
-            final_outputs[v] = final_path
+        for variant, video_path in video_outputs.items():
+            final_path = os.path.join(export_dir, f"final_{variant}.mp4")
+            try:
+                _mux_with_music(video_path, music_path, final_path, mute_chain)
+            except FFmpegExecutionError as exc:
+                raise _classify_ffmpeg_error(exc)
+            final_outputs[variant] = final_path
 
-        # 6) Optional upload to object storage
+        update_job_state(job_id, stage="publishing", progress=92)
         storage = get_storage()
-        public_map = {}
         if settings.USE_OBJECT_STORAGE:
-            for v, path in final_outputs.items():
-                key = f"exports/{job_id}/final_{v}.mp4"
-                # upload via S3 adapter
+            for variant, path in final_outputs.items():
+                key = f"exports/{job_id}/final_{variant}.mp4"
                 try:
-                    storage.upload(path, key)  # type: ignore
-                    public_map[v] = storage.presigned_url(key)  # type: ignore
-                except Exception:
-                    public_map[v] = path
-        else:
-            for v, path in final_outputs.items():
-                public_map[v] = path
+                    storage.upload(path, key)  # type: ignore[attr-defined]
+                except Exception as exc:
+                    logger.warning("Upload to object storage failed for %s: %s", path, exc)
+        # Local storage already points to the filesystem path via final_outputs
 
-        with get_session() as session:
-            job = session.exec(select(Job).where(Job.job_id == job_id)).first()
-            job.status = JobStatus.SUCCESS
-            for v, path in final_outputs.items():
-                session.add(Render(job_id=job_id, output_path=path, format=v))
-            session.add(job)
-            session.commit()
+        update_job_state(job_id, status=JobStatus.SUCCESS, stage="completed", progress=100, mark_finished=True)
 
-        # Save a small marker file for URLs (optional)
-        try:
-            with open(os.path.join(export_dir, "urls.txt"), "w") as f:
-                for v, url in public_map.items():
-                    f.write(f"{v}: {url}\n")
-        except Exception:
-            pass
-
-    except Exception as e:
         with get_session() as session:
             job = session.exec(select(Job).where(Job.job_id == job_id)).first()
             if job:
-                job.status = JobStatus.FAILED
-                job.error = str(e)
+                job.error = None
+                job.stage = "completed"
+                job.progress = 100
+                job.status = JobStatus.SUCCESS
+                job.finished_at = job.finished_at or datetime.utcnow()
+                job.updated_at = datetime.utcnow()
+                for variant, path in final_outputs.items():
+                    session.add(Render(job_id=job_id, output_path=path, format=variant))
                 session.add(job)
                 session.commit()
+
+        logger.info("Render job %s completed", job_id)
+
+    except RetryableRenderError as exc:
+        attempt = self.request.retries + 1
+        logger.warning(
+            "Render job %s transient failure (attempt %s/%s): %s",
+            job_id,
+            attempt,
+            max_attempts,
+            exc,
+        )
+        update_job_state(job_id, status=JobStatus.RETRYING, stage="retrying", progress=95, error=str(exc))
+        raise
+    except RenderPipelineError as exc:
+        logger.error("Render job %s failed: %s", job_id, exc)
+        update_job_state(job_id, status=JobStatus.FAILED, stage="failed", progress=100, error=str(exc), mark_finished=True)
+        raise
+    except FFmpegExecutionError as exc:
+        mapped = _classify_ffmpeg_error(exc)
+        if isinstance(mapped, RetryableRenderError):
+            attempt = self.request.retries + 1
+            logger.warning(
+                "Render job %s ffmpeg transient failure (attempt %s/%s): %s",
+                job_id,
+                attempt,
+                max_attempts,
+                mapped,
+            )
+            update_job_state(job_id, status=JobStatus.RETRYING, stage="retrying", progress=95, error=str(mapped))
+            raise mapped
+        logger.error("Render job %s ffmpeg failure: %s", job_id, mapped)
+        update_job_state(job_id, status=JobStatus.FAILED, stage="failed", progress=100, error=str(mapped), mark_finished=True)
+        raise mapped
+    except Exception as exc:
+        logger.exception("Render job %s unexpected failure", job_id)
+        update_job_state(job_id, status=JobStatus.FAILED, stage="failed", progress=100, error=str(exc), mark_finished=True)
         raise

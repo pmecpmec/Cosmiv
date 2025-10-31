@@ -1,17 +1,21 @@
-import subprocess
+from pipeline.utils.ffmpeg import run_ffmpeg
 
 
 def generate_music_bed(duration: float, output_path: str, freq: int = 220) -> str:
     cmd = [
         "ffmpeg",
         "-y",
-        "-f", "lavfi",
-        "-t", str(duration),
-        "-i", f"sine=frequency={freq}:sample_rate=44100:beep_factor=2",
-        "-filter:a", "volume=0.15",
+        "-f",
+        "lavfi",
+        "-t",
+        str(duration),
+        "-i",
+        f"sine=frequency={freq}:sample_rate=44100:beep_factor=2",
+        "-filter:a",
+        "volume=0.15",
         output_path,
     ]
-    subprocess.run(cmd, check=True)
+    run_ffmpeg(cmd)
     return output_path
 
 

@@ -1,6 +1,7 @@
 import os
-import subprocess
 from typing import List
+
+from pipeline.utils.ffmpeg import run_ffmpeg
 
 FFMPEG = "ffmpeg"
 
@@ -10,16 +11,23 @@ def normalize_clip(input_path: str, output_path: str) -> str:
     cmd = [
         FFMPEG,
         "-y",
-        "-i", input_path,
-        "-vf", "scale=1920:-1:flags=lanczos,fps=30",
-        "-c:v", "libx264",
-        "-preset", "veryfast",
-        "-crf", "20",
-        "-c:a", "aac",
-        "-b:a", "192k",
+        "-i",
+        input_path,
+        "-vf",
+        "scale=1920:-1:flags=lanczos,fps=30",
+        "-c:v",
+        "libx264",
+        "-preset",
+        "veryfast",
+        "-crf",
+        "20",
+        "-c:a",
+        "aac",
+        "-b:a",
+        "192k",
         output_path,
     ]
-    subprocess.run(cmd, check=True)
+    run_ffmpeg(cmd)
     return output_path
 
 

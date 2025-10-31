@@ -67,6 +67,7 @@ Aiditor/
 - ✂️ **Smart Scene Selection**: Selects best scenes up to target duration
 - 🎵 **Multiple Themes**: Choose from Cinematic, Esports, or Chill styles
 - 🚀 **Full Rendering Pipeline**: Returns final MP4 ready to download
+- 📈 **Live Job Progress**: Track render stages and automatic retries in real time
 
 ## 🛠️ Technology Stack
 
@@ -109,6 +110,9 @@ docker-compose -f backend/docker-compose.yml build --no-cache
 
 # Stop container
 docker-compose -f backend/docker-compose.yml down
+
+# Run backend unit tests
+pytest
 ```
 
 ### Frontend
@@ -166,6 +170,14 @@ Make sure the backend is running: `docker-compose -f backend/docker-compose.yml 
 - [ ] User authentication
 - [ ] Cloud storage integration
 - [ ] AI-powered enhancements (Runway/Sora)
+
+## ✅ Phase 1 Enhancements
+
+- Modular highlight detector combining motion, loudness, and optional ML events.
+- Hardened FFmpeg rendering with NVENC capability checks and structured fallbacks.
+- Celery jobs expose `stage`, `progress`, and timing metadata with retry support.
+- Frontend dashboard surfaces progress, and async upload polling reflects real status.
+- Added pytest coverage for detector scoring and job state persistence.
 
 ## 📄 License
 
