@@ -1,6 +1,7 @@
 from typing import Optional
 from sqlmodel import SQLModel, Field
 from datetime import datetime
+from sqlalchemy import Column, JSON
 
 class JobStatus:
     PENDING = "PENDING"
@@ -34,6 +35,20 @@ class Render(SQLModel, table=True):
     job_id: str = Field(index=True)
     output_path: str
     format: str = Field(default="landscape")
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class UploadedClip(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    clip_id: str = Field(index=True, unique=True)
+    storage_path: str
+    storage_provider: str = Field(default="local")
+    original_name: str
+    content_type: Optional[str] = None
+    size_bytes: int = Field(default=0)
+    metadata_json: Optional[dict] = Field(default=None, sa_column=Column(JSON))
+    status: str = Field(default="uploaded")
+    public_url: Optional[str] = None
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
 # New Big Road models
