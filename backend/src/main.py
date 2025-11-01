@@ -1,5 +1,6 @@
 from fastapi import FastAPI, UploadFile, File, Form
 from fastapi.responses import FileResponse, JSONResponse
+from starlette.background import BackgroundTask
 from media_processing import process_zip_highlight
 import tempfile, os, shutil
 from typing import List
@@ -65,10 +66,10 @@ async def upload_zip(file: UploadFile = File(...), target_duration: int = Form(6
             f.write(await file.read())
         highlight_path = process_zip_highlight(zip_path, target_duration, workdir)
         return FileResponse(
-            highlight_path, 
-            filename="highlight.mp4", 
+            highlight_path,
+            filename="highlight.mp4",
             media_type="video/mp4",
-            background=lambda: shutil.rmtree(workdir, ignore_errors=True)
+            background=BackgroundTask(shutil.rmtree, workdir, True)
         )
     except Exception as e:
         shutil.rmtree(workdir, ignore_errors=True)
@@ -91,7 +92,7 @@ async def upload_clips(files: List[UploadFile] = File(...), target_duration: int
             highlight_path,
             filename="highlight.mp4",
             media_type="video/mp4",
-            background=lambda: shutil.rmtree(workdir, ignore_errors=True)
+            background=BackgroundTask(shutil.rmtree, workdir, True)
         )
     except Exception as e:
         shutil.rmtree(workdir, ignore_errors=True)
