@@ -17,6 +17,7 @@ from api_styles_v2 import router as styles_v2_router
 from api_social_v2 import router as social_v2_router
 from config import settings
 from api_billing_v2 import router as billing_v2_router
+from api_upload import router as upload_router
 
 app = FastAPI(title="Auto-Editor MVP")
 
@@ -161,3 +162,4 @@ app.include_router(accounts_v2_router)
 app.include_router(styles_v2_router)
 app.include_router(social_v2_router)
 app.include_router(billing_v2_router)
+app.include_router(upload_router)
