@@ -2,7 +2,7 @@
 
 📋 **1. Overview**
 
-Welcome, Daan (aka `DeWindWaker`)! You’re our integrations and inspiration scout. Your focus areas:
+Welcome, Daan (aka `DeWindWaker`)! You’re our integrations and inspiration scout. Your focus areas (no coding required—just research, planning, and documentation):
 
 - Connect the platform to external APIs and services (game networks, billing, AI tooling, storage)
 - Source modern UI/UX inspiration that fits an AI-powered gaming montage experience
@@ -19,25 +19,24 @@ Welcome, Daan (aka `DeWindWaker`)! You’re our integrations and inspiration sco
 
 🚀 **3. Tasks to Do** *(mark with ✅ when finished, leave ❌ until complete)*
 
-- **API & Integrations**
-  - ❌ Inventory credential requirements and OAuth flows for Steam, Xbox Live, PlayStation Network, and Nintendo Switch; note trust center URLs and required scopes
-  - ❌ Confirm billing provider path (Stripe vs. alternative) and capture webhook/event workflow; draft `.env.example` entries for secret keys
-  - ❌ Review AI service touchpoints (Whisper STT, MusicGen/Riffusion, highlight ML) and outline which external APIs we’ll call vs. host in-house; document where credentials/config will live
-  - ❌ Smoke-test existing mock endpoints through the frontend to ensure request/response shapes are ready for live swapping
+- **API & Integrations Strategy**
+  - ❌ Inventory credential requirements and OAuth flows for Steam, Xbox Live, PlayStation Network, and Nintendo Switch; list developer portal links, scopes, review timelines, and estimated fees
+  - ❌ Draft an integration readiness brief (one-pager) describing how each provider’s sandbox/live environments work and what user information we must request during onboarding
+  - ❌ Confirm billing provider direction (Stripe vs. Paddle vs. Xsolla) with pros/cons for gaming subscriptions; include webhook events we’ll need and suggest `.env` variables for secrets storage
 
-- **Automation & Operations**
-  - ❌ Map clip import/export automation: define cron cadence for Celery beat, export destinations (S3 vs. local), and weekly montage auto-upload targets
-  - ❌ Validate S3/MinIO adapter paths by running a credentials dry-run plan (no keys yet); note bucket naming conventions and IAM needs
-  - ❌ Propose notification surface (email, Discord, webhooks) for when weekly montage jobs finish, including which service would send it
+- **Hosting, Automation & Operations**
+  - ❌ Evaluate three hosting options (e.g., Fly.io, Render, Railway, AWS) for the FastAPI + Celery stack; capture pricing, GPU availability, and deployment complexity in a comparison table
+  - ❌ Map the clip import/export automation flow: note desired Celery beat cadence, storage destination (S3 vs. local), and where weekly montage uploads should land (YouTube, S3 folder, etc.)
+  - ❌ Recommend a notification/alerting approach when weekly montage jobs finish (Slack, Discord, email); outline tool choices and setup steps (no code required)
 
 - **Design & UX Research**
-  - ❌ Collect at least three modern gaming/AI dashboard inspirations (Dribbble, Behance, Pinterest, etc.); drop assets or links into a new `/designs/` folder with short captions
-  - ❌ Draft motion/animation ideas (loading screen, tab transitions, success states) and log them in `/designs/notes.md`
-  - ❌ Summarize typography, color, and iconography direction that matches the references so UI can be themed consistently
+  - ❌ Collect at least three modern gaming/AI dashboard inspirations (Dribbble, Behance, Pinterest, etc.) and save links or screenshots into `/designs/` with short captions
+  - ❌ Draft motion/animation concepts (loading screen, tab transitions, success celebrations) and log them in `/designs/notes.md`
+  - ❌ Summarize typography, color palette, and iconography direction that aligns with the references so the UI can be themed consistently
 
 - **Documentation & Comms**
   - ❌ After finishing each task above, update its marker here to ✅ and add a one-line summary with date
-  - ❌ Notify Pedro (`pmec`) inside Discord/PM when an integration is verified or new design set is ready; include any blockers ChatGPT surfaced
+  - ❌ Notify Pedro (`pmec`) inside Discord/PM when an integration plan, hosting recommendation, or design set is ready; include any blockers ChatGPT surfaced
 
 🧭 **4. If You Don’t Know What to Do Next**
 

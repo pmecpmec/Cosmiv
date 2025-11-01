@@ -9,10 +9,11 @@
 - Automated tests for highlight detection heuristics and Celery task behavior in `backend/tests`
 
 ## ⚙️ In Progress
-- Real platform OAuth & clip import integrations (Steam, Xbox Live, PlayStation Network, Nintendo Switch) – Daan auditing credential flows and scopes
-- Billing provider selection and webhook planning to replace mock Stripe endpoints – Daan coordinating requirements
-- Weekly montage automation blueprint (Celery beat schedule, export destinations, notification channel) – Daan drafting
-- Design inspiration research for modern gaming/AI dashboards, animations, and typography – Daan gathering references and motion ideas
+- Platform credential research for Steam, Xbox Live, PlayStation Network, and Nintendo Switch – Daan compiling developer portal requirements and scopes
+- Billing provider evaluation (Stripe vs. Paddle vs. Xsolla) with webhook/event mapping – Daan preparing recommendation brief
+- Hosting strategy comparison (Fly.io, Render, Railway, AWS) for FastAPI + Celery – Daan gathering pricing, GPU availability, deployment considerations
+- Weekly montage automation planning (Celery beat cadence, export destinations, notification channel) – Daan outlining operations flow
+- Design inspiration roundup for gaming/AI dashboards, animations, and visual language – Daan capturing references and motion ideas
 
 ## 🕒 Pending
 - Production-ready OAuth implementations and secure credential storage for all game platforms
