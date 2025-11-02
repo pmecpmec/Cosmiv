@@ -23,7 +23,7 @@ jobs:
         env:
           POSTGRES_PASSWORD: postgres
           POSTGRES_USER: postgres
-          POSTGRES_DB: aiditor_test
+          POSTGRES_DB: cosmiv_test
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -118,8 +118,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run linter
-        run: npm run lint || true
+      - name: Run tests
+        run: npm test -- --passWithNoTests || true
 
       - name: Build
         run: npm run build
