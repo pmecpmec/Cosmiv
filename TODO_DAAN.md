@@ -2,6 +2,12 @@
 
 _Last updated: 2025-01-27 by agent_cosmiv_sync_
 
+> **🔄 Need to regenerate this file?** 
+> 
+> Simply open `AGENT_PROMPTS/DAAN_TODO_GENERATOR.md`, copy everything from "## 🪐 Agent Prompt" to the end, and paste it into Cursor's agent prompt. 
+> 
+> **Quick guide:** See `FOR_DAAN_HOW_TO_USE_AGENTS.md` for step-by-step instructions.
+
 ## 👋 Welcome, Daan (DeWindWaker)
 
 You're in charge of **API integrations**, **external service connections**, and **design inspiration** for **Cosmiv**, the AI Gaming Montage Platform.  

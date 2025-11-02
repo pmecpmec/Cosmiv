@@ -264,7 +264,9 @@ _Last updated: 2025-01-27 by agent_cosmiv_email (email system added)_
 
 - `README.md` - Project overview
 - `COSMIV_STORY.md` - **Complete Cosmiv story, branding, and style guide (READ THIS FIRST)**
+- `FOR_DAAN_HOW_TO_USE_AGENTS.md` - **Quick guide for Daan to use agent prompts**
 - `AGENT_PROMPTS/` - **Cursor agent prompts for Broken Planet transformation**
+  - `DAAN_TODO_GENERATOR.md` - **Daan's personal TODO generator (copy & paste ready)**
   - `BIGROAD_BROKENPLANET.md` - Project audit and Big Road planning
   - `STYLE_AUDITOR_BROKENPLANET.md` - UI style audit and updates
   - `TODO_DAAN_BROKENPLANET.md` - Non-technical task assignment
