@@ -438,7 +438,6 @@ export default function UploadForm() {
                 onChange={handleFileChangeMulti}
                 disabled={isUploading}
               />
-
               <span className="text-4xl sm:text-5xl">🎞️</span>
               <div className="space-y-1">
                 <p className="text-lg sm:text-xl font-semibold text-white">
