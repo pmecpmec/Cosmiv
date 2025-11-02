@@ -26,7 +26,7 @@ CELERY_BROKER_URL = REDIS_URL
 CELERY_RESULT_BACKEND = REDIS_URL
 
 celery_app = Celery(
-    "aiditor",
+    "cosmiv",
     broker=CELERY_BROKER_URL,
     backend=CELERY_RESULT_BACKEND,
 )

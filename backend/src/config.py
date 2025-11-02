@@ -25,13 +25,13 @@ class Settings(BaseSettings):
 
     # Freemium
     FREEMIUM_MAX_DURATION: int = 60
-    WATERMARK_TEXT: str = "Aiditor Free"
+    WATERMARK_TEXT: str = "Cosmiv Free"
 
     # Rendering
     ENABLE_NVENC: bool = True
 
     # DB
-    POSTGRES_DSN: str = "postgresql+psycopg://postgres:CHANGEME@postgres:5432/aiditor"
+    POSTGRES_DSN: str = "postgresql+psycopg://postgres:CHANGEME@postgres:5432/cosmiv"
     DB_PATH: str = "/app/storage/db.sqlite3"
 
     # Storage (S3/MinIO)
@@ -40,8 +40,8 @@ class Settings(BaseSettings):
     S3_REGION: str = "us-east-1"
     S3_ACCESS_KEY: str = "minioadmin"
     S3_SECRET_KEY: str = "minioadmin"
-    S3_BUCKET: str = "aiditor"
-    S3_PUBLIC_BASE_URL: str = "http://localhost:9000/aiditor"
+    S3_BUCKET: str = "cosmiv"
+    S3_PUBLIC_BASE_URL: str = "http://localhost:9000/cosmiv"
 
     # Broker
     REDIS_URL: str = "redis://redis:6379/0"

@@ -72,7 +72,7 @@ You should see:
 
 ### Step 5: Open Browser
 
-Visit `http://localhost:3000` to see your Aiditor app!
+Visit `http://localhost:3000` to see your Cosmiv app!
 
 ## 🎨 Features Implemented
 

@@ -1,6 +1,6 @@
 # ✅ Setup Complete!
 
-Your Aiditor AI Highlight Editor is fully configured and ready to use!
+Your Cosmiv AI Gaming Montage Platform is fully configured and ready to use!
 
 ## 🎉 What's Been Completed
 
@@ -102,7 +102,7 @@ The frontend features:
 ## 📁 File Structure
 
 ```
-Aiditor/
+Cosmiv/
 ├── backend/
 │   ├── src/
 │   │   ├── main.py              ✅ API endpoints

@@ -37,8 +37,8 @@ export default function Billing() {
       {error && <div className="text-red-400 text-sm mb-3">⚠️ {error}</div>}
 
       {currentPlan && (
-        <div className="bg-purple-500/20 border border-purple-500/40 rounded-xl p-4 mb-6">
-          <div className="text-white font-semibold">Current: {currentPlan.plan.toUpperCase()}</div>
+        <div className="bg-cosmic-violet/20 border border-cosmic-violet/40 rounded-xl p-4 mb-6 backdrop-blur-sm">
+          <div className="text-white font-semibold">Current: {currentPlan.plan === "free" ? "Cosmic Cadet" : currentPlan.plan === "pro" ? "Nebula Knight" : currentPlan.plan.toUpperCase()}</div>
         </div>
       )}
 
@@ -47,11 +47,11 @@ export default function Billing() {
         {plans.map((p) => (
           <div
             key={p.id}
-            className={`bg-white/10 border rounded-xl p-6 ${
-              p.price === 0 ? "border-white/20" : "border-purple-400/50"
+            className={`bg-white/10 border rounded-xl p-6 backdrop-blur-sm hover:border-cosmic-neon-cyan/50 transition-all ${
+              p.price === 0 ? "border-white/20" : "border-cosmic-violet/50"
             }`}
           >
-            <div className="text-white text-xl font-semibold mb-2">{p.name}</div>
+            <div className="text-white text-xl font-semibold mb-2 bg-gradient-to-r from-cosmic-violet to-cosmic-neon-cyan bg-clip-text text-transparent">{p.name}</div>
             <div className="text-white text-3xl font-bold mb-4">
               ${p.price}
               {p.price > 0 && <span className="text-sm">/month</span>}
@@ -63,7 +63,7 @@ export default function Billing() {
             </ul>
             <button
               onClick={() => setEntitlement(p.id)}
-              className="w-full bg-purple-500/70 hover:bg-purple-600 text-white font-semibold py-2 rounded-lg transition-all"
+              className="w-full bg-gradient-to-r from-cosmic-violet to-cosmic-deep-blue hover:from-cosmic-purple hover:to-cosmic-violet text-white font-semibold py-2 rounded-lg transition-all shadow-lg shadow-cosmic-violet/30"
             >
               {currentPlan?.plan === p.id ? "Current Plan" : "Select"}
             </button>
@@ -72,7 +72,7 @@ export default function Billing() {
       </div>
 
       {/* Note */}
-      <div className="mt-6 bg-blue-500/10 border border-blue-500/30 rounded-xl p-4 text-blue-200 text-sm">
+      <div className="mt-6 bg-cosmic-deep-blue/10 border border-cosmic-neon-cyan/30 rounded-xl p-4 text-cosmic-neon-cyan/80 text-sm backdrop-blur-sm">
         ℹ️ Demo mode: set plan via test endpoint. Production uses Stripe checkout sessions.
       </div>
     </div>

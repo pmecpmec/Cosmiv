@@ -207,7 +207,7 @@ export default function UploadForm() {
             Upload Your Clip
           </h2>
           <p className="text-sm sm:text-base text-gray-300 max-w-2xl mx-auto lg:mx-0">
-            Drop in a single clip, tweak the desired highlight length, and let Aiditor handle the rest. We’ll process your footage and deliver a polished highlight reel.
+            Drop in a single clip, tweak the desired highlight length, and let Cosmiv handle the rest. We'll process your footage and deliver a polished highlight reel.
           </p>
         </header>
 

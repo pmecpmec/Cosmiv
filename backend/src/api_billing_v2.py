@@ -8,8 +8,8 @@ from datetime import datetime, timedelta
 router = APIRouter(prefix="/v2/billing")
 
 PLANS = [
-    {"id":"free","name":"Free","price":0,"features":["60s limit","watermark"]},
-    {"id":"pro","name":"Pro","price":9,"features":["longer renders","no watermark"]},
+    {"id":"free","name":"Cosmic Cadet","price":0,"features":["60s limit","watermark"]},
+    {"id":"pro","name":"Nebula Knight","price":9,"features":["longer renders","no watermark"]},
 ]
 
 @router.get("/plans")

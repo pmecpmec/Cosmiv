@@ -1,6 +1,6 @@
-# 🎬 Aiditor - AI Highlight Editor
+# 🌌 Cosmiv - AI Gaming Montage Platform
 
-An AI-powered web application that automatically edits highlight videos from raw gameplay or media clips.
+An AI-powered web application that automatically edits highlight videos from raw gameplay or media clips. Cosmiv features a futuristic cosmic interface with space-themed UI elements and an intelligent AI assistant represented as a glowing cosmic orb.
 
 ## 🚀 Quick Start
 
@@ -33,7 +33,7 @@ The frontend will be available at `http://localhost:3000`
 ## 📁 Project Structure
 
 ```
-Aiditor/
+Cosmiv/
 ├── backend/                 # Python FastAPI backend
 │   ├── src/
 │   │   ├── main.py         # API endpoints

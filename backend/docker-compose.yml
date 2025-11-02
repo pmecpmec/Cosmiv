@@ -14,12 +14,12 @@ services:
       - DB_PATH=/app/storage/db.sqlite3
       - USE_POSTGRES=false
       - USE_OBJECT_STORAGE=false
-      - POSTGRES_DSN=postgresql+psycopg://postgres:postgres@postgres:5432/aiditor
+      - POSTGRES_DSN=postgresql+psycopg://postgres:postgres@postgres:5432/cosmiv
       - S3_ENDPOINT_URL=http://minio:9000
       - S3_ACCESS_KEY=minioadmin
       - S3_SECRET_KEY=minioadmin
-      - S3_BUCKET=aiditor
-      - S3_PUBLIC_BASE_URL=http://localhost:9000/aiditor
+      - S3_BUCKET=cosmiv
+      - S3_PUBLIC_BASE_URL=http://localhost:9000/cosmiv
     depends_on:
       - redis
     restart: unless-stopped
@@ -36,7 +36,7 @@ services:
       - REDIS_URL=redis://redis:6379/0
       - DB_PATH=/app/storage/db.sqlite3
       - USE_POSTGRES=false
-      - POSTGRES_DSN=postgresql+psycopg://postgres:postgres@postgres:5432/aiditor
+      - POSTGRES_DSN=postgresql+psycopg://postgres:postgres@postgres:5432/cosmiv
     depends_on:
       - redis
 
@@ -66,7 +66,7 @@ services:
     environment:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_USER=postgres
-      - POSTGRES_DB=aiditor
+      - POSTGRES_DB=cosmiv
     ports:
       - "5432:5432"
     volumes:

@@ -4,21 +4,23 @@ import Dashboard from './components/Dashboard'
 import Accounts from './components/Accounts'
 import Billing from './components/Billing'
 import Social from './components/Social'
+import CosmicBackground from './components/CosmicBackground'
 import './App.css'
 
 function App() {
   const [activeTab, setActiveTab] = useState("upload")
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      <div className="container mx-auto px-4 py-16">
+    <div className="min-h-screen relative">
+      <CosmicBackground />
+      <div className="container mx-auto px-4 py-16 relative z-10">
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-5xl font-bold text-white mb-4">
-            🎬 Aiditor
+            🌌 Cosmiv
           </h1>
           <p className="text-xl text-gray-300">
-            AI-Powered Highlight Video Editor
+            AI-Powered Gaming Montage Platform
           </p>
         </div>
 
@@ -37,8 +39,8 @@ function App() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`px-4 py-2 text-sm font-semibold transition-all border-b-2 ${
                   activeTab === tab.id
-                    ? "border-purple-400 text-purple-400"
-                    : "border-transparent text-gray-400 hover:text-white"
+                    ? "border-cosmic-neon-cyan text-cosmic-neon-cyan"
+                    : "border-transparent text-gray-400 hover:text-cosmic-violet"
                 }`}
               >
                 {tab.icon} {tab.label}

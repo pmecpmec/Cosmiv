@@ -115,7 +115,7 @@ def write_ffconcat(workdir: str, selected: List[SceneCandidate]) -> str:
 # Update ZIP flow to reuse multi-file pipeline
 def process_zip_highlight(zip_path: str, target_duration: int, workdir: str = None):
     if workdir is None:
-        workdir = tempfile.mkdtemp(prefix="aiditor_")
+        workdir = tempfile.mkdtemp(prefix="cosmiv_")
     try:
         extract_dir = os.path.join(workdir, "extracted")
         os.makedirs(extract_dir, exist_ok=True)

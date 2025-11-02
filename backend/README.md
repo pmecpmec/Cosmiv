@@ -1,4 +1,4 @@
-# Aiditor Backend
+# Cosmiv Backend
 
 FastAPI backend for AI-powered video highlight editing.
 
@@ -188,7 +188,7 @@ docker-compose logs -f worker
 ## Infra options
 
 - SQLite (default) or Postgres: set `USE_POSTGRES=true` and provide `POSTGRES_DSN`.
-- Local FS (default) or MinIO/S3: set `USE_OBJECT_STORAGE=true` and S3 envs. Create bucket `aiditor` in MinIO console (http://localhost:9001).
+- Local FS (default) or MinIO/S3: set `USE_OBJECT_STORAGE=true` and S3 envs. Create bucket `cosmiv` in MinIO console (http://localhost:9001).
 
 ## Compose (optional services)
 
@@ -200,15 +200,15 @@ docker-compose logs -f worker
 ```
 USE_POSTGRES=false
 USE_OBJECT_STORAGE=false
-POSTGRES_DSN=postgresql+psycopg://postgres:postgres@postgres:5432/aiditor
+POSTGRES_DSN=postgresql+psycopg://postgres:postgres@postgres:5432/cosmiv
 REDIS_URL=redis://redis:6379/0
 DB_PATH=/app/storage/db.sqlite3
 S3_ENDPOINT_URL=http://minio:9000
 S3_REGION=us-east-1
 S3_ACCESS_KEY=minioadmin
 S3_SECRET_KEY=minioadmin
-S3_BUCKET=aiditor
-S3_PUBLIC_BASE_URL=http://localhost:9000/aiditor
+S3_BUCKET=cosmiv
+S3_PUBLIC_BASE_URL=http://localhost:9000/cosmiv
 ```
 
 ## Accounts & Clip Discovery (v2)

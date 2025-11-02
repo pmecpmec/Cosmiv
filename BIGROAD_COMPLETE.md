@@ -179,7 +179,7 @@ USE_POSTGRES = False  # SQLite by default
 USE_OBJECT_STORAGE = False  # Local storage by default
 USE_HIGHLIGHT_MODEL = False  # Mock model off by default
 FREEMIUM_MAX_DURATION = 60  # seconds
-WATERMARK_TEXT = "Aiditor Free"
+WATERMARK_TEXT = "Cosmiv Free"
 ```
 
 **docker-compose.yml** env vars control all behavior.
