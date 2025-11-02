@@ -685,6 +685,11 @@ These are tasks you can tackle together without coding:
 | 2025-01-27 | Initial TODO list created   | ✅     | Agent generated tasks                         |
 | 2025-01-27 | OAuth infrastructure review | ⚙️     | Found mock implementations, need credentials  |
 | 2025-01-27 | Billing system review       | ⚙️     | Stripe structure exists, needs webhook config |
+| 2025-01-27 | OAuth integration brief     | ✅     | Created `docs/INTEGRATION_READINESS.md` - comprehensive setup guide for all platforms |
+| 2025-01-27 | Billing provider comparison | ✅     | Created `docs/BILLING_PROVIDER_COMPARISON.md` - Stripe recommended vs Paddle/Xsolla |
+| 2025-01-27 | Hosting platform comparison | ✅     | Created `docs/HOSTING_COMPARISON.md` - Fly.io recommended, compares 4 platforms with pricing |
+| 2025-01-27 | Weekly montage automation   | ✅     | Created `docs/WEEKLY_MONTAGE_AUTOMATION.md` - comprehensive flow documentation |
+| 2025-01-27 | Notification system recommendations | ✅     | Created `docs/NOTIFICATION_SYSTEM.md` - Slack/Email recommendations for alerts |
 
 ---
 
