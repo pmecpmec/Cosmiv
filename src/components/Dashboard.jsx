@@ -25,6 +25,14 @@ export default function Dashboard() {
   const downloadUrl = async (jobId, format) => {
     const r = await fetch(`/api/v2/jobs/${jobId}/download?format=${format}`);
     const d = await r.json();
+    
+    // Track view for analytics
+    try {
+      await fetch(`/api/v2/analytics/track-view/${jobId}`, { method: "POST" });
+    } catch (e) {
+      // Silent fail
+    }
+    
     return d.url || d.path;
   };
 
@@ -38,8 +46,8 @@ export default function Dashboard() {
 
   return (
     <div>
-      <h3 className="text-white text-xl font-semibold mb-4">Analytics Dashboard</h3>
-      {error && <div className="text-red-400 text-sm mb-3">{error}</div>}
+      <h3 className="text-pure-white text-3xl font-black mb-8 tracking-poppr">A N A L Y T I C S   D A S H B O A R D</h3>
+      {error && <div className="border-2 border-pure-white bg-pure-white text-pure-black p-4 mb-6 font-black tracking-wide">{error}</div>}
       {summary && (
         <div className="grid grid-cols-3 gap-4 mb-6">
           <Card label="Total Jobs" value={summary.total_jobs} />
@@ -49,41 +57,41 @@ export default function Dashboard() {
       )}
 
       {/* Trend Chart */}
-      <div className="bg-white/10 border border-white/20 rounded-xl p-4 mb-6">
-        <div className="text-white font-semibold mb-4">Job Activity Trend</div>
+      <div className="bg-pure-white/5 border-2 border-pure-white/20 p-6 mb-8">
+        <div className="text-pure-white font-black mb-6 text-xl tracking-wide uppercase">Job Activity Trend</div>
         <ResponsiveContainer width="100%" height={200}>
           <LineChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#ffffff20" />
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.2)" />
             <XAxis dataKey="date" stroke="#fff" />
             <YAxis stroke="#fff" />
-            <Tooltip contentStyle={{ backgroundColor: "#1e293b", border: "1px solid #ffffff30", borderRadius: "8px" }} />
-            <Line type="monotone" dataKey="jobs" stroke="#8b5cf6" strokeWidth={2} />
+            <Tooltip contentStyle={{ backgroundColor: "#000000", border: "2px solid #ffffff", color: "#ffffff" }} />
+            <Line type="monotone" dataKey="jobs" stroke="#ffffff" strokeWidth={2} />
           </LineChart>
         </ResponsiveContainer>
       </div>
 
       {/* Recent Jobs */}
-      <div className="bg-white/10 border border-white/20 rounded-xl p-4">
-        <div className="text-white font-semibold mb-2">Recent Jobs</div>
+      <div className="bg-pure-white/5 border-2 border-pure-white/20 p-6">
+        <div className="text-pure-white font-black mb-4 text-xl tracking-wide uppercase">Recent Jobs</div>
         <div className="space-y-3">
           {jobs.map((j) => (
-            <div key={j.job_id} className="flex items-center justify-between text-sm text-gray-300 bg-white/5 rounded-lg p-3">
+            <div key={j.job_id} className="flex items-center justify-between text-sm text-pure-white/70 bg-pure-white/5 border-2 border-pure-white/20 p-4 mb-3">
               <div className="flex-1">
-                <div className="text-white font-mono text-xs">{j.job_id}</div>
-                <div>Status: <span className={j.status==="SUCCESS"?"text-green-400":j.status==="FAILED"?"text-red-400":"text-yellow-300"}>{j.status}</span></div>
-                <div className="text-xs text-gray-400">Stage: {j.stage || "-"}</div>
-                <div className="text-xs text-gray-400">Progress: {typeof j.progress === "number" ? `${j.progress}%` : "-"}</div>
+                <div className="text-pure-white font-black text-xs tracking-wide mb-1">{j.job_id}</div>
+                <div className="font-bold">Status: <span className={j.status==="SUCCESS"?"text-pure-white":j.status==="FAILED"?"text-pure-white/50":"text-pure-white/70"}>{j.status}</span></div>
+                <div className="text-xs text-pure-white/50 font-bold">Stage: {j.stage || "-"}</div>
+                <div className="text-xs text-pure-white/50 font-bold">Progress: {typeof j.progress === "number" ? `${j.progress}%` : "-"}</div>
               </div>
               <div className="flex gap-2">
                 {["landscape","portrait"].map((fmt)=> (
-                  <button key={fmt} onClick={async ()=>{ const u = await downloadUrl(j.job_id, fmt); window.open(u, "_blank"); }} className="px-3 py-1 bg-blue-500/70 hover:bg-blue-600 text-white rounded">
+                  <button key={fmt} onClick={async ()=>{ const u = await downloadUrl(j.job_id, fmt); window.open(u, "_blank"); }} className="px-4 py-2 bg-pure-white text-pure-black font-black border-2 border-pure-white hover:opacity-90 transition-opacity tracking-wide text-xs">
                     {fmt}
                   </button>
                 ))}
               </div>
             </div>
           ))}
-          {jobs.length===0 && <div className="text-gray-400 text-sm">No jobs yet.</div>}
+          {jobs.length===0 && <div className="text-pure-white/50 font-bold tracking-wide">N O   J O B S   Y E T</div>}
         </div>
       </div>
     </div>
@@ -92,9 +100,9 @@ export default function Dashboard() {
 
 function Card({label, value}){
   return (
-    <div className="bg-white/10 border border-white/20 rounded-xl p-4 text-center">
-      <div className="text-gray-300 text-xs">{label}</div>
-      <div className="text-white text-2xl font-bold">{value}</div>
+    <div className="bg-pure-white/5 border-2 border-pure-white/20 p-6 text-center">
+      <div className="text-pure-white/70 text-xs font-black tracking-wide uppercase mb-2">{label}</div>
+      <div className="text-pure-white text-3xl font-black">{value}</div>
     </div>
   );
 }

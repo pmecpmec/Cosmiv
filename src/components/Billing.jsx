@@ -1,79 +1,265 @@
 import { useEffect, useState } from "react";
+import { useAuth } from "../contexts/AuthContext";
+import { motion } from "framer-motion";
 
 export default function Billing() {
+  const { getAuthHeaders, user } = useAuth();
   const [plans, setPlans] = useState([]);
   const [currentPlan, setCurrentPlan] = useState(null);
   const [error, setError] = useState(null);
-  const [userId, setUserId] = useState("demo");
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
 
   useEffect(() => {
+    // Check for Stripe success callback
+    const urlParams = new URLSearchParams(window.location.search);
+    const successParam = urlParams.get("success");
+    const sessionId = urlParams.get("session_id");
+    
+    if (successParam === "true" && sessionId) {
+      handleCheckoutSuccess(sessionId);
+    } else if (urlParams.get("canceled") === "true") {
+      setError("Checkout was canceled");
+    }
+    
     loadPlans();
     loadEntitlement();
   }, []);
 
   const loadPlans = async () => {
-    const res = await fetch("/api/v2/billing/plans");
-    const data = await res.json();
-    setPlans(data.plans || []);
+    try {
+      const res = await fetch("/api/v2/billing/plans");
+      const data = await res.json();
+      setPlans(data.plans || []);
+    } catch (err) {
+      setError("Failed to load plans");
+    }
   };
 
   const loadEntitlement = async () => {
-    const res = await fetch(`/api/v2/billing/entitlements?user_id=${userId}`);
-    const data = await res.json();
-    setCurrentPlan(data);
+    try {
+      const headers = getAuthHeaders();
+      const res = await fetch("/api/v2/billing/entitlements", { headers });
+      const data = await res.json();
+      setCurrentPlan(data);
+    } catch (err) {
+      setError("Failed to load current plan");
+    }
   };
 
-  const setEntitlement = async (plan) => {
-    const formData = new FormData();
-    formData.append("user_id", userId);
-    formData.append("plan", plan);
-    await fetch("/api/v2/billing/entitlements", { method: "POST", body: formData });
-    await loadEntitlement();
+  const handleCheckout = async (planId) => {
+    if (planId === "free") {
+      // Free plan - just set it directly
+      await setEntitlementDirect(planId);
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const headers = getAuthHeaders();
+      const formData = new FormData();
+      formData.append("plan", planId);
+
+      const res = await fetch("/api/v2/billing/checkout", {
+        method: "POST",
+        headers: {
+          ...headers,
+        },
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({ detail: "Checkout failed" }));
+        throw new Error(errorData.detail || "Failed to create checkout");
+      }
+
+      const data = await res.json();
+
+      if (data.mode === "mock") {
+        // Mock mode - simulate success
+        await setEntitlementDirect(planId);
+        setSuccess(true);
+        setTimeout(() => setSuccess(false), 3000);
+      } else {
+        // Real Stripe - redirect to checkout
+        window.location.href = data.checkout_url;
+      }
+    } catch (err) {
+      setError(err.message || "Failed to start checkout");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCheckoutSuccess = async (sessionId) => {
+    try {
+      const headers = getAuthHeaders();
+      const formData = new FormData();
+      formData.append("session_id", sessionId);
+
+      const res = await fetch("/api/v2/billing/checkout/success", {
+        method: "POST",
+        headers: {
+          ...headers,
+        },
+        body: formData,
+      });
+
+      if (res.ok) {
+        setSuccess(true);
+        await loadEntitlement();
+        // Clean URL
+        window.history.replaceState({}, document.title, "/billing");
+      }
+    } catch (err) {
+      setError("Failed to verify checkout");
+    }
+  };
+
+  const setEntitlementDirect = async (plan) => {
+    // Direct entitlement setting (for free plan or admin/testing)
+    try {
+      const headers = getAuthHeaders();
+      const formData = new FormData();
+      formData.append("user_id", user?.user_id || "");
+      formData.append("plan", plan);
+
+      await fetch("/api/v2/billing/entitlements", {
+        method: "POST",
+        headers: {
+          ...headers,
+        },
+        body: formData,
+      });
+
+      await loadEntitlement();
+    } catch (err) {
+      setError("Failed to update plan");
+    }
+  };
+
+  const getPlanHighlight = (planId) => {
+    if (planId === "creator") return "border-pure-white bg-pure-white text-pure-black";
+    if (planId === "pro") return "border-pure-white/50 bg-pure-white/10 text-pure-white";
+    return "border-pure-white/20 bg-pure-white/5 text-pure-white";
   };
 
   return (
-    <div>
-      <h3 className="text-white text-xl font-semibold mb-4">Subscription Plans</h3>
-      {error && <div className="text-red-400 text-sm mb-3">⚠️ {error}</div>}
+    <div className="bg-pure-white/5 border-2 border-pure-white/20 p-12">
+      <h2 className="text-4xl font-black text-pure-white mb-12 tracking-poppr text-center">💳   B I L L I N G   &   S U B S C R I P T I O N</h2>
+      
+      {error && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-6 p-6 border-2 border-pure-white bg-pure-white text-pure-black"
+        >
+          <p className="font-black tracking-wide">⚠️ {error}</p>
+        </motion.div>
+      )}
+
+      {success && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-6 p-6 border-2 border-pure-white bg-pure-white text-pure-black"
+        >
+          <p className="font-black tracking-wide">✅ Subscription activated successfully!</p>
+        </motion.div>
+      )}
 
       {currentPlan && (
-        <div className="bg-cosmic-violet/20 border border-cosmic-violet/40 rounded-xl p-4 mb-6 backdrop-blur-sm">
-          <div className="text-white font-semibold">Current: {currentPlan.plan === "free" ? "Cosmic Cadet" : currentPlan.plan === "pro" ? "Nebula Knight" : currentPlan.plan.toUpperCase()}</div>
+        <div className="mb-8 p-6 border-2 border-cosmic-violet/40 bg-cosmic-violet/20 text-pure-white backdrop-blur-sm">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="font-black text-xl tracking-wide uppercase mb-2">
+                Current Plan: {currentPlan.plan === "free" ? "Cosmic Cadet" : currentPlan.plan === "pro" ? "Nebula Knight" : currentPlan.plan === "creator" ? "Creator+" : currentPlan.plan.toUpperCase()}
+              </div>
+              {currentPlan.expires_at && (
+                <div className="text-pure-white/70 text-sm mt-1 font-bold">
+                  Expires: {new Date(currentPlan.expires_at).toLocaleDateString()}
+                </div>
+              )}
+              {!currentPlan.is_active && (
+                <div className="text-pure-white/70 text-sm mt-2 font-black tracking-wide">⚠️ Subscription expired</div>
+              )}
+            </div>
+            {currentPlan.is_active && (
+              <div className="px-4 py-2 bg-cosmic-neon-cyan text-pure-black border-2 border-cosmic-neon-cyan font-black tracking-wide text-sm">
+                A C T I V E
+              </div>
+            )}
+          </div>
         </div>
       )}
 
       {/* Plans grid */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {plans.map((p) => (
-          <div
+          <motion.div
             key={p.id}
-            className={`bg-white/10 border rounded-xl p-6 backdrop-blur-sm hover:border-cosmic-neon-cyan/50 transition-all ${
-              p.price === 0 ? "border-white/20" : "border-cosmic-violet/50"
-            }`}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            whileHover={{ y: -5, scale: 1.02 }}
+            className={`border-2 p-8 relative ${getPlanHighlight(p.id)}`}
           >
-            <div className="text-white text-xl font-semibold mb-2 bg-gradient-to-r from-cosmic-violet to-cosmic-neon-cyan bg-clip-text text-transparent">{p.name}</div>
-            <div className="text-white text-3xl font-bold mb-4">
+            {p.id === "creator" && (
+              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 px-4 py-2 bg-cosmic-neon-cyan text-pure-black border-2 border-cosmic-neon-cyan font-black tracking-wide text-xs">
+                M O S T   P O P U L A R
+              </div>
+            )}
+            
+            <div className="text-3xl font-black mb-3 tracking-wide uppercase bg-gradient-to-r from-cosmic-violet to-cosmic-neon-cyan bg-clip-text text-transparent">{p.name === "Cosmic Cadet" ? "Cosmic Cadet" : p.name === "Nebula Knight" ? "Nebula Knight" : p.name}</div>
+            <div className="text-5xl font-black mb-4">
               ${p.price}
-              {p.price > 0 && <span className="text-sm">/month</span>}
+              {p.price > 0 && <span className="text-xl opacity-70">/month</span>}
             </div>
-            <ul className="space-y-2 mb-4">
+            
+            <ul className="space-y-3 mb-8 mt-6">
               {p.features.map((f, i) => (
-                <li key={i} className="text-gray-300 text-sm">✓ {f}</li>
+                <li key={i} className="text-sm flex items-center gap-3 font-bold">
+                  <span>✓</span> <span>{f}</span>
+                </li>
               ))}
             </ul>
+            
             <button
-              onClick={() => setEntitlement(p.id)}
-              className="w-full bg-gradient-to-r from-cosmic-violet to-cosmic-deep-blue hover:from-cosmic-purple hover:to-cosmic-violet text-white font-semibold py-2 rounded-lg transition-all shadow-lg shadow-cosmic-violet/30"
+              onClick={() => handleCheckout(p.id)}
+              disabled={loading || currentPlan?.plan === p.id}
+              className={`w-full font-black py-4 border-2 transition-all tracking-wide ${
+                currentPlan?.plan === p.id
+                  ? "bg-pure-white/20 text-pure-white/50 cursor-not-allowed border-pure-white/20"
+                  : p.price === 0
+                  ? "bg-pure-white/10 hover:bg-pure-white/20 text-pure-white border-pure-white/20 hover:opacity-90"
+                  : "bg-gradient-to-r from-cosmic-violet to-cosmic-deep-blue hover:from-cosmic-purple hover:to-cosmic-violet text-white border-cosmic-violet/50 hover:shadow-lg hover:shadow-cosmic-violet/30"
+              }`}
             >
-              {currentPlan?.plan === p.id ? "Current Plan" : "Select"}
+              {loading ? (
+                "P R O C E S S I N G . . ."
+              ) : currentPlan?.plan === p.id ? (
+                "C U R R E N T   P L A N"
+              ) : p.price === 0 ? (
+                "S E L E C T   F R E E"
+              ) : (
+                `S U B S C R I B E   T O   ${p.name.toUpperCase()}`
+              )}
             </button>
-          </div>
+          </motion.div>
         ))}
       </div>
 
-      {/* Note */}
-      <div className="mt-6 bg-cosmic-deep-blue/10 border border-cosmic-neon-cyan/30 rounded-xl p-4 text-cosmic-neon-cyan/80 text-sm backdrop-blur-sm">
-        ℹ️ Demo mode: set plan via test endpoint. Production uses Stripe checkout sessions.
+      {/* Info */}
+      <div className="mt-8 p-6 border-2 border-cosmic-neon-cyan/30 bg-cosmic-deep-blue/10 text-cosmic-neon-cyan/90 backdrop-blur-sm">
+        <div className="font-black mb-3 tracking-wide uppercase text-sm">ℹ️   P A Y M E N T   I N F O R M A T I O N</div>
+        <div className="font-bold">
+          {process.env.NODE_ENV === "production" ? (
+            "Secure payments powered by Stripe. Your subscription will auto-renew monthly."
+          ) : (
+            "Demo mode: Stripe integration ready. Set STRIPE_SECRET_KEY to enable real payments."
+          )}
+        </div>
       </div>
     </div>
   );

@@ -2,6 +2,60 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Black/White Aesthetic - Tyler the Creator + Poppr inspired */
+@layer base {
+  body {
+    @apply bg-pure-black text-pure-white;
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    /* Poppr-inspired smooth scrolling */
+    scroll-behavior: smooth;
+  }
+  
+  * {
+    @apply border-white/10;
+  }
+
+  /* Poppr-inspired section spacing */
+  section {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+  }
+}
+
+@layer utilities {
+  .text-stroke {
+    -webkit-text-stroke: 1px white;
+    text-stroke: 1px white;
+  }
+}
+
+/* PWA and Mobile Optimizations */
+@layer base {
+  /* Prevent text selection on buttons (mobile) */
+  button {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+  }
+
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Prevent pull-to-refresh on mobile (can be customized) */
+  body {
+    overscroll-behavior-y: contain;
+    /* Safe area for notched devices */
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+}
+
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -9,7 +63,7 @@
 
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
-  background-color: #0f172a;
+  background-color: #000000;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -23,6 +77,8 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  background-color: #000000;
+  color: #FFFFFF;
 }
 
 #root {

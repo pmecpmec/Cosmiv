@@ -1,66 +1,243 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { AuthProvider, useAuth } from './contexts/AuthContext'
 import UploadForm from './components/UploadForm'
 import Dashboard from './components/Dashboard'
+import Analytics from './components/Analytics'
 import Accounts from './components/Accounts'
 import Billing from './components/Billing'
 import Social from './components/Social'
 import CosmicBackground from './components/CosmicBackground'
+import Login from './components/Login'
+import Register from './components/Register'
+import Header from './components/Header'
+import LandingPage from './components/LandingPage'
+import LoadingScreen from './components/LoadingScreen'
+import AdminDashboard from './components/AdminDashboard'
+import WeeklyMontages from './components/WeeklyMontages'
+import OfflineIndicator from './components/OfflineIndicator'
+import UpdateNotification from './components/UpdateNotification'
+import AIChatbot from './components/AIChatbot'
+import Feed from './components/Feed'
+import Communities from './components/Communities'
+import AIAdminPanel from './components/AIAdminPanel'
+import { AnimatePresence, motion } from 'framer-motion'
 import './App.css'
 
-function App() {
-  const [activeTab, setActiveTab] = useState("upload")
+function AppContent() {
+  const [activeTab, setActiveTab] = useState("home")
+  const [authMode, setAuthMode] = useState("login") // "login" or "register"
+  const [showLoading, setShowLoading] = useState(true)
+  const { user, loading, logout, isAuthenticated } = useAuth()
+
+  // Show loading screen initially
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowLoading(false)
+    }, 2000) // Show for 2 seconds
+    return () => clearTimeout(timer)
+  }, [])
+
+  // Show loading screen
+  if (showLoading) {
+    return <LoadingScreen />
+  }
+
+  // Show auth pages if not authenticated
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-pure-black flex items-center justify-center">
+        <div className="text-pure-white text-xl font-black tracking-wide">L O A D I N G . . .</div>
+      </div>
+    )
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-pure-black flex items-center justify-center px-4 py-16">
+        <div className="w-full max-w-md">
+          <div className="text-center mb-12">
+            <h1 className="text-5xl font-black text-pure-white mb-6 tracking-poppr">
+              🌌   C O S M I V
+            </h1>
+            <p className="text-xl text-pure-white/70 font-bold tracking-wide">
+              A I - P O W E R E D   G A M I N G   M O N T A G E   P L A T F O R M
+            </p>
+          </div>
+          {authMode === "login" ? (
+            <Login onSwitchToRegister={() => setAuthMode("register")} />
+          ) : (
+            <Register onSwitchToLogin={() => setAuthMode("login")} />
+          )}
+        </div>
+      </div>
+    )
+  }
 
   return (
-    <div className="min-h-screen relative">
+    <div className="min-h-screen relative bg-pure-black text-pure-white">
       <CosmicBackground />
-      <div className="container mx-auto px-4 py-16 relative z-10">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold text-white mb-4">
-            🌌 Cosmiv
-          </h1>
-          <p className="text-xl text-gray-300">
-            AI-Powered Gaming Montage Platform
-          </p>
-        </div>
+      {/* Fixed Header */}
+      <Header activeTab={activeTab} setActiveTab={setActiveTab} />
 
-        {/* Tabs */}
-        <div className="max-w-5xl mx-auto mb-8">
-          <div className="flex gap-2 border-b border-white/20">
-            {[
-              { id: "upload", label: "Upload", icon: "⬆️" },
-              { id: "dashboard", label: "Dashboard", icon: "📊" },
-              { id: "accounts", label: "Accounts", icon: "🔗" },
-              { id: "billing", label: "Billing", icon: "💳" },
-              { id: "social", label: "Social", icon: "📱" }
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`px-4 py-2 text-sm font-semibold transition-all border-b-2 ${
-                  activeTab === tab.id
-                    ? "border-cosmic-neon-cyan text-cosmic-neon-cyan"
-                    : "border-transparent text-gray-400 hover:text-cosmic-violet"
-                }`}
-              >
-                {tab.icon} {tab.label}
-              </button>
-            ))}
-          </div>
-        </div>
+      {/* PWA Indicators */}
+      <OfflineIndicator />
+      <UpdateNotification />
 
-        {/* Tab Content */}
-        <div className="max-w-5xl mx-auto">
-          {activeTab === "upload" && (
-            <div className="max-w-3xl mx-auto">
-              <UploadForm />
-            </div>
+      {/* Main Content */}
+      <div className="pt-16">
+        <AnimatePresence mode="wait">
+          {activeTab === "home" && (
+            <motion.div
+              key="home"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <LandingPage onGetStarted={() => setActiveTab("upload")} />
+            </motion.div>
           )}
-          {activeTab === "dashboard" && <Dashboard />}
-          {activeTab === "accounts" && <Accounts />}
-          {activeTab === "billing" && <Billing />}
-          {activeTab === "social" && <Social />}
-        </div>
+          {activeTab === "upload" && (
+            <motion.div
+              key="upload"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="container mx-auto px-4 py-16"
+            >
+              <div className="max-w-3xl mx-auto">
+                <UploadForm />
+              </div>
+            </motion.div>
+          )}
+          {activeTab === "dashboard" && (
+            <motion.div
+              key="dashboard"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="container mx-auto px-4 py-16"
+            >
+              <Dashboard />
+            </motion.div>
+          )}
+          {activeTab === "analytics" && (
+            <motion.div
+              key="analytics"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="container mx-auto px-4 py-16"
+            >
+              <Analytics />
+            </motion.div>
+          )}
+          {activeTab === "feed" && (
+            <motion.div
+              key="feed"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <Feed />
+            </motion.div>
+          )}
+          {activeTab === "ai" && (
+            <motion.div
+              key="ai"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="container mx-auto px-4 py-16"
+            >
+              <div className="max-w-4xl mx-auto">
+                <div className="mb-6">
+                  <h2 className="text-3xl font-bold text-white mb-2">🤖 AI Assistant</h2>
+                  <p className="text-gray-300">Ask me anything about Cosmiv, get help, or chat!</p>
+                </div>
+                <div className="h-[600px]">
+                  <AIChatbot />
+                </div>
+              </div>
+            </motion.div>
+          )}
+          {activeTab === "communities" && (
+            <motion.div
+              key="communities"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 pt-16"
+            >
+              <Communities />
+            </motion.div>
+          )}
+          {activeTab === "accounts" && (
+            <motion.div
+              key="accounts"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="container mx-auto px-4 py-16"
+            >
+              <Accounts />
+            </motion.div>
+          )}
+          {activeTab === "billing" && (
+            <motion.div
+              key="billing"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="container mx-auto px-4 py-16"
+            >
+              <Billing />
+            </motion.div>
+          )}
+          {activeTab === "social" && (
+            <motion.div
+              key="social"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="container mx-auto px-4 py-16"
+            >
+              <Social />
+            </motion.div>
+          )}
+          {activeTab === "weekly" && (
+            <motion.div
+              key="weekly"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="container mx-auto px-4 py-16"
+            >
+              <WeeklyMontages />
+            </motion.div>
+          )}
+          {activeTab === "admin" && (
+            <motion.div
+              key="admin"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="container mx-auto px-4 py-16"
+            >
+              <AdminDashboard />
+            </motion.div>
+          )}
+          {activeTab === "ai-admin" && (
+            <motion.div
+              key="ai-admin"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="container mx-auto px-4 py-16"
+            >
+              <AIAdminPanel />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   )
@@ -73,6 +250,14 @@ function FeatureCard({ icon, title, description }) {
       <h3 className="text-xl font-semibold text-white mb-2">{title}</h3>
       <p className="text-gray-300 text-sm">{description}</p>
     </div>
+  )
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   )
 }
 

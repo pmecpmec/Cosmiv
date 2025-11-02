@@ -1,34 +1,31 @@
 # 🌌 Cosmiv - AI Gaming Montage Platform
 
-An AI-powered web application that automatically edits highlight videos from raw gameplay or media clips. Cosmiv features a futuristic cosmic interface with space-themed UI elements and an intelligent AI assistant represented as a glowing cosmic orb.
+An AI-powered web application that automatically edits highlight videos from raw gameplay or media clips. Cosmiv features a futuristic cosmic interface with space-themed UI elements and an intelligent AI assistant represented as a glowing cosmic orb. Transform your raw gameplay clips into viral, AI-edited montages automatically.
 
-## 🚀 Quick Start
+## 🌐 Try It Now!
 
-### Prerequisites
+**Visit the live website:** [https://pmecpmec.github.io/Cosmiv/](https://pmecpmec.github.io/Cosmiv/) *(Note: Update URL when repo is renamed)*
 
-- **Backend**: Docker and Docker Compose
-- **Frontend**: Node.js 18+ and npm
+Upload your clips, choose your style, and let AI create your next viral highlight reel! 🚀
 
-### Backend Setup (Docker)
+## ✨ Features
 
-```powershell
-cd backend
-docker-compose up -d
-```
+- 🤖 **AI-Powered Editing** - Automatic highlight detection and montage creation
+- 🎨 **Multiple Styles** - Cinematic, gaming, energetic, and more
+- 🎵 **AI Music Generation** - Style-matched soundtracks
+- 📱 **Multi-Format** - Landscape (YouTube) and Portrait (TikTok/Shorts)
+- 🔄 **Weekly Montages** - Community-compiled highlights
+- 💳 **Subscription Tiers** - Free, Pro, and Creator+ options
+- 🔗 **Platform Integration** - Connect Steam, Xbox, PlayStation, Switch
 
-The API will be available at `http://localhost:8000`
+## 🛠️ Built With
 
-### Frontend Setup
+- **Frontend:** React, Vite, TailwindCSS, Framer Motion
+- **Backend:** FastAPI, Python, Celery, Redis
+- **AI:** Custom highlight detection, scene analysis, style matching
+- **Deployment:** GitHub Pages (Frontend), Railway/Render (Backend)
 
-```powershell
-# Install dependencies
-npm install
-
-# Start development server
-npm run dev
-```
-
-The frontend will be available at `http://localhost:3000`
+## 📚 Documentation
 
 ## 📁 Project Structure
 
@@ -171,6 +168,12 @@ Make sure the backend is running: `docker-compose -f backend/docker-compose.yml 
 - [ ] Cloud storage integration
 - [ ] AI-powered enhancements (Runway/Sora)
 
+## 📚 Documentation
+
+- **Security Guide:** [SECURITY.md](./SECURITY.md)
+- **Deployment:** [DEPLOYMENT.md](./DEPLOYMENT.md)
+- **GitHub Pages:** [GITHUB_PAGES_DEPLOY.md](./GITHUB_PAGES_DEPLOY.md)
+
 ## ✅ Phase 1 Enhancements
 
 - Modular highlight detector combining motion, loudness, and optional ML events.
@@ -181,36 +184,10 @@ Make sure the backend is running: `docker-compose -f backend/docker-compose.yml 
 
 ## 📄 License
 
-MIT
+This project is open source. See LICENSE file for details.
 
-## 🤝 Contributing
+---
 
-Contributions welcome! Please open an issue or pull request.
+**Made with ❤️ for gamers and content creators**
 
-## v2 Async Flow (Jobs)
-
-- Create a job (async render): frontend uses POST `/v2/jobs` with files and target duration
-- Poll status: GET `/v2/jobs/{job_id}/status`
-- Download URL: GET `/v2/jobs/{job_id}/download?format=landscape|portrait`
-
-## Multi-aspect Exports
-
-- The renderer outputs both `final_landscape.mp4` and `final_portrait.mp4`
-- If object storage is enabled, the API returns a presigned URL; otherwise a local path/URL is returned
-
-## GPU Acceleration (optional)
-
-- The pipeline attempts NVENC (`h264_nvenc`) and falls back to `libx264`
-- Ensure host supports NVIDIA drivers for NVENC to take effect
-
-## Billing (mock)
-
-- GET `/v2/billing/plans`
-- POST `/v2/billing/checkout` — returns mocked checkout URL
-- POST `/v2/billing/entitlements` — test-only to set plan (free/pro)
-- GET `/v2/billing/entitlements?user_id=...`
-
-## Dashboard
-
-- Frontend Dashboard shows analytics summary and recent jobs
-- Uses `/analytics/summary` and `/v2/jobs` to display system status
+**Live Site:** [https://pmecpmec.github.io/Cosmiv/](https://pmecpmec.github.io/Cosmiv/) *(Note: Update URL when repo is renamed)*

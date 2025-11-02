@@ -1,9 +1,15 @@
 import os
-import boto3
-from botocore.client import Config as BotoConfig
 from datetime import timedelta
 from typing import Optional
 from config import settings
+
+# Optional boto3 import (only needed if using S3 storage)
+try:
+    import boto3
+    from botocore.client import Config as BotoConfig
+    BOTO3_AVAILABLE = True
+except ImportError:
+    BOTO3_AVAILABLE = False
 
 class LocalStorage:
     def save(self, src_path: str, dest_rel_path: str) -> str:
@@ -19,6 +25,8 @@ class LocalStorage:
 
 class S3Storage:
     def __init__(self):
+        if not BOTO3_AVAILABLE:
+            raise ImportError("boto3 is required for S3 storage. Install with: pip install boto3")
         self.client = boto3.client(
             "s3",
             endpoint_url=settings.S3_ENDPOINT_URL,

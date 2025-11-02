@@ -2,6 +2,9 @@
 .env
 .env.local
 .env.*.local
+.env.production
+.env.development
+.env.test
 
 # Python
 __pycache__/
@@ -27,7 +30,10 @@ wheels/
 MANIFEST
 
 # Virtual environments
+.venv/
+**/.venv/
 venv/
+**/venv/
 ENV/
 env/
 .venv
@@ -48,6 +54,20 @@ node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Database files (may contain sensitive user data)
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+
+# Storage directories (user uploads and exports)
+backend/storage/uploads/
+backend/storage/exports/
+backend/storage/jobs/
+backend/storage/*.db
+backend/storage/*.sqlite
+backend/storage/*.sqlite3
 
 # Build outputs
 dist/
@@ -75,8 +95,29 @@ celerybeat.pid
 *.crt
 secrets.yaml
 secrets.json
+# Keep dist for GitHub Pages (optional - uncomment if you want to commit built files)
+# !dist/.gitkeep
 
 # Temporary files
 *.tmp
 *.temp
+*.swp
+*.bak
 .cache/
+
+# Security: Private keys and certificates
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cer
+secrets.json
+credentials.json
+*.credentials
+
+# IDE and editor files (may contain sensitive data)
+.vscode/settings.json
+.idea/workspace.xml
+*.sublime-project
+*.sublime-workspace

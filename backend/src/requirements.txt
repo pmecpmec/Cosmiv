@@ -18,3 +18,16 @@ passlib[bcrypt]>=1.7.4
 cryptography>=41.0.0
 slowapi>=0.1.9
 httpx>=0.24.0
+pytest
+pytest-cov
+stripe
+requests
+# AI/LLM Services (optional - install if using AI features)
+# Uncomment to enable:
+# openai>=1.0.0
+# anthropic>=0.18.0
+# AI Music Generation (optional - only needed if MUSICGEN_ENABLED=true)
+# Uncomment to enable MusicGen:
+# transformers>=4.35.0
+# torch>=2.0.0
+# torchaudio>=2.0.0

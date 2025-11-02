@@ -1,5 +1,5 @@
 """
-Authentication endpoints for AIDIT
+Authentication endpoints for Cosmiv
 Handles user registration, login, and token management
 """
 from fastapi import APIRouter, HTTPException, Depends, status

@@ -1,12 +1,13 @@
-from fastapi import APIRouter, UploadFile, File, Form, Query
+from fastapi import APIRouter, UploadFile, File, Form, Query, Depends
 from fastapi.responses import JSONResponse
 from typing import List, Optional
 from storage import job_upload_dir, job_export_dir
-from models import Job, JobStatus, Render
+from models import Job, JobStatus, Render, User
 from db import get_session
 from sqlmodel import select
 from tasks import render_job
 from services.storage_adapters import get_storage
+from auth import get_current_user
 import os
 from config import settings
 
@@ -20,6 +21,7 @@ async def create_job_v2(
     formats: Optional[str] = Form("landscape,portrait"),
     hud_remove: Optional[bool] = Form(False),
     watermark: Optional[bool] = Form(True),
+    current_user: Optional[User] = Depends(get_current_user),
 ):
     from storage import new_job_id
     jid = new_job_id()
@@ -33,8 +35,16 @@ async def create_job_v2(
     if target_duration > settings.FREEMIUM_MAX_DURATION:
         return JSONResponse({"error": f"Max duration {settings.FREEMIUM_MAX_DURATION}s on free tier"}, status_code=400)
 
+    user_id = current_user.user_id if current_user else None
+    
     with get_session() as session:
-        job = Job(job_id=jid, status=JobStatus.PENDING, target_duration=target_duration)
+        job = Job(
+            job_id=jid,
+            status=JobStatus.PENDING,
+            target_duration=target_duration,
+            user_id=user_id,
+            style_id=style,
+        )
         session.add(job)
         session.commit()
 
@@ -72,16 +82,34 @@ def job_status_v2(job_id: str):
         job = session.exec(select(Job).where(Job.job_id == job_id)).first()
         if not job:
             return JSONResponse({"error": "job not found"}, status_code=404)
-        return {
+        
+        result = {
             "job_id": job.job_id,
             "status": job.status,
             "error": job.error,
             "stage": job.stage,
-            "progress": job.progress,
             "started_at": job.started_at.isoformat() if job.started_at else None,
             "finished_at": job.finished_at.isoformat() if job.finished_at else None,
             "updated_at": job.updated_at.isoformat() if job.updated_at else None,
         }
+        
+        # Include progress if available
+        if job.progress:
+            try:
+                import json
+                result["progress"] = json.loads(job.progress)
+            except Exception:
+                pass
+        
+        # Include error details if available
+        if job.error_detail:
+            try:
+                import json
+                result["error_detail"] = json.loads(job.error_detail)
+            except Exception:
+                pass
+        
+        return result
 
 @router.get("/jobs/{job_id}/download")
 def job_download_v2(job_id: str, format: str = Query("landscape", enum=["landscape","portrait"])):

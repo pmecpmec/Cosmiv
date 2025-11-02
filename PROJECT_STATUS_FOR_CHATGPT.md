@@ -13,6 +13,7 @@ _Last updated: 2025-01-27 by agent_cosmiv_sync_
 - **Branding Consistency:** Package names, database names, S3 buckets, Celery app all rebranded
 
 ### Backend Infrastructure
+
 - **FastAPI backend** with comprehensive REST API structure
 - **Celery workers** for async job processing (video rendering, montages)
 - **Celery beat scheduler** for periodic tasks (weekly montages)
@@ -22,6 +23,7 @@ _Last updated: 2025-01-27 by agent_cosmiv_sync_
 - **JWT authentication** system with access/refresh tokens
 
 ### API Endpoints
+
 - **Accounts API** (`/api/v2/accounts`) - OAuth linking, provider management, clip discovery
 - **Billing API** (`/api/v2/billing`) - Subscription plans, Stripe integration, webhooks
 - **Social API** (`/api/v2/social`) - Post scheduling for TikTok/YouTube/Instagram
@@ -34,6 +36,7 @@ _Last updated: 2025-01-27 by agent_cosmiv_sync_
 - **Communities API** - Community management
 
 ### Video Processing Pipeline
+
 - **Preprocessing** - Video extraction, transcoding to consistent format (H.264, 1080p, 30fps)
 - **Highlight Detection** - Scene analysis, audio peak detection, motion intensity scoring
 - **ML Model Interface** - Structure ready for highlight detection model (`ml/highlights/model.py`)
@@ -44,6 +47,7 @@ _Last updated: 2025-01-27 by agent_cosmiv_sync_
 - **Style System** - Multiple editing themes/presets
 
 ### Frontend
+
 - **React + Vite** application with TailwindCSS
 - **Cosmic Theme & Branding:**
   - Animated cosmic background with starfield, nebulae, and glowing planet
@@ -65,6 +69,7 @@ _Last updated: 2025-01-27 by agent_cosmiv_sync_
 - **Service Worker** - Offline support, PWA capabilities
 
 ### OAuth Infrastructure
+
 - **OAuth Handlers** implemented for:
   - Steam (OpenID 2.0)
   - Xbox Live (OAuth 2.0)
@@ -75,12 +80,14 @@ _Last updated: 2025-01-27 by agent_cosmiv_sync_
 - Database models for storing OAuth tokens (`UserAuth` model)
 
 ### Billing System
-- **Subscription Plans** - Cosmic Cadet (Free), Nebula Knight (Pro $9/mo), Creator+ tier planned ($19/mo)
+
+- **Subscription Plans** - Cosmic Cadet (Free), Nebula Knight (Pro $9/mo), Creator+ ($19/mo)
 - **Stripe Integration** - Checkout sessions, subscription management
 - **Webhook Handler** - Structure ready for subscription events
 - **Entitlement System** - User tier management, feature gating (space-themed plan names)
 
 ### Storage & Infrastructure
+
 - **Storage Adapters** - S3/MinIO compatible storage system
 - **Database Migrations** - SQLModel automatic schema management
 - **Environment Configuration** - Comprehensive settings via `config.py`
@@ -91,6 +98,7 @@ _Last updated: 2025-01-27 by agent_cosmiv_sync_
 ## ⚙️ In Progress
 
 ### OAuth Integrations
+
 - **Status:** OAuth handlers exist but run in **mock mode** by default
 - **What's Needed:**
   - Real API credentials for all platforms (Steam API key, Xbox/PSN/Nintendo Client IDs)
@@ -103,6 +111,7 @@ _Last updated: 2025-01-27 by agent_cosmiv_sync_
   - `backend/src/config.py` - Environment variable settings
 
 ### Billing Integration
+
 - **Status:** Stripe structure ready, needs live configuration
 - **What's Needed:**
   - Stripe account setup, API keys
@@ -114,6 +123,7 @@ _Last updated: 2025-01-27 by agent_cosmiv_sync_
   - Environment variables: `STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET`
 
 ### Weekly Montage Automation
+
 - **Status:** Celery beat scheduler exists, task structure ready
 - **What's Needed:**
   - Destination API setup (TikTok, YouTube, Instagram upload APIs)
@@ -125,6 +135,7 @@ _Last updated: 2025-01-27 by agent_cosmiv_sync_
   - `backend/src/services/social_posters.py` - Social posting service
 
 ### Social Media Posting
+
 - **Status:** Endpoints and service structure exist, in mock mode
 - **What's Needed:**
   - TikTok API integration
@@ -140,6 +151,7 @@ _Last updated: 2025-01-27 by agent_cosmiv_sync_
 ## 🕒 Pending
 
 ### Production Readiness
+
 - **OAuth Credentials** - Production API keys and secrets management
 - **Stripe Webhooks** - Live webhook endpoint deployment and testing
 - **Database Migration** - Production PostgreSQL setup with migrations
@@ -148,30 +160,35 @@ _Last updated: 2025-01-27 by agent_cosmiv_sync_
 - **Rate Limiting** - API rate limiting for external services
 
 ### ML/AI Enhancements
+
 - **Highlight Detection Model** - Training and deployment (`USE_HIGHLIGHT_MODEL=true`)
 - **MusicGen Integration** - Local MusicGen model or API service
 - **Whisper STT** - Real speech-to-text for transcription and censorship
 - **AI Video Enhancement** - Integration with video enhancement APIs/models
 
 ### Testing & Quality
+
 - **Unit Tests** - No test files found, need comprehensive test suite
 - **Integration Tests** - OAuth flow testing, billing webhook testing
 - **E2E Tests** - Full user journey testing
 - **CI/CD Pipeline** - Tests run in `.github/workflows/ci.yml` but need actual test files
 
 ### Monitoring & Observability
+
 - **Admin Analytics** - Enhanced metrics dashboard
 - **Error Tracking** - Sentry or similar error monitoring
 - **Performance Monitoring** - APM tools (Grafana, Prometheus)
 - **Logging** - Structured logging and log aggregation
 
 ### Design & UX
+
 - **Design System** - ✅ Cosmiv space theme implemented
 - **Brand Identity** - Cosmic/futuristic aesthetic with violet → deep blue → neon cyan gradients
-- **UI Polish** - ✅ Animated cosmic background, space-themed colors, glowing effects
+- **UI Polish** - ✅ Animated cosmic background, space-themed colors, glowing effects, motion design with Framer Motion
 - **Design Research** - Future: Additional cosmic gaming UI inspirations
 
 ### Deployment
+
 - **Production Deployment** - CI/CD pipeline has placeholder deployment script
 - **Kubernetes Manifests** - If using K8s, need deployment configs
 - **Database Persistence** - Production PostgreSQL with backups
@@ -183,6 +200,7 @@ _Last updated: 2025-01-27 by agent_cosmiv_sync_
 ## 📦 Repository Overview
 
 ### Backend Structure
+
 - `backend/src/` - Main FastAPI application
   - `main.py` - FastAPI app setup, route registration
   - `config.py` - Settings and environment variables
@@ -206,6 +224,7 @@ _Last updated: 2025-01-27 by agent_cosmiv_sync_
   - `tasks_enhanced.py` - Enhanced tasks (weekly montages)
 
 ### Frontend Structure
+
 - `src/` - React application
   - `App.jsx` - Main app component
   - `components/` - React components
@@ -220,6 +239,7 @@ _Last updated: 2025-01-27 by agent_cosmiv_sync_
   - `utils/` - Utility functions
 
 ### Configuration Files
+
 - `package.json` - Frontend dependencies
 - `backend/src/requirements.txt` - Python dependencies
 - `docker-compose.yml` - Local development setup
@@ -227,6 +247,7 @@ _Last updated: 2025-01-27 by agent_cosmiv_sync_
 - `.github/workflows/` - CI/CD pipelines
 
 ### Documentation
+
 - `README.md` - Project overview
 - `DEPLOYMENT.md` - Deployment guide
 - `SECURITY.md` - Security documentation
@@ -237,6 +258,7 @@ _Last updated: 2025-01-27 by agent_cosmiv_sync_
 ## 📊 Key Technical Details
 
 ### Technology Stack
+
 - **Backend:** FastAPI (Python 3.12), Celery, Redis, SQLModel, SQLite/PostgreSQL
 - **Frontend:** React 18, Vite, TailwindCSS, Framer Motion
 - **Media Processing:** FFmpeg, MoviePy, OpenCV, PySceneDetect
@@ -245,6 +267,7 @@ _Last updated: 2025-01-27 by agent_cosmiv_sync_
 - **Containerization:** Docker, Docker Compose
 
 ### Architecture Patterns
+
 - **RESTful API** design
 - **Async task processing** with Celery
 - **OAuth 2.0 / OpenID** for platform integrations
@@ -253,6 +276,7 @@ _Last updated: 2025-01-27 by agent_cosmiv_sync_
 - **Storage adapter** pattern (abstracted storage backends)
 
 ### Security Considerations
+
 - JWT secret key must be set in production (currently has dev default)
 - OAuth credentials must be secured (environment variables)
 - Stripe webhook signature verification implemented
@@ -264,6 +288,7 @@ _Last updated: 2025-01-27 by agent_cosmiv_sync_
 ## 🎯 Notes for ChatGPT
 
 ### When Helping Daan
+
 - **Daan is non-technical** - Provide step-by-step instructions, avoid jargon
 - **Focus on external services** - API setup, credentials, documentation research
 - **Use mock mode** - All integrations have mock modes for testing without real credentials
@@ -272,18 +297,21 @@ _Last updated: 2025-01-27 by agent_cosmiv_sync_
 - **Documentation research** - Help find and summarize API documentation
 
 ### Common Tasks
+
 1. **OAuth Setup:** Guide through developer portal registration, callback URL configuration
 2. **Stripe Setup:** Help with webhook configuration, event handling, testing
 3. **API Research:** Summarize platform APIs, rate limits, authentication methods
 4. **Design Research:** Find and describe modern UI/UX patterns for gaming/video apps
 
 ### When Pedro Asks
+
 - **Summarize progress** from `TODO_DAAN.md`
 - **Identify blockers** - Missing credentials, unclear docs, technical limitations
 - **Suggest next steps** - Prioritize tasks based on dependencies
 - **Highlight risks** - Security concerns, API limitations, scalability issues
 
 ### Integration Status Summary
+
 - **OAuth:** Infrastructure ready, needs credentials (4 platforms)
 - **Billing:** Structure ready, needs Stripe keys + webhook config (space-themed plan names implemented)
 - **Social Posting:** Endpoints ready, needs API integrations (3 platforms)
@@ -293,8 +321,10 @@ _Last updated: 2025-01-27 by agent_cosmiv_sync_
 ---
 
 ## 🔄 Agent Workflow
+
 This file is automatically updated by `agent_cosmiv_sync` (formerly `agent_project_sync`) whenever it runs.
 The agent:
+
 1. Scans repo structure
 2. Analyzes completed/in-progress/pending items
 3. Updates `TODO_DAAN.md` with actionable tasks
@@ -306,4 +336,3 @@ The agent:
 _For the latest task list, see `TODO_DAAN.md`_  
 _For deployment instructions, see `DEPLOYMENT.md`_  
 _For security guidelines, see `SECURITY.md`_
-

@@ -1,0 +1,15 @@
+# Ensure database files are never committed
+*.db filter=gitignore
+*.sqlite filter=gitignore
+*.sqlite3 filter=gitignore
+
+# Ensure env files are never committed
+.env filter=gitignore
+.env.* filter=gitignore
+!.env*.example
+
+# Private keys
+*.pem filter=gitignore
+*.key filter=gitignore
+*.p12 filter=gitignore
+

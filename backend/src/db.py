@@ -11,6 +11,22 @@ else:
 
 
 def init_db():
+    """Initialize database with all models"""
+    # Import all models to register them with SQLModel
+    from models import (
+        Job, Clip, Render, User, AuthProvider, UserAuth, DiscoveredClip,
+        Entitlement, WeeklyMontage, SocialConnection, SocialPost,
+        JobEngagement, SocialPostEngagement, StylePerformance, UserAnalytics
+    )
+    from models_community import (
+        Server, Channel, ServerMember, Message, DirectMessage,
+        ServerInvite, Post, Follow, LinkedProfile,
+        PostLike, FeedAlgorithm, FeedCache
+    )
+    from models_ai import (
+        ContentVersion, CodeGeneration, UXAnalysis, AITask, VideoEnhancement
+    )
+    
     SQLModel.metadata.create_all(engine)
     _apply_migrations()
 

@@ -200,9 +200,12 @@ docker-compose logs -f worker
 ```
 USE_POSTGRES=false
 USE_OBJECT_STORAGE=false
+# Database
 POSTGRES_DSN=postgresql+psycopg://postgres:postgres@postgres:5432/cosmiv
 REDIS_URL=redis://redis:6379/0
 DB_PATH=/app/storage/db.sqlite3
+
+# Storage
 S3_ENDPOINT_URL=http://minio:9000
 S3_REGION=us-east-1
 S3_ACCESS_KEY=minioadmin

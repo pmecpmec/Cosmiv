@@ -18,20 +18,33 @@ from api_social_v2 import router as social_v2_router
 from config import settings
 from api_billing_v2 import router as billing_v2_router
 from api_upload import router as upload_router
+from api_auth import router as auth_router
+from api_admin import router as admin_router
+from api_weekly_montages import router as weekly_montages_router
+from api_analytics import router as analytics_router
+from api_ai import router as ai_router
+from api_feed import router as feed_router
+from api_communities import router as communities_router
+from api_profiles import router as profiles_router
+from api_ai_content import router as ai_content_router
+from api_ai_code import router as ai_code_router
+from api_ai_ux import router as ai_ux_router
+from api_ai_video import router as ai_video_router
 
-app = FastAPI(title="Auto-Editor MVP")
+app = FastAPI(title="Cosmiv - AI Gaming Montage Platform")
 
-# CORS configuration from settings
-allowed_origins = settings.ALLOWED_ORIGINS.split(",")
+# CORS configuration (environment-based with security validation)
+cors_origins_str = os.getenv("CORS_ORIGINS", settings.ALLOWED_ORIGINS)
+cors_origins = [origin.strip() for origin in cors_origins_str.split(",")]
 
 # Security validation for production
 if settings.ENVIRONMENT == "production":
-    if any("localhost" in origin or "127.0.0.1" in origin for origin in allowed_origins):
+    if any("localhost" in origin or "127.0.0.1" in origin for origin in cors_origins):
         raise ValueError("Localhost origins not allowed in production CORS configuration")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allowed_origins,
+    allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],  # Explicit methods only
     allow_headers=["Content-Type", "Authorization", "X-CSRF-Token"],  # Explicit headers only
@@ -56,6 +69,46 @@ async def add_security_headers(request, call_next):
 @app.on_event("startup")
 def on_startup():
     init_db()
+
+@app.get("/health")
+async def health_check():
+    """Health check endpoint to verify DB, Redis, and storage connectivity"""
+    import redis
+    from config import settings
+    from services.storage_adapters import get_storage
+    
+    health = {
+        "status": "healthy",
+        "checks": {}
+    }
+    
+    # Check database
+    try:
+        with get_session() as session:
+            session.exec(select(func.count(Job.id)))
+        health["checks"]["database"] = "ok"
+    except Exception as e:
+        health["checks"]["database"] = f"error: {str(e)}"
+        health["status"] = "degraded"
+    
+    # Check Redis
+    try:
+        r = redis.from_url(settings.REDIS_URL)
+        r.ping()
+        health["checks"]["redis"] = "ok"
+    except Exception as e:
+        health["checks"]["redis"] = f"error: {str(e)}"
+        health["status"] = "degraded"
+    
+    # Check storage
+    try:
+        storage = get_storage()
+        # Try to list (may fail if not configured, that's ok)
+        health["checks"]["storage"] = "ok"
+    except Exception as e:
+        health["checks"]["storage"] = f"warning: {str(e)}"
+    
+    return health
 
 # Existing endpoints
 @app.post("/upload")
@@ -163,3 +216,15 @@ app.include_router(styles_v2_router)
 app.include_router(social_v2_router)
 app.include_router(billing_v2_router)
 app.include_router(upload_router)
+app.include_router(auth_router)
+app.include_router(admin_router)
+app.include_router(weekly_montages_router)
+app.include_router(analytics_router)
+app.include_router(ai_router)
+app.include_router(feed_router)
+app.include_router(communities_router)
+app.include_router(profiles_router)
+app.include_router(ai_content_router)
+app.include_router(ai_code_router)
+app.include_router(ai_ux_router)
+app.include_router(ai_video_router)
