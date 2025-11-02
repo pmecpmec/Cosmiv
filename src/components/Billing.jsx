@@ -147,8 +147,8 @@ export default function Billing() {
   };
 
   return (
-    <div className="bg-pure-white/5 border-2 border-pure-white/20 p-12">
-      <h2 className="text-4xl font-black text-pure-white mb-12 tracking-poppr text-center">💳   B I L L I N G   &   S U B S C R I P T I O N</h2>
+    <div className="broken-planet-card rounded-2xl p-12 float">
+      <h2 className="text-4xl font-black gradient-text-cosmic mb-12 tracking-poppr text-center">💳   B I L L I N G   &   S U B S C R I P T I O N</h2>
       
       {error && (
         <motion.div
@@ -171,7 +171,7 @@ export default function Billing() {
       )}
 
       {currentPlan && (
-        <div className="mb-8 p-6 border-2 border-cosmic-violet/40 bg-cosmic-violet/20 text-pure-white backdrop-blur-sm">
+        <div className="mb-8 p-6 border-2 border-cosmic-neon-cyan/40 bg-cosmic-violet/20 text-pure-white backdrop-blur-sm neon-glow-cyan broken-planet-card">
           <div className="flex items-center justify-between">
             <div>
               <div className="font-black text-xl tracking-wide uppercase mb-2">
@@ -198,20 +198,20 @@ export default function Billing() {
       {/* Plans grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {plans.map((p) => (
-          <motion.div
+            <motion.div
             key={p.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             whileHover={{ y: -5, scale: 1.02 }}
-            className={`border-2 p-8 relative ${getPlanHighlight(p.id)}`}
+            className={`border-2 p-8 relative broken-planet-card ${getPlanHighlight(p.id)}`}
           >
             {p.id === "creator" && (
-              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 px-4 py-2 bg-cosmic-neon-cyan text-pure-black border-2 border-cosmic-neon-cyan font-black tracking-wide text-xs">
+              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 px-4 py-2 bg-cosmic-neon-cyan text-pure-black border-2 border-cosmic-neon-cyan font-black tracking-wide text-xs neon-glow-cyan">
                 M O S T   P O P U L A R
               </div>
             )}
             
-            <div className="text-3xl font-black mb-3 tracking-wide uppercase bg-gradient-to-r from-cosmic-violet to-cosmic-neon-cyan bg-clip-text text-transparent">{p.name === "Cosmic Cadet" ? "Cosmic Cadet" : p.name === "Nebula Knight" ? "Nebula Knight" : p.name}</div>
+            <div className="text-3xl font-black mb-3 tracking-wide uppercase gradient-text-cosmic">{p.name === "Cosmic Cadet" ? "Cosmic Cadet" : p.name === "Nebula Knight" ? "Nebula Knight" : p.name}</div>
             <div className="text-5xl font-black mb-4">
               ${p.price}
               {p.price > 0 && <span className="text-xl opacity-70">/month</span>}
@@ -233,7 +233,7 @@ export default function Billing() {
                   ? "bg-pure-white/20 text-pure-white/50 cursor-not-allowed border-pure-white/20"
                   : p.price === 0
                   ? "bg-pure-white/10 hover:bg-pure-white/20 text-pure-white border-pure-white/20 hover:opacity-90"
-                  : "bg-gradient-to-r from-cosmic-violet to-cosmic-deep-blue hover:from-cosmic-purple hover:to-cosmic-violet text-white border-cosmic-violet/50 hover:shadow-lg hover:shadow-cosmic-violet/30"
+                  : "bg-gradient-to-r from-cosmic-violet to-cosmic-deep-blue hover:from-cosmic-purple hover:to-cosmic-violet text-white border-cosmic-neon-cyan/50 hover:shadow-lg hover:shadow-cosmic-neon-cyan/30 neon-glow hover:neon-glow-cyan chromatic-aberration"
               }`}
             >
               {loading ? (
@@ -251,7 +251,7 @@ export default function Billing() {
       </div>
 
       {/* Info */}
-      <div className="mt-8 p-6 border-2 border-cosmic-neon-cyan/30 bg-cosmic-deep-blue/10 text-cosmic-neon-cyan/90 backdrop-blur-sm">
+      <div className="mt-8 p-6 border-2 border-cosmic-neon-cyan/30 bg-cosmic-deep-blue/10 text-cosmic-neon-cyan/90 backdrop-blur-sm broken-planet-card neon-glow-cyan">
         <div className="font-black mb-3 tracking-wide uppercase text-sm">ℹ️   P A Y M E N T   I N F O R M A T I O N</div>
         <div className="font-bold">
           {process.env.NODE_ENV === "production" ? (

@@ -46,7 +46,7 @@ export default function Dashboard() {
 
   return (
     <div>
-      <h3 className="text-pure-white text-3xl font-black mb-8 tracking-poppr">A N A L Y T I C S   D A S H B O A R D</h3>
+      <h3 className="gradient-text-cosmic text-3xl font-black mb-8 tracking-poppr">A N A L Y T I C S   D A S H B O A R D</h3>
       {error && <div className="border-2 border-pure-white bg-pure-white text-pure-black p-4 mb-6 font-black tracking-wide">{error}</div>}
       {summary && (
         <div className="grid grid-cols-3 gap-4 mb-6">
@@ -57,7 +57,7 @@ export default function Dashboard() {
       )}
 
       {/* Trend Chart */}
-      <div className="bg-pure-white/5 border-2 border-pure-white/20 p-6 mb-8">
+      <div className="broken-planet-card p-6 mb-8">
         <div className="text-pure-white font-black mb-6 text-xl tracking-wide uppercase">Job Activity Trend</div>
         <ResponsiveContainer width="100%" height={200}>
           <LineChart data={chartData}>
@@ -71,11 +71,11 @@ export default function Dashboard() {
       </div>
 
       {/* Recent Jobs */}
-      <div className="bg-pure-white/5 border-2 border-pure-white/20 p-6">
+      <div className="broken-planet-card p-6">
         <div className="text-pure-white font-black mb-4 text-xl tracking-wide uppercase">Recent Jobs</div>
         <div className="space-y-3">
           {jobs.map((j) => (
-            <div key={j.job_id} className="flex items-center justify-between text-sm text-pure-white/70 bg-pure-white/5 border-2 border-pure-white/20 p-4 mb-3">
+            <div key={j.job_id} className="flex items-center justify-between text-sm text-pure-white/70 broken-planet-card p-4 mb-3">
               <div className="flex-1">
                 <div className="text-pure-white font-black text-xs tracking-wide mb-1">{j.job_id}</div>
                 <div className="font-bold">Status: <span className={j.status==="SUCCESS"?"text-pure-white":j.status==="FAILED"?"text-pure-white/50":"text-pure-white/70"}>{j.status}</span></div>
@@ -84,7 +84,7 @@ export default function Dashboard() {
               </div>
               <div className="flex gap-2">
                 {["landscape","portrait"].map((fmt)=> (
-                  <button key={fmt} onClick={async ()=>{ const u = await downloadUrl(j.job_id, fmt); window.open(u, "_blank"); }} className="px-4 py-2 bg-pure-white text-pure-black font-black border-2 border-pure-white hover:opacity-90 transition-opacity tracking-wide text-xs">
+                  <button key={fmt} onClick={async ()=>{ const u = await downloadUrl(j.job_id, fmt); window.open(u, "_blank"); }} className="px-4 py-2 bg-gradient-to-r from-cosmic-violet to-cosmic-deep-blue hover:from-cosmic-purple hover:to-cosmic-violet text-white font-black border-2 border-cosmic-neon-cyan/50 hover:neon-glow-cyan transition-all tracking-wide text-xs neon-glow chromatic-aberration">
                     {fmt}
                   </button>
                 ))}
@@ -100,9 +100,9 @@ export default function Dashboard() {
 
 function Card({label, value}){
   return (
-    <div className="bg-pure-white/5 border-2 border-pure-white/20 p-6 text-center">
-      <div className="text-pure-white/70 text-xs font-black tracking-wide uppercase mb-2">{label}</div>
-      <div className="text-pure-white text-3xl font-black">{value}</div>
+    <div className="broken-planet-card p-6 text-center float">
+      <div className="text-cosmic-neon-cyan/70 text-xs font-black tracking-wide uppercase mb-2">{label}</div>
+      <div className="gradient-text-cosmic text-3xl font-black">{value}</div>
     </div>
   );
 }

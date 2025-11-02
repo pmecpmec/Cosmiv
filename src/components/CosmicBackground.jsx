@@ -87,6 +87,36 @@ export default function CosmicBackground() {
       ctx.arc(0, 0, radius, 0, Math.PI * 2)
       ctx.fill()
 
+      // Broken Planet: Draw cracks/glitch lines
+      ctx.strokeStyle = 'rgba(255, 0, 128, 0.6)' // Glitch pink
+      ctx.lineWidth = 2
+      ctx.shadowBlur = 10
+      ctx.shadowColor = 'rgba(255, 0, 128, 0.8)'
+      
+      // Draw crack lines (slightly offset for glitch effect)
+      const cracks = [
+        { start: { angle: -Math.PI / 6, dist: radius * 0.3 }, end: { angle: Math.PI / 4, dist: radius * 0.9 } },
+        { start: { angle: Math.PI / 3, dist: radius * 0.4 }, end: { angle: -Math.PI / 4, dist: radius * 0.85 } },
+        { start: { angle: Math.PI * 0.7, dist: radius * 0.35 }, end: { angle: Math.PI * 1.2, dist: radius * 0.8 } },
+      ]
+      
+      cracks.forEach((crack, idx) => {
+        const time = Date.now() * 0.001
+        const glitchOffset = Math.sin(time + idx) * 2 // Subtle glitch animation
+        
+        const x1 = Math.cos(crack.start.angle) * crack.start.dist + glitchOffset
+        const y1 = Math.sin(crack.start.angle) * crack.start.dist
+        const x2 = Math.cos(crack.end.angle) * crack.end.dist + glitchOffset
+        const y2 = Math.sin(crack.end.angle) * crack.end.dist
+        
+        ctx.beginPath()
+        ctx.moveTo(x1, y1)
+        ctx.lineTo(x2, y2)
+        ctx.stroke()
+      })
+      
+      ctx.shadowBlur = 0
+
       // Draw grid/network pattern
       ctx.strokeStyle = 'rgba(255, 100, 255, 0.6)'
       ctx.lineWidth = 1.5
@@ -237,11 +267,13 @@ export default function CosmicBackground() {
   }, [])
 
   return (
-    <canvas
-      ref={canvasRef}
-      className="fixed inset-0 w-full h-full -z-10"
-      style={{ background: 'linear-gradient(to bottom, #0a0a1a 0%, #1a0a2e 50%, #0a1a2a 100%)' }}
-    />
+    <div className="fixed inset-0 w-full h-full -z-10 scanlines">
+      <canvas
+        ref={canvasRef}
+        className="w-full h-full"
+        style={{ background: 'linear-gradient(to bottom, #0a0a1a 0%, #1a0a2e 50%, #0a1a2a 100%)' }}
+      />
+    </div>
   )
 }
 

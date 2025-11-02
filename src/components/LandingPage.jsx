@@ -1,4 +1,5 @@
 import ScrollReveal from './ScrollReveal'
+import { motion } from 'framer-motion'
 
 export default function LandingPage({ onGetStarted }) {
   const pipelineSteps = [
@@ -25,8 +26,8 @@ export default function LandingPage({ onGetStarted }) {
       >
         <div className="container mx-auto text-center">
           <ScrollReveal delay={0.2}>
-            <h1 className="text-7xl md:text-9xl font-black text-pure-white mb-8 tracking-poppr">
-              🎬 A I D I T O R
+            <h1 className="text-7xl md:text-9xl font-black gradient-text-cosmic mb-8 tracking-poppr chromatic-aberration">
+              🌌 C O S M I V
             </h1>
           </ScrollReveal>
           <ScrollReveal delay={0.4}>
@@ -41,12 +42,14 @@ export default function LandingPage({ onGetStarted }) {
             </p>
           </ScrollReveal>
           <ScrollReveal delay={0.8}>
-            <button
+            <motion.button
               onClick={onGetStarted}
-              className="px-12 py-5 bg-pure-white text-pure-black font-black border-2 border-pure-white text-lg tracking-wide hover:opacity-90 transition-opacity"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="px-12 py-5 bg-gradient-to-r from-cosmic-violet to-cosmic-deep-blue hover:from-cosmic-purple hover:to-cosmic-violet text-white font-black border-2 border-cosmic-neon-cyan/50 text-lg tracking-wide transition-all neon-glow hover:neon-glow-cyan chromatic-aberration"
             >
               G E T   S T A R T E D
-            </button>
+            </motion.button>
           </ScrollReveal>
         </div>
       </section>
@@ -63,16 +66,19 @@ export default function LandingPage({ onGetStarted }) {
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-6">
             {pipelineSteps.map((step, index) => (
               <ScrollReveal key={index} delay={index * 0.1} direction="up">
-                <div className="bg-pure-white/5 border-2 border-pure-white/20 p-8 hover:border-pure-white transition-all text-center relative group">
+                <motion.div 
+                  className="broken-planet-card p-8 hover:border-cosmic-neon-cyan transition-all text-center relative group float"
+                  whileHover={{ y: -5, scale: 1.02 }}
+                >
                   <div className="text-4xl mb-4">{step.icon}</div>
-                  <h3 className="text-lg font-black text-pure-white mb-2">{step.title}</h3>
-                  <p className="text-sm text-pure-white/70 font-bold">{step.description}</p>
+                  <h3 className="text-lg font-black text-cosmic-neon-cyan mb-2">{step.title}</h3>
+                  <p className="text-sm text-white/70 font-bold">{step.description}</p>
                   {index < pipelineSteps.length - 1 && (
-                    <div className="hidden lg:block absolute top-1/2 -right-3 transform -translate-y-1/2 text-pure-white text-2xl font-black">
+                    <div className="hidden lg:block absolute top-1/2 -right-3 transform -translate-y-1/2 text-cosmic-neon-cyan text-2xl font-black neon-glow-cyan">
                       →
                     </div>
                   )}
-                </div>
+                </motion.div>
               </ScrollReveal>
             ))}
           </div>
@@ -91,12 +97,14 @@ export default function LandingPage({ onGetStarted }) {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {features.map((feature, index) => (
               <ScrollReveal key={index} delay={index * 0.15} direction="up">
-                <div className="bg-pure-white/5 border-2 border-pure-white/20 p-8 hover:border-pure-white transition-all group"
+                <motion.div 
+                  className="broken-planet-card p-8 hover:border-cosmic-neon-cyan transition-all group float"
+                  whileHover={{ y: -5, scale: 1.02 }}
                 >
                 <div className="text-4xl mb-4">{feature.icon}</div>
-                <h3 className="text-xl font-black text-pure-white mb-2">{feature.title}</h3>
-                <p className="text-pure-white/60 font-bold">{feature.description}</p>
-              </div>
+                <h3 className="text-xl font-black gradient-text-cosmic mb-2">{feature.title}</h3>
+                <p className="text-white/60 font-bold">{feature.description}</p>
+              </motion.div>
               </ScrollReveal>
             ))}
           </div>
@@ -108,20 +116,25 @@ export default function LandingPage({ onGetStarted }) {
       >
         <div className="container mx-auto text-center">
           <ScrollReveal delay={0.3} direction="fade">
-            <div className="bg-pure-white/5 border-2 border-pure-white/20 p-16 max-w-4xl mx-auto text-center">
-              <h2 className="text-4xl md:text-5xl font-black text-pure-white mb-6 tracking-poppr">
+            <motion.div 
+              className="broken-planet-card p-16 max-w-4xl mx-auto text-center float"
+              whileHover={{ scale: 1.01 }}
+            >
+              <h2 className="text-4xl md:text-5xl font-black gradient-text-cosmic mb-6 tracking-poppr">
                 R E A D Y   T O   C R E A T E ?
               </h2>
-              <p className="text-xl text-pure-white/70 mb-12 font-bold leading-relaxed max-w-2xl mx-auto">
+              <p className="text-xl text-white/70 mb-12 font-bold leading-relaxed max-w-2xl mx-auto">
                 Join thousands of creators transforming their gameplay into engaging montages.
               </p>
-              <button
+              <motion.button
                 onClick={onGetStarted}
-                className="px-12 py-5 bg-pure-white text-pure-black font-black border-2 border-pure-white text-lg tracking-wide hover:opacity-90 transition-opacity"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="px-12 py-5 bg-gradient-to-r from-cosmic-violet to-cosmic-deep-blue hover:from-cosmic-purple hover:to-cosmic-violet text-white font-black border-2 border-cosmic-neon-cyan/50 text-lg tracking-wide transition-all neon-glow hover:neon-glow-cyan chromatic-aberration"
               >
                 S T A R T   C R E A T I N G   N O W
-              </button>
-            </div>
+              </motion.button>
+            </motion.div>
           </ScrollReveal>
         </div>
       </section>

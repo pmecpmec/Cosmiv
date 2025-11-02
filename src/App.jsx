@@ -56,7 +56,7 @@ function AppContent() {
       <div className="min-h-screen bg-pure-black flex items-center justify-center px-4 py-16">
         <div className="w-full max-w-md">
           <div className="text-center mb-12">
-            <h1 className="text-5xl font-black text-pure-white mb-6 tracking-poppr">
+            <h1 className="text-5xl font-black gradient-text-cosmic mb-6 tracking-poppr chromatic-aberration">
               🌌   C O S M I V
             </h1>
             <p className="text-xl text-pure-white/70 font-bold tracking-wide">

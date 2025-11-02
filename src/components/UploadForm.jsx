@@ -397,10 +397,10 @@ export default function UploadForm() {
   const displayFiles = files.length ? files : (clipFile ? [clipFile] : []);
 
   return (
-    <div className="bg-white/10 backdrop-blur-lg rounded-2xl border border-white/20 shadow-2xl p-6 sm:p-8">
+    <div className="broken-planet-card rounded-2xl shadow-2xl p-6 sm:p-8 float">
       <div className="flex flex-col gap-6 lg:gap-10">
         <header className="text-center lg:text-left">
-          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">
+          <h2 className="text-2xl sm:text-3xl font-bold gradient-text-cosmic mb-2">
             Create Your Highlight Reel with Cosmiv
           </h2>
           <p className="text-sm sm:text-base text-gray-300 max-w-2xl mx-auto lg:mx-0">
@@ -424,9 +424,9 @@ export default function UploadForm() {
               }}
               className={`rounded-2xl border-2 border-dashed transition-all p-8 sm:p-10 flex flex-col items-center justify-center gap-4 text-center ${
                 isDragging
-                  ? "border-cosmic-violet bg-cosmic-violet/20"
-                  : "border-white/30 bg-white/5 hover:bg-white/10 hover:border-white/40"
-              } ${isUploading ? "opacity-60 cursor-progress" : "cursor-pointer"}`}
+                  ? "border-cosmic-neon-cyan bg-cosmic-violet/20 neon-glow-cyan"
+                  : "border-cosmic-neon-cyan/30 bg-white/5 hover:bg-white/10 hover:border-cosmic-neon-cyan hover:neon-glow-cyan"
+              } ${isUploading ? "opacity-60 cursor-progress" : "cursor-pointer"} broken-planet-card`
             >
               <input
                 ref={inputRef}
@@ -478,9 +478,9 @@ export default function UploadForm() {
                     disabled={isUploading}
                     className={`p-3 border-2 rounded-lg transition-all text-sm ${
                       theme === t.id
-                        ? "border-cosmic-violet bg-cosmic-violet/20 text-white"
-                        : "border-white/20 bg-white/5 text-gray-300 hover:border-white/40"
-                    } ${isUploading ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+                        ? "border-cosmic-neon-cyan bg-cosmic-violet/20 text-cosmic-neon-cyan neon-glow-cyan"
+                        : "border-white/20 bg-white/5 text-gray-300 hover:border-cosmic-neon-cyan/50 hover:text-white"
+                    } ${isUploading ? "opacity-50 cursor-not-allowed" : "cursor-pointer"} broken-planet-card`
                   >
                     <div className="font-semibold mb-1">{t.name}</div>
                     <div className="text-xs opacity-70">{t.description}</div>
@@ -533,7 +533,7 @@ export default function UploadForm() {
                     type="button"
                     onClick={uploadVideo}
                     disabled={displayFiles.length === 0 || isUploading}
-                    className="px-4 py-2 rounded-lg text-sm font-semibold bg-gradient-to-r from-cosmic-violet to-cosmic-deep-blue text-white shadow-lg shadow-cosmic-violet/20 hover:from-cosmic-purple hover:to-cosmic-violet transition disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="px-4 py-2 rounded-lg text-sm font-semibold bg-gradient-to-r from-cosmic-violet to-cosmic-deep-blue text-white shadow-lg shadow-cosmic-violet/20 hover:from-cosmic-purple hover:to-cosmic-violet transition disabled:opacity-40 disabled:cursor-not-allowed neon-glow hover:neon-glow-cyan chromatic-aberration"
                   >
                     {isUploading ? "Processing..." : "Sync Upload"}
                   </button>
@@ -541,7 +541,7 @@ export default function UploadForm() {
                     type="button"
                     onClick={uploadAsyncV2}
                     disabled={displayFiles.length === 0 || isUploading}
-                    className="px-4 py-2 rounded-lg text-sm font-semibold bg-gradient-to-r from-cosmic-deep-blue to-cosmic-neon-cyan text-white shadow-lg shadow-cosmic-neon-cyan/20 hover:opacity-90 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="px-4 py-2 rounded-lg text-sm font-semibold bg-gradient-to-r from-cosmic-deep-blue to-cosmic-neon-cyan text-white shadow-lg shadow-cosmic-neon-cyan/20 hover:opacity-90 transition disabled:opacity-40 disabled:cursor-not-allowed neon-glow-cyan hover:neon-glow-pink chromatic-aberration"
                   >
                     {isUploading ? "Queued..." : "Async V2"}
                   </button>
@@ -596,7 +596,7 @@ export default function UploadForm() {
                   <a
                     href={resultUrl}
                     download="highlight.mp4"
-                    className="px-4 py-2 rounded-lg bg-gradient-to-r from-cosmic-violet to-cosmic-deep-blue hover:from-cosmic-purple hover:to-cosmic-violet text-white text-sm font-semibold transition shadow-lg shadow-cosmic-violet/20"
+                    className="px-4 py-2 rounded-lg bg-gradient-to-r from-cosmic-violet to-cosmic-deep-blue hover:from-cosmic-purple hover:to-cosmic-violet text-white text-sm font-semibold transition shadow-lg shadow-cosmic-violet/20 neon-glow hover:neon-glow-cyan chromatic-aberration"
                   >
                     Download highlight
                   </a>

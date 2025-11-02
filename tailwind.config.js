@@ -11,6 +11,9 @@ export default {
           purple: "#A855F7",       // Purple accent
           pink: "#EC4899",         // Pink accent
           space: "#0A0A1A",        // Deep space background
+          // Broken Planet colors
+          "glitch-pink": "#FF0080",  // Glitch effects, error states
+          "hot-pink": "#FF00FF",     // Vibrant highlights, neon glows
         },
         "pure-black": "#000000",
         "pure-white": "#FFFFFF",

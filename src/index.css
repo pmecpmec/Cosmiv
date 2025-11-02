@@ -28,6 +28,184 @@
     -webkit-text-stroke: 1px white;
     text-stroke: 1px white;
   }
+
+  /* Broken Planet Glitch Effect */
+  .glitch-effect {
+    position: relative;
+    filter: blur(0.3px);
+    animation: glitch 3s infinite;
+  }
+
+  .glitch-effect::before,
+  .glitch-effect::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .glitch-effect::before {
+    left: 2px;
+    text-shadow: 2px 0 #FF0080;
+    clip: rect(44px, 450px, 56px, 0);
+    animation: glitch-anim 5s infinite linear alternate-reverse;
+  }
+
+  .glitch-effect::after {
+    left: -2px;
+    text-shadow: -2px 0 #00FFFF;
+    clip: rect(44px, 450px, 56px, 0);
+    animation: glitch-anim2 5s infinite linear alternate-reverse;
+  }
+
+  @keyframes glitch {
+    0%, 100% { transform: translate(0); }
+    20% { transform: translate(-2px, 2px); }
+    40% { transform: translate(-2px, -2px); }
+    60% { transform: translate(2px, 2px); }
+    80% { transform: translate(2px, -2px); }
+  }
+
+  @keyframes glitch-anim {
+    0% { clip: rect(10px, 9999px, 50px, 0); }
+    20% { clip: rect(30px, 9999px, 35px, 0); }
+    40% { clip: rect(20px, 9999px, 15px, 0); }
+    60% { clip: rect(50px, 9999px, 5px, 0); }
+    80% { clip: rect(1px, 9999px, 45px, 0); }
+    100% { clip: rect(25px, 9999px, 20px, 0); }
+  }
+
+  @keyframes glitch-anim2 {
+    0% { clip: rect(50px, 9999px, 10px, 0); }
+    20% { clip: rect(35px, 9999px, 30px, 0); }
+    40% { clip: rect(15px, 9999px, 20px, 0); }
+    60% { clip: rect(5px, 9999px, 50px, 0); }
+    80% { clip: rect(45px, 9999px, 1px, 0); }
+    100% { clip: rect(20px, 9999px, 25px, 0); }
+  }
+
+  /* Scanline Overlay */
+  .scanlines {
+    position: relative;
+  }
+
+  .scanlines::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(0, 255, 255, 0.03) 0px,
+      rgba(0, 255, 255, 0.03) 1px,
+      transparent 1px,
+      transparent 2px
+    );
+    pointer-events: none;
+    z-index: 1;
+    animation: scanline-move 8s linear infinite;
+  }
+
+  @keyframes scanline-move {
+    0% { background-position: 0 0; }
+    100% { background-position: 0 100vh; }
+  }
+
+  /* Enhanced Neon Glow */
+  .neon-glow {
+    box-shadow: 
+      0 0 10px rgba(139, 92, 246, 0.5),
+      0 0 20px rgba(139, 92, 246, 0.3),
+      0 0 30px rgba(0, 255, 255, 0.3),
+      0 0 40px rgba(0, 255, 255, 0.2);
+  }
+
+  .neon-glow-pink {
+    box-shadow: 
+      0 0 10px rgba(255, 0, 128, 0.5),
+      0 0 20px rgba(255, 0, 128, 0.3),
+      0 0 30px rgba(255, 0, 255, 0.3),
+      0 0 40px rgba(255, 0, 255, 0.2);
+  }
+
+  .neon-glow-cyan {
+    box-shadow: 
+      0 0 10px rgba(0, 255, 255, 0.5),
+      0 0 20px rgba(0, 255, 255, 0.3),
+      0 0 30px rgba(0, 255, 255, 0.4),
+      0 0 40px rgba(0, 255, 255, 0.3);
+  }
+
+  /* Chromatic Aberration Effect */
+  .chromatic-aberration {
+    filter: blur(0.3px);
+  }
+
+  .chromatic-aberration:hover {
+    text-shadow: 
+      1px 0 0 #FF0080,
+      -1px 0 0 #00FFFF;
+  }
+
+  /* Floating Animation */
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+
+  .float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  /* Gradient Text */
+  .gradient-text-cosmic {
+    background: linear-gradient(135deg, #8B5CF6 0%, #1E3A8A 50%, #00FFFF 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Broken Planet Card Style */
+  .broken-planet-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    position: relative;
+    transition: all 0.3s ease;
+  }
+
+  .broken-planet-card:hover {
+    border-color: rgba(0, 255, 255, 0.5);
+    box-shadow: 
+      0 0 20px rgba(139, 92, 246, 0.3),
+      0 0 40px rgba(0, 255, 255, 0.2),
+      inset 0 0 20px rgba(255, 0, 128, 0.1);
+    transform: translateY(-5px);
+  }
+
+  .broken-planet-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.1),
+      transparent
+    );
+    transition: left 0.5s;
+  }
+
+  .broken-planet-card:hover::before {
+    left: 100%;
+  }
 }
 
 /* PWA and Mobile Optimizations */

@@ -36,8 +36,8 @@ export default function Register({ onSwitchToLogin }) {
   }
 
   return (
-    <div className="bg-pure-white/5 border-2 border-pure-white/20 p-12 max-w-md mx-auto">
-      <h2 className="text-4xl font-black text-pure-white mb-4 text-center tracking-poppr">C R E A T E   A C C O U N T</h2>
+    <div className="broken-planet-card rounded-2xl p-12 max-w-md mx-auto float">
+      <h2 className="text-4xl font-black gradient-text-cosmic mb-4 text-center tracking-poppr">C R E A T E   A C C O U N T</h2>
       <p className="text-pure-white/70 text-center mb-8 font-bold tracking-wide">Join Cosmiv today</p>
 
       {error && (
@@ -56,7 +56,7 @@ export default function Register({ onSwitchToLogin }) {
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required
-            className="w-full px-6 py-4 bg-pure-black border-2 border-pure-white/20 text-pure-white placeholder-pure-white/30 focus:outline-none focus:border-pure-white font-bold tracking-wide disabled:opacity-50"
+            className="w-full px-6 py-4 bg-pure-black border-2 border-cosmic-neon-cyan/30 text-pure-white placeholder-pure-white/30 focus:outline-none focus:border-cosmic-neon-cyan font-bold tracking-wide disabled:opacity-50 focus:neon-glow-cyan"
             placeholder="Choose a username"
             disabled={loading}
           />
@@ -71,7 +71,7 @@ export default function Register({ onSwitchToLogin }) {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full px-6 py-4 bg-pure-black border-2 border-pure-white/20 text-pure-white placeholder-pure-white/30 focus:outline-none focus:border-pure-white font-bold tracking-wide disabled:opacity-50"
+            className="w-full px-6 py-4 bg-pure-black border-2 border-cosmic-neon-cyan/30 text-pure-white placeholder-pure-white/30 focus:outline-none focus:border-cosmic-neon-cyan font-bold tracking-wide disabled:opacity-50 focus:neon-glow-cyan"
             placeholder="Enter your email"
             disabled={loading}
           />
@@ -87,7 +87,7 @@ export default function Register({ onSwitchToLogin }) {
             onChange={(e) => setPassword(e.target.value)}
             required
             minLength={8}
-            className="w-full px-6 py-4 bg-pure-black border-2 border-pure-white/20 text-pure-white placeholder-pure-white/30 focus:outline-none focus:border-pure-white font-bold tracking-wide disabled:opacity-50"
+            className="w-full px-6 py-4 bg-pure-black border-2 border-cosmic-neon-cyan/30 text-pure-white placeholder-pure-white/30 focus:outline-none focus:border-cosmic-neon-cyan font-bold tracking-wide disabled:opacity-50 focus:neon-glow-cyan"
             placeholder="At least 8 characters"
             disabled={loading}
           />
@@ -103,7 +103,7 @@ export default function Register({ onSwitchToLogin }) {
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
-            className="w-full px-6 py-4 bg-pure-black border-2 border-pure-white/20 text-pure-white placeholder-pure-white/30 focus:outline-none focus:border-pure-white font-bold tracking-wide disabled:opacity-50"
+            className="w-full px-6 py-4 bg-pure-black border-2 border-cosmic-neon-cyan/30 text-pure-white placeholder-pure-white/30 focus:outline-none focus:border-cosmic-neon-cyan font-bold tracking-wide disabled:opacity-50 focus:neon-glow-cyan"
             placeholder="Confirm your password"
             disabled={loading}
           />
@@ -112,7 +112,7 @@ export default function Register({ onSwitchToLogin }) {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-pure-white text-pure-black font-black py-4 border-2 border-pure-white hover:opacity-90 transition-opacity tracking-wide disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full bg-gradient-to-r from-cosmic-violet to-cosmic-deep-blue hover:from-cosmic-purple hover:to-cosmic-violet text-white font-black py-4 border-2 border-cosmic-neon-cyan/50 hover:neon-glow-cyan transition-all tracking-wide disabled:opacity-50 disabled:cursor-not-allowed neon-glow chromatic-aberration"
         >
           {loading ? 'C R E A T I N G   A C C O U N T . . .' : 'C R E A T E   A C C O U N T'}
         </button>
