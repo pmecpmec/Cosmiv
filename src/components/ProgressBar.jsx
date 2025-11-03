@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 
 export default function ProgressBar({ progress, isProcessing, isComplete }) {
   const [displayProgress, setDisplayProgress] = useState(0);
@@ -47,13 +48,23 @@ export default function ProgressBar({ progress, isProcessing, isComplete }) {
         </span>
         <span>{Math.round(displayProgress)}%</span>
       </div>
-      <div className="w-full bg-pure-white/10 border-2 border-pure-white/20 h-4 overflow-hidden">
-        <div
-          className="h-full bg-pure-white transition-all duration-300 ease-out relative overflow-hidden"
-          style={{ width: `${displayProgress}%` }}
+      <div className="w-full bg-cosmic-deep-blue/30 border-2 border-cosmic-neon-cyan/30 h-5 rounded-full overflow-hidden backdrop-blur-sm relative">
+        <motion.div
+          className="h-full bg-gradient-to-r from-cosmic-violet via-cosmic-neon-cyan to-cosmic-purple relative overflow-hidden"
+          initial={{ width: 0 }}
+          animate={{ width: `${displayProgress}%` }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
+          style={{ 
+            boxShadow: displayProgress > 0 ? '0 0 20px rgba(0, 255, 255, 0.5), inset 0 0 10px rgba(139, 92, 246, 0.3)' : 'none'
+          }}
         >
-          <div className="absolute inset-0 bg-pure-black/20 animate-pulse"></div>
-        </div>
+          {/* Shimmer effect */}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer"></div>
+          {/* Pulse effect */}
+          {!isComplete && (
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-pulse"></div>
+          )}
+        </motion.div>
       </div>
       {!isComplete && (
         <p className="text-xs text-pure-white/50 mt-3 text-center font-bold tracking-wide">

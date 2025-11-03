@@ -127,7 +127,7 @@ async function syncUploads() {
 // Push notifications (for job completion, etc.)
 self.addEventListener("push", (event) => {
   const data = event.data ? event.data.json() : {};
-  const title = data.title || "Aiditor";
+  const title = data.title || "Cosmiv";
   const options = {
     body: data.body || "You have a new notification",
     icon: "/icons/icon-192x192.png",

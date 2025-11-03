@@ -67,7 +67,12 @@ export default function Header({ activeTab, setActiveTab }) {
     <motion.header
       initial={{ y: -100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-cosmic-violet/90 via-cosmic-deep-blue/90 to-cosmic-violet/90 backdrop-blur-md border-b-2 border-cosmic-neon-cyan/50 shadow-lg shadow-cosmic-neon-cyan/30 neon-glow-cyan"
+      className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-cosmic-violet/90 via-cosmic-deep-blue/90 to-cosmic-violet/90 backdrop-blur-xl border-b-2 border-cosmic-neon-cyan/50 shadow-2xl shadow-cosmic-neon-cyan/40"
+      style={{
+        background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.9) 0%, rgba(30, 58, 138, 0.9) 50%, rgba(139, 92, 246, 0.9) 100%)',
+        backdropFilter: 'blur(20px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(20px) saturate(180%)'
+      }}
     >
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">

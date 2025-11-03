@@ -422,11 +422,11 @@ export default function UploadForm() {
                   inputRef.current?.click();
                 }
               }}
-              className={`rounded-2xl border-2 border-dashed transition-all p-8 sm:p-10 flex flex-col items-center justify-center gap-4 text-center ${
+              className={`rounded-2xl border-2 border-dashed transition-all p-8 sm:p-10 flex flex-col items-center justify-center gap-4 text-center broken-planet-card ${
                 isDragging
                   ? "border-cosmic-neon-cyan bg-cosmic-violet/20 neon-glow-cyan"
                   : "border-cosmic-neon-cyan/30 bg-white/5 hover:bg-white/10 hover:border-cosmic-neon-cyan hover:neon-glow-cyan"
-              } ${isUploading ? "opacity-60 cursor-progress" : "cursor-pointer"} broken-planet-card`
+              } ${isUploading ? "opacity-60 cursor-progress" : "cursor-pointer"}`}
             >
               <input
                 ref={inputRef}
@@ -475,11 +475,11 @@ export default function UploadForm() {
                     type="button"
                     onClick={() => setTheme(t.id)}
                     disabled={isUploading}
-                    className={`p-3 border-2 rounded-lg transition-all text-sm ${
+                    className={`p-3 border-2 rounded-lg transition-all text-sm broken-planet-card ${
                       theme === t.id
                         ? "border-cosmic-neon-cyan bg-cosmic-violet/20 text-cosmic-neon-cyan neon-glow-cyan"
                         : "border-white/20 bg-white/5 text-gray-300 hover:border-cosmic-neon-cyan/50 hover:text-white"
-                    } ${isUploading ? "opacity-50 cursor-not-allowed" : "cursor-pointer"} broken-planet-card`
+                    } ${isUploading ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
                   >
                     <div className="font-semibold mb-1">{t.name}</div>
                     <div className="text-xs opacity-70">{t.description}</div>
@@ -564,7 +564,7 @@ export default function UploadForm() {
             <ProgressBar progress={progress} isProcessing={isUploading} isComplete={Boolean(resultUrl)} />
           </section>
 
-          <section className="bg-white/5 border border-white/10 rounded-2xl p-5 sm:p-6 flex flex-col gap-4">
+          <section className="bg-white/5 border border-white/10 rounded-2xl p-5 sm:p-6 flex flex-col gap-4 broken-planet-card">
             <h3 className="text-lg font-semibold text-white">Preview</h3>
             {!displayFiles.length && !resultUrl && (
               <p className="text-sm text-gray-300">

@@ -206,6 +206,88 @@
   .broken-planet-card:hover::before {
     left: 100%;
   }
+
+  /* Shimmer Animation */
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
+  .animate-shimmer {
+    animation: shimmer 2s infinite;
+  }
+
+  /* Enhanced Button Styles */
+  .neon-button-primary {
+    background: linear-gradient(135deg, #8B5CF6 0%, #1E3A8A 50%, #00FFFF 100%);
+    border: 2px solid rgba(0, 255, 255, 0.5);
+    color: white;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 
+      0 0 10px rgba(139, 92, 246, 0.5),
+      0 0 20px rgba(139, 92, 246, 0.3),
+      0 0 30px rgba(0, 255, 255, 0.3),
+      0 0 40px rgba(0, 255, 255, 0.2);
+  }
+
+  .neon-button-primary:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 
+      0 0 20px rgba(139, 92, 246, 0.6),
+      0 0 40px rgba(139, 92, 246, 0.4),
+      0 0 50px rgba(0, 255, 255, 0.4),
+      0 0 60px rgba(0, 255, 255, 0.3),
+      0 10px 30px rgba(0, 0, 0, 0.5);
+    filter: brightness(1.1);
+  }
+
+  .neon-button-primary:active {
+    transform: translateY(0) scale(0.98);
+  }
+
+  .neon-button-secondary {
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .neon-button-secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(0, 255, 255, 0.5);
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+  }
+
+  /* Smooth Scroll Behavior */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Enhanced Typography Scale */
+  .text-hero {
+    font-size: clamp(3rem, 8vw, 9rem);
+    line-height: 1.1;
+  }
+
+  .text-section {
+    font-size: clamp(2rem, 5vw, 4.5rem);
+    line-height: 1.2;
+  }
+
+  .text-subsection {
+    font-size: clamp(1.25rem, 3vw, 2rem);
+    line-height: 1.3;
+  }
 }
 
 /* PWA and Mobile Optimizations */
