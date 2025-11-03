@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react"
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts"
-import { useAuth } from '../contexts/AuthContext'
+import { SkeletonChart, SkeletonCard } from './ui/Skeleton'
+import { CardLoader } from './ui/LoadingOverlay'
+import api from '../utils/apiClient'
 
 export default function Analytics() {
-  const { getAuthHeaders } = useAuth()
   const [stats, setStats] = useState(null)
   const [timeSeries, setTimeSeries] = useState([])
   const [topStyles, setTopStyles] = useState([])
@@ -17,28 +18,18 @@ export default function Analytics() {
 
   const loadAnalytics = async () => {
     try {
-      const headers = getAuthHeaders()
+      // Load all analytics data in parallel
+      const [statsData, tsData, stylesData, recData] = await Promise.all([
+        api.get("/api/v2/analytics/user/stats", { requireAuth: true }).catch(() => null),
+        api.get("/api/v2/analytics/time-series?days=7&metric=jobs", { requireAuth: true }).catch(() => ({ data: [] })),
+        api.get("/api/v2/analytics/styles/top?limit=5", { requireAuth: false }).catch(() => ({ styles: [] })),
+        api.get("/api/v2/analytics/recommendations/style", { requireAuth: true }).catch(() => null),
+      ])
       
-      // Load user stats
-      const statsRes = await fetch("/api/v2/analytics/user/stats", { headers })
-      const statsData = await statsRes.json()
       setStats(statsData)
-      
-      // Load time series
-      const tsRes = await fetch("/api/v2/analytics/time-series?days=7&metric=jobs", { headers })
-      const tsData = await tsRes.json()
-      setTimeSeries(tsData.data || [])
-      
-      // Load top styles
-      const stylesRes = await fetch("/api/v2/analytics/styles/top?limit=5")
-      const stylesData = await stylesRes.json()
-      setTopStyles(stylesData.styles || [])
-      
-      // Load recommendation
-      const recRes = await fetch("/api/v2/analytics/recommendations/style", { headers })
-      const recData = await recRes.json()
+      setTimeSeries(tsData?.data || [])
+      setTopStyles(stylesData?.styles || [])
       setRecommendation(recData)
-      
     } catch (e) {
       setError(e.message)
     } finally {
@@ -48,8 +39,13 @@ export default function Analytics() {
 
   if (loading) {
     return (
-      <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20">
-        <div className="text-white text-center">Loading analytics...</div>
+      <div className="space-y-6">
+        <div className="bg-pure-white/5 border-2 border-pure-white/20 p-12">
+          <h2 className="text-4xl font-black text-pure-white mb-12 tracking-poppr text-center">📊   A N A L Y T I C S   D A S H B O A R D</h2>
+          <SkeletonCard lines={3} className="mb-6" />
+          <SkeletonChart height={300} className="mb-6" />
+          <SkeletonChart height={200} />
+        </div>
       </div>
     )
   }

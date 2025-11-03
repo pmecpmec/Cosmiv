@@ -509,6 +509,7 @@ This is your **technical development checklist**. These are tasks that require c
 **Goal:** Clean up and optimize the UploadForm component
 
 **Current Status:**
+
 - `src/components/UploadForm.jsx` has both sync and async upload methods
 - Some duplicate state management between `clipFile` and `files`
 - Could benefit from consolidation and better error handling
@@ -516,16 +517,19 @@ This is your **technical development checklist**. These are tasks that require c
 **Steps:**
 
 1. **Consolidate State Management:**
+
    - Unify `clipFile` and `files` into a single state structure
    - Simplify file handling logic to reduce duplication
    - Clean up unused variables and functions
 
 2. **Improve Error Handling:**
+
    - Add better error messages for different failure scenarios
    - Handle edge cases (network failures, corrupted files, etc.)
    - Add retry logic for failed uploads
 
 3. **Code Organization:**
+
    - Extract upload logic into custom hooks if needed
    - Separate concerns (file validation, upload, status tracking)
    - Improve component readability and maintainability
@@ -618,11 +622,11 @@ BASE_URL=https://yourdomain.com
 
 ## 🪜 Progress Log
 
-| Date       | Task                                | Status | Notes                  |
-| ---------- | ----------------------------------- | ------ | ---------------------- |
-| 2025-01-27 | Initial TODO list created           | ✅     | Agent generated tasks  |
-| 2025-01-27 | Fixed package-lock.json conflicts   | ✅     | Regenerated clean file |
-| 2025-01-27 | Fixed config.py trailing whitespace | ✅     | Cleaned up formatting  |
+| Date       | Task                                | Status | Notes                     |
+| ---------- | ----------------------------------- | ------ | ------------------------- |
+| 2025-01-27 | Initial TODO list created           | ✅     | Agent generated tasks     |
+| 2025-01-27 | Fixed package-lock.json conflicts   | ✅     | Regenerated clean file    |
+| 2025-01-27 | Fixed config.py trailing whitespace | ✅     | Cleaned up formatting     |
 | 2025-01-27 | Upload Form refactoring task added  | 📋     | New task for code cleanup |
 
 ---

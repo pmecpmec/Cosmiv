@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { useEffect, useState, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function ProgressBar({ progress, isProcessing, isComplete }) {
   const [displayProgress, setDisplayProgress] = useState(0);
@@ -41,7 +41,14 @@ export default function ProgressBar({ progress, isProcessing, isComplete }) {
             </>
           ) : (
             <>
-              <div className="animate-spin h-5 w-5 border-2 border-pure-white border-t-transparent"></div>
+              <motion.div
+                className="relative w-5 h-5"
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
+              >
+                <div className="absolute inset-0 border-2 border-cosmic-neon-cyan/50 border-t-cosmic-violet rounded-full"></div>
+                <div className="absolute inset-1 border border-cosmic-neon-cyan/30 border-b-transparent rounded-full"></div>
+              </motion.div>
               <span>P R O C E S S I N G . . .</span>
             </>
           )}
@@ -55,14 +62,62 @@ export default function ProgressBar({ progress, isProcessing, isComplete }) {
           animate={{ width: `${displayProgress}%` }}
           transition={{ duration: 0.3, ease: "easeOut" }}
           style={{ 
-            boxShadow: displayProgress > 0 ? '0 0 20px rgba(0, 255, 255, 0.5), inset 0 0 10px rgba(139, 92, 246, 0.3)' : 'none'
+            boxShadow: displayProgress > 0 
+              ? `0 0 ${10 + displayProgress * 0.2}px rgba(0, 255, 255, 0.6), 
+                 0 0 ${20 + displayProgress * 0.3}px rgba(139, 92, 246, 0.4),
+                 inset 0 0 ${5 + displayProgress * 0.1}px rgba(139, 92, 246, 0.5)` 
+              : 'none'
           }}
         >
-          {/* Shimmer effect */}
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer"></div>
-          {/* Pulse effect */}
+          {/* Enhanced cosmic shimmer effect */}
+          <motion.div
+            className="absolute inset-0 bg-gradient-to-r from-transparent via-cosmic-neon-cyan/50 to-transparent"
+            animate={{
+              x: ['-100%', '100%'],
+            }}
+            transition={{
+              duration: 1.5,
+              repeat: Infinity,
+              ease: 'linear',
+            }}
+          />
+          {/* Pulsing glow effect */}
           {!isComplete && (
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-pulse"></div>
+            <motion.div
+              className="absolute inset-0 bg-gradient-to-br from-cosmic-violet/30 via-transparent to-cosmic-neon-cyan/30"
+              animate={{
+                opacity: [0.3, 0.7, 0.3],
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: 'easeInOut',
+              }}
+            />
+          )}
+          {/* Particle trail effect */}
+          {isProcessing && !isComplete && (
+            <div className="absolute inset-0 overflow-hidden">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <motion.div
+                  key={i}
+                  className="absolute top-0 w-1 h-full bg-cosmic-neon-cyan rounded-full"
+                  style={{
+                    left: `${displayProgress}%`,
+                  }}
+                  animate={{
+                    opacity: [0, 1, 0],
+                    scaleY: [0.5, 1, 0.5],
+                  }}
+                  transition={{
+                    duration: 1,
+                    repeat: Infinity,
+                    delay: i * 0.3,
+                    ease: 'easeInOut',
+                  }}
+                />
+              ))}
+            </div>
           )}
         </motion.div>
       </div>

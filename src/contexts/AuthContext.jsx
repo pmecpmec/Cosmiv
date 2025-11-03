@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react'
+import api from '../utils/apiClient'
 
 const AuthContext = createContext(null)
 
@@ -31,30 +32,26 @@ export function AuthProvider({ children }) {
       formData.append('username_or_email', usernameOrEmail)
       formData.append('password', password)
 
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        body: formData,
+      // Use api client for better error handling
+      const data = await api.post('/api/auth/login', formData, {
+        requireAuth: false,
+        headers: {}, // Don't set Content-Type for FormData
       })
-
-      if (!response.ok) {
-        const error = await response.json().catch(() => ({ detail: 'Login failed' }))
-        throw new Error(error.detail || 'Login failed')
-      }
-
-      const data = await response.json()
       
       // Store token and user
       localStorage.setItem('auth_token', data.access_token)
       localStorage.setItem('auth_refresh_token', data.refresh_token)
-      localStorage.setItem('auth_user', JSON.stringify(data.user))
+      if (data.user) {
+        localStorage.setItem('auth_user', JSON.stringify(data.user))
+        setUser(data.user)
+      }
       
       setToken(data.access_token)
-      setUser(data.user)
       
       return { success: true }
     } catch (error) {
       console.error('Login error:', error)
-      return { success: false, error: error.message }
+      return { success: false, error: error.message || 'Login failed' }
     }
   }
 
@@ -65,30 +62,26 @@ export function AuthProvider({ children }) {
       formData.append('email', email)
       formData.append('password', password)
 
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        body: formData,
+      // Use api client for better error handling
+      const data = await api.post('/api/auth/register', formData, {
+        requireAuth: false,
+        headers: {}, // Don't set Content-Type for FormData
       })
-
-      if (!response.ok) {
-        const error = await response.json().catch(() => ({ detail: 'Registration failed' }))
-        throw new Error(error.detail || 'Registration failed')
-      }
-
-      const data = await response.json()
       
       // Store token and user
       localStorage.setItem('auth_token', data.access_token)
       localStorage.setItem('auth_refresh_token', data.refresh_token)
-      localStorage.setItem('auth_user', JSON.stringify(data.user))
+      if (data.user) {
+        localStorage.setItem('auth_user', JSON.stringify(data.user))
+        setUser(data.user)
+      }
       
       setToken(data.access_token)
-      setUser(data.user)
       
       return { success: true }
     } catch (error) {
       console.error('Registration error:', error)
-      return { success: false, error: error.message }
+      return { success: false, error: error.message || 'Registration failed' }
     }
   }
 
@@ -111,18 +104,15 @@ export function AuthProvider({ children }) {
       const formData = new FormData()
       formData.append('refresh_token', refreshToken)
 
-      const response = await fetch('/api/auth/refresh', {
-        method: 'POST',
-        body: formData,
+      const data = await api.post('/api/auth/refresh', formData, {
+        requireAuth: false,
+        headers: {},
       })
 
-      if (!response.ok) {
-        logout()
-        return null
-      }
-
-      const data = await response.json()
       localStorage.setItem('auth_token', data.access_token)
+      if (data.refresh_token) {
+        localStorage.setItem('auth_refresh_token', data.refresh_token)
+      }
       setToken(data.access_token)
       return data.access_token
     } catch (error) {

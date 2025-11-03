@@ -75,6 +75,57 @@ export default {
         'cosmic-gradient': 'linear-gradient(135deg, #8B5CF6 0%, #1E3A8A 50%, #00FFFF 100%)',
         'space-gradient': 'linear-gradient(to bottom, #0A0A1A 0%, #1A0A2E 50%, #0A1A2A 100%)',
       },
+      keyframes: {
+        float: {
+          '0%, 100%': { transform: 'translateY(0px) rotate(0deg)' },
+          '33%': { transform: 'translateY(-10px) rotate(1deg)' },
+          '66%': { transform: 'translateY(-5px) rotate(-1deg)' },
+        },
+        'pulse-glow': {
+          '0%, 100%': { opacity: '1', filter: 'brightness(1)' },
+          '50%': { opacity: '0.8', filter: 'brightness(1.5)' },
+        },
+        'gradient-shift': {
+          '0%': { backgroundPosition: '0% 50%' },
+          '50%': { backgroundPosition: '100% 50%' },
+          '100%': { backgroundPosition: '0% 50%' },
+        },
+        shimmer: {
+          '0%': { backgroundPosition: '-200% center' },
+          '100%': { backgroundPosition: '200% center' },
+        },
+        twinkle: {
+          '0%, 100%': { opacity: '0.3', transform: 'scale(1)' },
+          '50%': { opacity: '1', transform: 'scale(1.2)' },
+        },
+        'float-cosmic': {
+          '0%, 100%': { transform: 'translateY(0px)' },
+          '50%': { transform: 'translateY(-15px)' },
+        },
+        'nebula-shift': {
+          '0%': { backgroundPosition: '0% 50%' },
+          '50%': { backgroundPosition: '100% 50%' },
+          '100%': { backgroundPosition: '0% 50%' },
+        },
+        'pulse-neon': {
+          '0%, 100%': {
+            textShadow: '0 0 5px #00FFFF, 0 0 10px #00FFFF, 0 0 15px #00FFFF, 0 0 20px #00FFFF',
+          },
+          '50%': {
+            textShadow: '0 0 10px #00FFFF, 0 0 20px #00FFFF, 0 0 30px #00FFFF, 0 0 40px #00FFFF, 0 0 50px #00FFFF',
+          },
+        },
+      },
+      animation: {
+        float: 'float 3s ease-in-out infinite',
+        'pulse-glow': 'pulse-glow 2s ease-in-out infinite',
+        'gradient-shift': 'gradient-shift 3s ease infinite',
+        shimmer: 'shimmer 2s infinite',
+        twinkle: 'twinkle 2s ease-in-out infinite',
+        'float-cosmic': 'float-cosmic 4s ease-in-out infinite',
+        'nebula-shift': 'nebula-shift 10s ease infinite',
+        'pulse-neon': 'pulse-neon 2s ease-in-out infinite',
+      },
     },
   },
   plugins: [],

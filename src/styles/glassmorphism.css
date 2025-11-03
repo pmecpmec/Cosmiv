@@ -1,0 +1,263 @@
+/**
+ * Glassmorphism & Neumorphism Utilities
+ * Additional CSS utilities for glass and soft shadow effects
+ */
+
+/* ============================================
+   GLASSMORPHISM UTILITIES
+   ============================================ */
+
+.glass {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.glass-subtle {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.glass-intense {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.glass-colored {
+  background: linear-gradient(
+    135deg,
+    rgba(139, 92, 246, 0.2) 0%,
+    rgba(0, 255, 255, 0.1) 50%,
+    rgba(168, 85, 247, 0.2) 100%
+  );
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(0, 255, 255, 0.2);
+}
+
+.glass-hover:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+  transition: all 0.3s ease;
+}
+
+/* ============================================
+   NEUMORPHISM UTILITIES
+   ============================================ */
+
+.neu-raised {
+  background: #1a1a1a;
+  box-shadow: 
+    8px 8px 16px #0a0a0a,
+    -8px -8px 16px #2a2a2a;
+}
+
+.neu-pressed {
+  background: #1a1a1a;
+  box-shadow: 
+    inset 8px 8px 16px #0a0a0a,
+    inset -8px -8px 16px #2a2a2a;
+}
+
+.neu-flat {
+  background: #1a1a1a;
+  box-shadow: 
+    4px 4px 8px #0a0a0a,
+    -4px -4px 8px #2a2a2a;
+}
+
+.neu-light-raised {
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 
+    8px 8px 16px rgba(0, 0, 0, 0.3),
+    -8px -8px 16px rgba(255, 255, 255, 0.1);
+}
+
+.neu-light-pressed {
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 
+    inset 8px 8px 16px rgba(0, 0, 0, 0.3),
+    inset -8px -8px 16px rgba(255, 255, 255, 0.1);
+}
+
+.neu-hover:hover {
+  box-shadow: 
+    12px 12px 24px #0a0a0a,
+    -12px -12px 24px #2a2a2a;
+  transform: translateY(-2px);
+  transition: all 0.2s ease;
+}
+
+.neu-active:active {
+  box-shadow: 
+    inset 8px 8px 16px #0a0a0a,
+    inset -8px -8px 16px #2a2a2a;
+  transform: translateY(0);
+}
+
+/* ============================================
+   DEPTH EFFECTS
+   ============================================ */
+
+.depth-subtle {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.3),
+    0 2px 4px -1px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.depth-medium {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 
+    0 10px 15px -3px rgba(0, 0, 0, 0.4),
+    0 4px 6px -2px rgba(0, 0, 0, 0.3),
+    inset 0 2px 0 rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.depth-strong {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 
+    0 20px 25px -5px rgba(0, 0, 0, 0.5),
+    0 10px 10px -5px rgba(0, 0, 0, 0.4),
+    inset 0 4px 0 rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+/* ============================================
+   COMBINED EFFECTS
+   ============================================ */
+
+.glass-neu {
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 
+    0 8px 16px rgba(0, 0, 0, 0.3),
+    inset 0 2px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.glass-neu-hover:hover {
+  background: rgba(255, 255, 255, 0.09);
+  box-shadow: 
+    0 12px 24px rgba(0, 0, 0, 0.4),
+    inset 0 3px 0 rgba(255, 255, 255, 0.15),
+    inset 0 -3px 0 rgba(0, 0, 0, 0.25);
+  transform: translateY(-4px);
+  transition: all 0.3s ease;
+}
+
+/* ============================================
+   GLASS BUTTONS
+   ============================================ */
+
+.btn-glass {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 
+    0 4px 6px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.btn-glass:hover {
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 
+    0 6px 12px rgba(0, 0, 0, 0.3),
+    inset 0 2px 0 rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+.btn-glass:active {
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 
+    inset 0 2px 4px rgba(0, 0, 0, 0.3),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.1);
+  transform: translateY(0);
+}
+
+/* ============================================
+   NEUMORPHIC BUTTONS
+   ============================================ */
+
+.btn-neu {
+  background: #1a1a1a;
+  box-shadow: 
+    6px 6px 12px #0a0a0a,
+    -6px -6px 12px #2a2a2a;
+  border: none;
+}
+
+.btn-neu:hover {
+  box-shadow: 
+    8px 8px 16px #0a0a0a,
+    -8px -8px 16px #2a2a2a;
+  transform: translateY(-2px);
+}
+
+.btn-neu:active {
+  box-shadow: 
+    inset 6px 6px 12px #0a0a0a,
+    inset -6px -6px 12px #2a2a2a;
+  transform: translateY(0);
+}
+
+/* ============================================
+   PERFORMANCE OPTIMIZATIONS
+   ============================================ */
+
+.glass,
+.glass-subtle,
+.glass-intense,
+.glass-colored,
+.depth-subtle,
+.depth-medium,
+.depth-strong {
+  will-change: backdrop-filter, background-color, transform;
+}
+
+.neu-raised,
+.neu-pressed,
+.neu-flat {
+  will-change: box-shadow, transform;
+}
+
+/* ============================================
+   REDUCE MOTION SUPPORT
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .glass-hover,
+  .neu-hover,
+  .glass-neu-hover,
+  .btn-glass,
+  .btn-neu {
+    transition: none;
+  }
+  
+  .glass-hover:hover,
+  .neu-hover:hover,
+  .glass-neu-hover:hover,
+  .btn-glass:hover,
+  .btn-neu:hover {
+    transform: none;
+  }
+}
+

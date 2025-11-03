@@ -1,69 +1,85 @@
 import { useEffect, useState } from "react"
 import { motion } from 'framer-motion'
 import { useAuth } from '../contexts/AuthContext'
+import { useToast } from '../contexts/ToastContext'
+import api from '../utils/apiClient'
+import { SkeletonList, SkeletonCard } from './ui/Skeleton'
+import { InlineLoader } from './ui/LoadingOverlay'
 
 export default function Accounts() {
-  const { user, getAuthHeaders } = useAuth()
+  const { user } = useAuth()
+  const { showError, showSuccess, showInfo } = useToast()
   const [providers, setProviders] = useState([])
   const [links, setLinks] = useState([])
   const [clips, setClips] = useState([])
   const [error, setError] = useState(null)
   const [success, setSuccess] = useState(null)
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [syncing, setSyncing] = useState(false)
+  const [initialLoading, setInitialLoading] = useState(true)
 
   useEffect(() => {
-    // Check for OAuth callback success/error
-    const params = new URLSearchParams(window.location.search)
-    const successParam = params.get('success')
-    const errorParam = params.get('error')
-    
-    if (successParam) {
-      setSuccess(`${successParam.toUpperCase()} account linked successfully!`)
-      // Clean URL
-      window.history.replaceState({}, document.title, window.location.pathname)
-      loadLinks()
+    const initialize = async () => {
+      setInitialLoading(true)
+      
+      // Check for OAuth callback success/error
+      const params = new URLSearchParams(window.location.search)
+      const successParam = params.get('success')
+      const errorParam = params.get('error')
+      
+      if (successParam) {
+        const successMsg = `${successParam.toUpperCase()} account linked successfully!`
+        setSuccess(successMsg)
+        showSuccess(successMsg)
+        // Clean URL
+        window.history.replaceState({}, document.title, window.location.pathname)
+      }
+      
+      if (errorParam) {
+        const errorMsg = `Failed to link account: ${errorParam}`
+        setError(errorMsg)
+        showError(errorMsg)
+        window.history.replaceState({}, document.title, window.location.pathname)
+      }
+      
+      // Load all data
+      await Promise.all([
+        loadProviders(),
+        loadLinks(),
+        loadClips(),
+      ])
+      
+      setInitialLoading(false)
     }
     
-    if (errorParam) {
-      setError(`Failed to link account: ${errorParam}`)
-      window.history.replaceState({}, document.title, window.location.pathname)
-    }
-    
-    loadProviders()
-    loadLinks()
-    loadClips()
+    initialize()
   }, [])
 
   const loadProviders = async () => {
     try {
-      const res = await fetch("/api/v2/accounts/providers")
-      if (!res.ok) throw new Error('Failed to load providers')
-      const data = await res.json()
+      const data = await api.get("/api/v2/accounts/providers", { requireAuth: false })
       setProviders(data.providers || [])
     } catch (err) {
-      setError(err.message)
+      const errorMsg = err.message || 'Failed to load providers'
+      setError(errorMsg)
+      showError(errorMsg)
     }
   }
 
   const loadLinks = async () => {
     try {
-      const headers = getAuthHeaders()
-      const res = await fetch("/api/v2/accounts/links", { headers })
-      if (!res.ok) throw new Error('Failed to load links')
-      const data = await res.json()
+      const data = await api.get("/api/v2/accounts/links")
       setLinks(data.links || [])
     } catch (err) {
-      setError(err.message)
+      const errorMsg = err.message || 'Failed to load links'
+      setError(errorMsg)
+      showError(errorMsg)
     }
   }
 
   const loadClips = async () => {
     try {
-      const headers = getAuthHeaders()
-      const res = await fetch("/api/v2/accounts/clips?limit=20", { headers })
-      if (!res.ok) throw new Error('Failed to load clips')
-      const data = await res.json()
+      const data = await api.get("/api/v2/accounts/clips?limit=20")
       setClips(data.clips || [])
     } catch (err) {
       // Silently fail for clips
@@ -74,11 +90,11 @@ export default function Accounts() {
     setLoading(true)
     setError(null)
     try {
-      // Redirect to OAuth endpoint
-      const headers = getAuthHeaders()
-      const res = await fetch(`/api/v2/accounts/oauth/${provider}`, { 
-        headers,
-        redirect: 'manual' // Don't follow redirect automatically
+      // Use apiClient.raw for manual redirect handling
+      const res = await api.raw(`/api/v2/accounts/oauth/${provider}`, {
+        method: 'GET',
+        requireAuth: true,
+        redirect: 'manual', // Don't follow redirect automatically
       })
       
       // Get redirect URL from response
@@ -86,39 +102,46 @@ export default function Accounts() {
         const redirectUrl = res.headers.get('Location')
         if (redirectUrl) {
           window.location.href = redirectUrl
+          return
         } else {
           throw new Error('No redirect URL received')
         }
-      } else {
-        // If mock mode, might return JSON
-        const data = await res.json()
+      }
+      
+      // If not a redirect, try to parse as JSON (mock mode)
+      const text = await res.text()
+      try {
+        const data = JSON.parse(text)
         if (data.auth_url) {
           window.location.href = data.auth_url
-        } else {
-          throw new Error('Invalid OAuth response')
+          return
         }
+      } catch {
+        // Not JSON, ignore
       }
+      
+      throw new Error('Invalid OAuth response')
     } catch (err) {
-      setError(err.message)
+      const errorMsg = err.message || 'Failed to link provider'
+      setError(errorMsg)
+      showError(errorMsg)
       setLoading(false)
     }
   }
 
   const unlinkProvider = async (provider) => {
-    if (!confirm(`Unlink ${provider} account?`)) return
+    if (!window.confirm(`Unlink ${provider} account?`)) return
     
     setLoading(true)
     try {
-      const headers = getAuthHeaders()
-      const res = await fetch(`/api/v2/accounts/links/${provider}`, {
-        method: 'DELETE',
-        headers,
-      })
-      if (!res.ok) throw new Error('Failed to unlink')
+      await api.delete(`/api/v2/accounts/links/${provider}`)
+      showSuccess(`${provider} account unlinked successfully`)
       await loadLinks()
       await loadClips()
     } catch (err) {
-      setError(err.message)
+      const errorMsg = err.message || 'Failed to unlink provider'
+      setError(errorMsg)
+      showError(errorMsg)
     } finally {
       setLoading(false)
     }
@@ -127,21 +150,19 @@ export default function Accounts() {
   const syncNow = async (provider = null) => {
     setSyncing(true)
     try {
-      const headers = getAuthHeaders()
       const formData = new FormData()
       if (provider) formData.append("provider", provider)
       
-      const res = await fetch("/api/v2/accounts/sync", {
-        method: "POST",
-        headers,
-        body: formData,
+      await api.post("/api/v2/accounts/sync", formData, {
+        headers: {}, // Don't set Content-Type for FormData
       })
-      if (!res.ok) throw new Error('Sync failed')
       
-      alert('Sync started! Your clips will appear shortly.')
+      showInfo('Sync started! Your clips will appear shortly.')
       setTimeout(() => loadClips(), 3000) // Reload clips after a delay
     } catch (err) {
-      setError(err.message)
+      const errorMsg = err.message || 'Sync failed'
+      setError(errorMsg)
+      showError(errorMsg)
     } finally {
       setSyncing(false)
     }
@@ -152,6 +173,20 @@ export default function Accounts() {
   links.forEach(link => {
     linkedMap[link.provider] = link
   })
+
+  if (initialLoading) {
+    return (
+      <div className="bg-pure-white/5 border-2 border-pure-white/20 p-12">
+        <h2 className="text-4xl font-black text-pure-white mb-12 tracking-poppr">🎮   G A M E   A C C O U N T   L I N K I N G</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <SkeletonCard lines={3} />
+          <SkeletonCard lines={3} />
+          <SkeletonCard lines={3} />
+          <SkeletonCard lines={3} />
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="bg-pure-white/5 border-2 border-pure-white/20 p-12">
@@ -170,7 +205,7 @@ export default function Accounts() {
       )}
 
       {/* Platform Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
         {providers.map((p) => {
           const isLinked = linkedIds.includes(p.id)
           const linkInfo = linkedMap[p.id]

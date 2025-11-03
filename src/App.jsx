@@ -1,27 +1,33 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense, lazy } from 'react'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
-import UploadForm from './components/UploadForm'
-import Dashboard from './components/Dashboard'
-import Analytics from './components/Analytics'
-import Accounts from './components/Accounts'
-import Billing from './components/Billing'
-import Social from './components/Social'
+import { ToastProvider } from './contexts/ToastContext'
+import ErrorBoundary from './components/ErrorBoundary'
 import CosmicBackground from './components/CosmicBackground'
 import Login from './components/Login'
 import Register from './components/Register'
 import Header from './components/Header'
-import LandingPage from './components/LandingPage'
 import LoadingScreen from './components/LoadingScreen'
-import AdminDashboard from './components/AdminDashboard'
-import WeeklyMontages from './components/WeeklyMontages'
 import OfflineIndicator from './components/OfflineIndicator'
 import UpdateNotification from './components/UpdateNotification'
-import AIChatbot from './components/AIChatbot'
-import Feed from './components/Feed'
-import Communities from './components/Communities'
-import AIAdminPanel from './components/AIAdminPanel'
+import { InlineLoader } from './components/ui/LoadingOverlay'
+import ScrollProgress from './components/ScrollProgress'
 import { AnimatePresence, motion } from 'framer-motion'
 import './App.css'
+
+// Lazy load heavy components to reduce initial bundle size
+const UploadForm = lazy(() => import('./components/UploadForm'))
+const Dashboard = lazy(() => import('./components/Dashboard'))
+const Analytics = lazy(() => import('./components/Analytics'))
+const Accounts = lazy(() => import('./components/Accounts'))
+const Billing = lazy(() => import('./components/Billing'))
+const Social = lazy(() => import('./components/Social'))
+const LandingPage = lazy(() => import('./components/LandingPage'))
+const AdminDashboard = lazy(() => import('./components/AdminDashboard'))
+const WeeklyMontages = lazy(() => import('./components/WeeklyMontages'))
+const AIChatbot = lazy(() => import('./components/AIChatbot'))
+const Feed = lazy(() => import('./components/Feed'))
+const Communities = lazy(() => import('./components/Communities'))
+const AIAdminPanel = lazy(() => import('./components/AIAdminPanel'))
 
 function AppContent() {
   const [activeTab, setActiveTab] = useState("home")
@@ -75,6 +81,7 @@ function AppContent() {
 
   return (
     <div className="min-h-screen relative bg-pure-black text-pure-white">
+      <ScrollProgress />
       <CosmicBackground />
       {/* Fixed Header */}
       <Header activeTab={activeTab} setActiveTab={setActiveTab} />
@@ -93,7 +100,9 @@ function AppContent() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
             >
-              <LandingPage onGetStarted={() => setActiveTab("upload")} />
+              <Suspense fallback={<InlineLoader message="Loading..." />}>
+                <LandingPage onGetStarted={() => setActiveTab("upload")} />
+              </Suspense>
             </motion.div>
           )}
           {activeTab === "upload" && (
@@ -105,7 +114,9 @@ function AppContent() {
               className="container mx-auto px-4 py-16"
             >
               <div className="max-w-3xl mx-auto">
-                <UploadForm />
+                <Suspense fallback={<InlineLoader message="Loading upload form..." />}>
+                  <UploadForm />
+                </Suspense>
               </div>
             </motion.div>
           )}
@@ -117,7 +128,9 @@ function AppContent() {
               exit={{ opacity: 0, y: -20 }}
               className="container mx-auto px-4 py-16"
             >
-              <Dashboard />
+              <Suspense fallback={<InlineLoader message="Loading dashboard..." />}>
+                <Dashboard />
+              </Suspense>
             </motion.div>
           )}
           {activeTab === "analytics" && (
@@ -128,7 +141,9 @@ function AppContent() {
               exit={{ opacity: 0, y: -20 }}
               className="container mx-auto px-4 py-16"
             >
-              <Analytics />
+              <Suspense fallback={<InlineLoader message="Loading analytics..." />}>
+                <Analytics />
+              </Suspense>
             </motion.div>
           )}
           {activeTab === "feed" && (
@@ -138,7 +153,9 @@ function AppContent() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
             >
-              <Feed />
+              <Suspense fallback={<InlineLoader message="Loading feed..." />}>
+                <Feed />
+              </Suspense>
             </motion.div>
           )}
           {activeTab === "ai" && (
@@ -155,7 +172,9 @@ function AppContent() {
                   <p className="text-gray-300">Ask me anything about Cosmiv, get help, or chat!</p>
                 </div>
                 <div className="h-[600px]">
-                  <AIChatbot />
+                  <Suspense fallback={<InlineLoader message="Loading AI assistant..." />}>
+                    <AIChatbot />
+                  </Suspense>
                 </div>
               </div>
             </motion.div>
@@ -168,7 +187,9 @@ function AppContent() {
               exit={{ opacity: 0 }}
               className="fixed inset-0 pt-16"
             >
-              <Communities />
+              <Suspense fallback={<InlineLoader message="Loading communities..." />}>
+                <Communities />
+              </Suspense>
             </motion.div>
           )}
           {activeTab === "accounts" && (
@@ -179,7 +200,9 @@ function AppContent() {
               exit={{ opacity: 0, y: -20 }}
               className="container mx-auto px-4 py-16"
             >
-              <Accounts />
+              <Suspense fallback={<InlineLoader message="Loading accounts..." />}>
+                <Accounts />
+              </Suspense>
             </motion.div>
           )}
           {activeTab === "billing" && (
@@ -190,7 +213,9 @@ function AppContent() {
               exit={{ opacity: 0, y: -20 }}
               className="container mx-auto px-4 py-16"
             >
-              <Billing />
+              <Suspense fallback={<InlineLoader message="Loading billing..." />}>
+                <Billing />
+              </Suspense>
             </motion.div>
           )}
           {activeTab === "social" && (
@@ -201,7 +226,9 @@ function AppContent() {
               exit={{ opacity: 0, y: -20 }}
               className="container mx-auto px-4 py-16"
             >
-              <Social />
+              <Suspense fallback={<InlineLoader message="Loading social..." />}>
+                <Social />
+              </Suspense>
             </motion.div>
           )}
           {activeTab === "weekly" && (
@@ -212,7 +239,9 @@ function AppContent() {
               exit={{ opacity: 0, y: -20 }}
               className="container mx-auto px-4 py-16"
             >
-              <WeeklyMontages />
+              <Suspense fallback={<InlineLoader message="Loading weekly montages..." />}>
+                <WeeklyMontages />
+              </Suspense>
             </motion.div>
           )}
           {activeTab === "admin" && (
@@ -223,7 +252,9 @@ function AppContent() {
               exit={{ opacity: 0, y: -20 }}
               className="container mx-auto px-4 py-16"
             >
-              <AdminDashboard />
+              <Suspense fallback={<InlineLoader message="Loading admin dashboard..." />}>
+                <AdminDashboard />
+              </Suspense>
             </motion.div>
           )}
           {activeTab === "ai-admin" && (
@@ -234,7 +265,9 @@ function AppContent() {
               exit={{ opacity: 0, y: -20 }}
               className="container mx-auto px-4 py-16"
             >
-              <AIAdminPanel />
+              <Suspense fallback={<InlineLoader message="Loading AI admin panel..." />}>
+                <AIAdminPanel />
+              </Suspense>
             </motion.div>
           )}
         </AnimatePresence>
@@ -255,9 +288,13 @@ function FeatureCard({ icon, title, description }) {
 
 function App() {
   return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <ToastProvider>
+          <AppContent />
+        </ToastProvider>
+      </AuthProvider>
+    </ErrorBoundary>
   )
 }
 

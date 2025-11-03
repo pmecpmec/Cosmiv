@@ -12,9 +12,9 @@ services:
       - PYTHONUNBUFFERED=1
       - REDIS_URL=redis://redis:6379/0
       - DB_PATH=/app/storage/db.sqlite3
-      - USE_POSTGRES=false
+      - USE_POSTGRES=true
       - USE_OBJECT_STORAGE=false
-      - POSTGRES_DSN=postgresql+psycopg://postgres:postgres@postgres:5432/cosmiv
+      - POSTGRES_DSN=postgresql+psycopg://postgres:changeme@postgres:5432/cosmiv
       - S3_ENDPOINT_URL=http://minio:9000
       - S3_ACCESS_KEY=minioadmin
       - S3_SECRET_KEY=minioadmin
@@ -22,6 +22,7 @@ services:
       - S3_PUBLIC_BASE_URL=http://localhost:9000/cosmiv
     depends_on:
       - redis
+      - postgres
     restart: unless-stopped
 
   worker:
@@ -35,10 +36,11 @@ services:
     environment:
       - REDIS_URL=redis://redis:6379/0
       - DB_PATH=/app/storage/db.sqlite3
-      - USE_POSTGRES=false
-      - POSTGRES_DSN=postgresql+psycopg://postgres:postgres@postgres:5432/cosmiv
+      - USE_POSTGRES=true
+      - POSTGRES_DSN=postgresql+psycopg://postgres:changeme@postgres:5432/cosmiv
     depends_on:
       - redis
+      - postgres
 
   beat:
     build:
@@ -51,8 +53,11 @@ services:
     environment:
       - REDIS_URL=redis://redis:6379/0
       - DB_PATH=/app/storage/db.sqlite3
+      - USE_POSTGRES=true
+      - POSTGRES_DSN=postgresql+psycopg://postgres:changeme@postgres:5432/cosmiv
     depends_on:
       - redis
+      - postgres
 
   redis:
     image: redis:7-alpine

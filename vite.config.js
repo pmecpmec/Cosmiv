@@ -30,7 +30,47 @@ export default defineConfig({
       input: {
         main: "./index.html",
       },
+      output: {
+        // Manual chunk splitting for better caching and smaller initial bundle
+        manualChunks: (id) => {
+          // Vendor chunks
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom')) {
+              return 'react-vendor'
+            }
+            if (id.includes('framer-motion')) {
+              return 'framer-motion'
+            }
+            if (id.includes('recharts')) {
+              return 'recharts'
+            }
+            if (id.includes('three') || id.includes('@react-three')) {
+              return 'three-vendor'
+            }
+            // Other node_modules
+            return 'vendor'
+          }
+          // Component chunks
+          if (id.includes('/components/Dashboard') || id.includes('/components/Analytics')) {
+            return 'dashboard'
+          }
+          if (id.includes('/components/AdminDashboard') || id.includes('/components/AIAdminPanel')) {
+            return 'admin'
+          }
+          if (id.includes('/components/Social') || id.includes('/components/Feed') || id.includes('/components/Communities')) {
+            return 'social'
+          }
+          if (id.includes('/components/Accounts') || id.includes('/components/Billing')) {
+            return 'settings'
+          }
+          if (id.includes('/components/game/')) {
+            return 'game'
+          }
+        },
+      },
     },
+    // Increase chunk size warning limit since we're code splitting
+    chunkSizeWarningLimit: 600,
   },
   // Copy public files (manifest, sw.js, icons) to dist
   publicDir: "public",

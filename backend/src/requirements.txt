@@ -20,8 +20,11 @@ slowapi>=0.1.9
 httpx>=0.24.0
 pytest
 pytest-cov
+pytest-asyncio
 stripe
 requests
+email-validator
+psycopg2-binary
 # AI/LLM Services (optional - install if using AI features)
 # Uncomment to enable:
 # openai>=1.0.0

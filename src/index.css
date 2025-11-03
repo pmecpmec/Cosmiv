@@ -2,13 +2,43 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import cosmic animations */
+@import './styles/cosmic-animations.css';
+
+/* Import gradients */
+@import './styles/gradients.css';
+
+/* Import glassmorphism & neumorphism */
+@import './styles/glassmorphism.css';
+
+/* Import performance optimizations */
+@import './styles/performance.css';
+
 /* Black/White Aesthetic - Tyler the Creator + Poppr inspired */
 @layer base {
   body {
     @apply bg-pure-black text-pure-white;
     font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    /* Poppr-inspired smooth scrolling */
+    /* Poppr-inspired smooth scrolling with performance optimization */
     scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    /* GPU acceleration for smooth scrolling */
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    /* Font rendering optimization */
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  html {
+    scroll-behavior: smooth;
+    /* Smooth scroll with reduced motion support */
+    @media (prefers-reduced-motion: reduce) {
+      scroll-behavior: auto;
+    }
+    /* Contain layout for better scroll performance */
+    contain: layout style paint;
   }
   
   * {
