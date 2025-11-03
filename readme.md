@@ -131,6 +131,57 @@ npm run preview
   - Parameters: `file` (ZIP), `target_duration` (seconds)
   - Returns: MP4 video file
 
+## 🤖 AI Assistant Setup
+
+The platform includes an AI chatbot assistant powered by OpenAI or Anthropic. To enable it:
+
+### 1. Get an API Key
+
+**Option A: OpenAI** (Recommended for testing)
+- Get your API key from: https://platform.openai.com/api-keys
+- Add it to your environment variables
+
+**Option B: Anthropic (Claude)**
+- Get your API key from: https://console.anthropic.com/
+- Add it to your environment variables
+
+### 2. Configure Your Environment
+
+**For Docker (docker-compose.yml):**
+```yaml
+environment:
+  - AI_PROVIDER=openai  # or "anthropic"
+  - OPENAI_API_KEY=sk-your-key-here  # if using OpenAI
+  # - ANTHROPIC_API_KEY=sk-ant-your-key-here  # if using Anthropic
+```
+
+**For Local Development (.env file):**
+```
+AI_PROVIDER=openai
+AI_ENABLED=true
+AI_DEFAULT_MODEL=gpt-4o-mini
+OPENAI_API_KEY=sk-your-openai-api-key-here
+```
+
+### 3. Install AI Packages
+
+The AI packages are now enabled in `requirements.txt`. If running with Docker, rebuild:
+```powershell
+cd backend
+docker-compose build --no-cache
+docker-compose up -d
+```
+
+### 4. Test the AI Assistant
+
+Once configured, the AI chatbot will:
+- Answer questions about the platform
+- Help with video editing features
+- Provide technical support
+- Guide users through subscriptions
+
+**Without an API key**, the chatbot will show a mock response asking you to configure your keys.
+
 ## 🐛 Troubleshooting
 
 ### Backend Issues

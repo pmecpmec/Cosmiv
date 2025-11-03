@@ -20,6 +20,11 @@ services:
       - S3_SECRET_KEY=minioadmin
       - S3_BUCKET=cosmiv
       - S3_PUBLIC_BASE_URL=http://localhost:9000/cosmiv
+      - AI_PROVIDER=openai
+      - AI_ENABLED=true
+      - AI_DEFAULT_MODEL=gpt-4o-mini
+      # Set your API key via environment variable or .env file
+      # - OPENAI_API_KEY=your_openai_api_key_here
     depends_on:
       - redis
       - postgres
