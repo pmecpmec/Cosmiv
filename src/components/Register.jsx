@@ -150,7 +150,7 @@ export default function Register({ onSwitchToLogin }) {
         >
           {loading ? 'C R E A T I N G   A C C O U N T . . .' : 'C R E A T E   A C C O U N T'}
         </button>
-      </form>
+      </AnimatedForm>
 
       <div className="mt-6 text-center">
         <p className="text-pure-white/60 text-sm font-bold">

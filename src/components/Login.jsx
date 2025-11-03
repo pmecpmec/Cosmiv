@@ -99,7 +99,7 @@ export default function Login({ onSwitchToRegister }) {
         >
           {loading ? 'S I G N I N G   I N . . .' : 'S I G N   I N'}
         </button>
-      </form>
+      </AnimatedForm>
 
       <div className="mt-8 text-center">
         <p className="text-pure-white/60 text-sm font-bold">
