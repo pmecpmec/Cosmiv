@@ -83,14 +83,20 @@ export default function LoadingScreen() {
           className="text-6xl"
           animate={{
             rotate: [0, 360],
+            scale: [1, 1.2, 1],
           }}
           transition={{
             duration: 10,
             repeat: Infinity,
-            ease: "linear"
+            ease: "linear",
+            scale: {
+              duration: 3,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }
           }}
         >
-          🎬
+          🌌
         </motion.div>
       </motion.div>
     )
@@ -115,13 +121,13 @@ export default function LoadingScreen() {
         </motion.div>
 
         {/* Title */}
-        <motion.h1
+          <motion.h1
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.2 }}
-          className="text-4xl font-black text-pure-white mb-4 tracking-poppr"
+          className="text-4xl font-black gradient-text-cosmic mb-4 tracking-poppr chromatic-aberration"
         >
-          A I D I T O R
+          🌌   C O S M I V
         </motion.h1>
 
         {/* Neural Network Animation */}
@@ -150,7 +156,7 @@ export default function LoadingScreen() {
           transition={{ delay: 0.8 }}
           className="text-pure-white/50 mt-8 font-black tracking-wide"
         >
-          I N I T I A L I Z I N G   A I   E N G I N E . . .
+          L A U N C H I N G   I N T O   T H E   C O S M O S . . .
         </motion.p>
       </div>
     </motion.div>
