@@ -1,5 +1,6 @@
 import ScrollReveal from './ScrollReveal'
 import { motion } from 'framer-motion'
+import CosmicBackground from './CosmicBackground'
 
 export default function LandingPage({ onGetStarted }) {
   const pipelineSteps = [
@@ -20,7 +21,8 @@ export default function LandingPage({ onGetStarted }) {
 
 
   return (
-    <div className="min-h-screen bg-pure-black text-pure-white">
+    <div className="min-h-screen bg-pure-black text-pure-white relative">
+      <CosmicBackground />
       {/* Hero Section */}
       <section className="pt-hero pb-hero px-4 min-h-screen flex items-center"
       >
