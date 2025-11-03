@@ -1,12 +1,12 @@
-# 🤖 Aiditor AI Systems - Complete Overview
+# 🤖 Cosmiv AI Systems - Complete Overview
 
-This document describes all AI-powered features implemented in Aiditor.
+This document describes all AI-powered features implemented in Cosmiv.
 
 ---
 
 ## 🎯 Overview
 
-Aiditor now features **7 professional AI systems** that work together to create an intelligent, self-improving platform:
+Cosmiv now features **7 professional AI systems** that work together to create an intelligent, self-improving platform:
 
 1. **AI Chatbot** - Customer support and Q&A
 2. **AI Content Renewal** - Automatic website content updates

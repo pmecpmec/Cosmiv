@@ -1,4 +1,4 @@
-# 🎯 Aiditor - Complete Development Phases
+# 🎯 Cosmiv - Complete Development Phases
 
 **Project:** AI Gaming Montage Platform  
 **Status:** Production-Ready  
@@ -8,7 +8,7 @@
 
 ## 📋 Overview
 
-This document consolidates all completed development phases for the Aiditor platform - an intelligent web platform that transforms gameplay clips into viral, AI-edited montages automatically.
+This document consolidates all completed development phases for the Cosmiv platform - an intelligent web platform that transforms gameplay clips into viral, AI-edited montages automatically.
 
 ---
 
@@ -415,7 +415,7 @@ This document consolidates all completed development phases for the Aiditor plat
 ## 🗂️ Project Structure
 
 ```
-Aiditor/
+Cosmiv/
 ├── backend/
 │   ├── src/
 │   │   ├── models.py           # Database models

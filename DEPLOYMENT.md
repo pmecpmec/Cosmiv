@@ -1,6 +1,6 @@
 # 🚀 Production Deployment Guide
 
-Complete guide for deploying Aiditor to production.
+Complete guide for deploying Cosmiv to production.
 
 ---
 

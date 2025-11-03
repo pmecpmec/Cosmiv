@@ -1,6 +1,6 @@
 """
 Community Models: Servers, Channels, Chats, Messages
-Discord-like community system for Aiditor
+Discord-like community system for Cosmiv
 """
 from datetime import datetime
 from typing import Optional, List

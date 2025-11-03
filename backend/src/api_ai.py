@@ -92,7 +92,7 @@ async def ai_chat(
         if online_admins:
             # In production, create a support ticket/message for admins
             # For now, we'll still use AI but note admin availability
-            system_prompt = """You are Aiditor's AI assistant. A human admin is currently online and may respond if needed.
+            system_prompt = """You are Cosmiv's AI assistant. A human admin is currently online and may respond if needed.
 Answer questions about:
 - How to use the platform
 - Video editing features
@@ -104,7 +104,7 @@ Answer questions about:
 Be friendly, concise, and helpful. Mention that admins are available if they need more help.
 """
         else:
-            system_prompt = """You are Aiditor's AI assistant - a helpful, professional support agent for our AI Gaming Montage Platform.
+            system_prompt = """You are Cosmiv's AI assistant - a helpful, professional support agent for our AI Gaming Montage Platform.
 Answer questions about:
 - How to use the platform
 - Video editing features

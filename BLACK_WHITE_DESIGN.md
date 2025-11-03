@@ -1,4 +1,4 @@
-# ⚫⚪ Aiditor Black/White Aesthetic Design System
+# ⚫⚪ Cosmiv Black/White Aesthetic Design System
 
 ## Design Philosophy
 
@@ -267,7 +267,7 @@ Update all components to use:
 - Premium, luxury aesthetic
 - Striking simplicity
 
-**Aiditor Implementation:**
+**Cosmiv Implementation:**
 
 - Black background with white elements
 - Bold, heavy fonts

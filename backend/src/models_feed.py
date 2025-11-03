@@ -1,5 +1,5 @@
 """
-Feed and Profile Models for Aiditor
+Feed and Profile Models for Cosmiv
 """
 from datetime import datetime
 from typing import Optional, List

@@ -1,4 +1,4 @@
-# 🎬 Aiditor Feed & Profiles System
+# 🎬 Cosmiv Feed & Profiles System
 
 ## Overview
 

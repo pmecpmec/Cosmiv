@@ -1,5 +1,5 @@
 """
-Unified AI Service for Aiditor Platform
+Unified AI Service for Cosmiv Platform
 Supports multiple AI providers: OpenAI, Anthropic, and local models
 """
 import os

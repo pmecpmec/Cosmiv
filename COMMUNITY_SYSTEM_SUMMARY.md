@@ -1,4 +1,4 @@
-# 🎉 Aiditor Community System - Implementation Summary
+# 🎉 Cosmiv Community System - Implementation Summary
 
 ## ✅ Completed Features
 

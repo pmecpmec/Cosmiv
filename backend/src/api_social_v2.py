@@ -226,7 +226,7 @@ async def schedule_post(
             job_id=job_id,
             weekly_montage_id=weekly_montage_id,
             platform=platform,
-            caption=caption or f"AI-edited montage from Aiditor 🎬",
+            caption=caption or f"AI-edited montage from Cosmiv 🎬",
             status="pending",
             scheduled_at=datetime.fromisoformat(scheduled_at) if scheduled_at else datetime.utcnow(),
         )
@@ -238,7 +238,7 @@ async def schedule_post(
         post_to_social_async.delay(
             post.id,
             video_path,
-            caption or f"AI-edited montage from Aiditor 🎬",
+            caption or f"AI-edited montage from Cosmiv 🎬",
             connection.access_token,
             platform=platform,
             user_id=current_user.user_id,

@@ -1,5 +1,5 @@
 """
-JWT Authentication utilities for Aiditor platform.
+JWT Authentication utilities for Cosmiv platform.
 """
 from datetime import datetime, timedelta
 from typing import Optional

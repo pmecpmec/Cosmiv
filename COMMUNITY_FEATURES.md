@@ -1,4 +1,4 @@
-# 💬 Aiditor Community Features
+# 💬 Cosmiv Community Features
 
 ## Overview
 

@@ -1,4 +1,4 @@
-# 📚 Aiditor Documentation Index
+# 📚 Cosmiv Documentation Index
 
 ## ✅ Essential Documentation (Keep These)
 

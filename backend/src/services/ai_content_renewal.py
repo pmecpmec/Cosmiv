@@ -48,7 +48,7 @@ class ContentRenewalService:
             
             response = ai_service.chat(
                 messages=[{"role": "user", "content": prompt}],
-                system_prompt="You are a professional content writer creating engaging, modern website content for an AI gaming montage platform called Aiditor.",
+                system_prompt="You are a professional content writer creating engaging, modern website content for an AI gaming montage platform called Cosmiv.",
                 temperature=0.8,
             )
             
@@ -70,7 +70,7 @@ class ContentRenewalService:
     def _build_prompt(self, content_type: str, context: Optional[Dict], style: Optional[str]) -> str:
         """Build AI prompt for content generation"""
         base_prompts = {
-            "landing_hero": """Create a compelling hero section for Aiditor - an AI gaming montage platform.
+            "landing_hero": """Create a compelling hero section for Cosmiv - an AI gaming montage platform.
             Include:
             - A catchy headline (10-15 words)
             - A subheadline describing the value proposition
@@ -78,7 +78,7 @@ class ContentRenewalService:
             
             Make it modern, bold, and appealing to gamers and content creators.""",
             
-            "landing_features": """Create feature descriptions for Aiditor's main features:
+            "landing_features": """Create feature descriptions for Cosmiv's main features:
             1. AI-Powered Highlight Detection
             2. Automatic Editing & Transitions
             3. Social Media Auto-Posting
@@ -88,7 +88,7 @@ class ContentRenewalService:
             
             For each feature, provide a title (5-10 words) and description (2-3 sentences).""",
             
-            "landing_testimonials": """Generate 3-4 fake testimonials (but make them realistic) for Aiditor users.
+            "landing_testimonials": """Generate 3-4 fake testimonials (but make them realistic) for Cosmiv users.
             Each should include:
             - User name and role (e.g., "Alex, Professional Streamer")
             - Quote (2-3 sentences)
@@ -96,7 +96,7 @@ class ContentRenewalService:
             
             Keep it authentic-sounding and focused on the platform's benefits.""",
             
-            "blog_posts": """Generate a blog post idea and outline for Aiditor's blog.
+            "blog_posts": """Generate a blog post idea and outline for Cosmiv's blog.
             Topic should be relevant to gaming, video editing, or content creation.
             Include:
             - Title
