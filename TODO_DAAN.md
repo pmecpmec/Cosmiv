@@ -291,6 +291,68 @@ Location: Ask Pedro where production `.env` file should be stored
 
 ---
 
+### 📧 Business Email System Implementation (Priority: High)
+
+**Goal:** Set up professional business email accounts for Cosmiv
+
+**Current Status:**
+- Email system plan exists: `EMAIL_SETUP_DAAN.md`
+- Planning phase complete, ready for implementation
+- Priority emails identified but not yet set up
+
+**Steps:**
+
+1. **Email Provider Selection:**
+   - Research options: Google Workspace, Microsoft 365, Zoho, ProtonMail Business
+   - Compare pricing, features, and reliability
+   - Consider: Which provider best fits Cosmiv's needs and budget?
+   - Document decision and reasoning in `docs/email_provider_selection.md`
+
+2. **Critical Email Accounts Setup:**
+   - **Founders (URGENT):**
+     - `pedro@cosmiv.com`
+     - `daan@cosmiv.com`
+   - **Operational (URGENT):**
+     - `support@cosmiv.com` - Customer support
+     - `info@cosmiv.com` - General inquiries
+     - `billing@cosmiv.com` - Payment and subscription questions
+
+3. **DNS Configuration:**
+   - Set up MX records for email routing
+   - Configure SPF records (prevents email spoofing)
+   - Set up DKIM (email authentication)
+   - Configure DMARC policy
+   - Document DNS settings in `docs/dns_configuration.md`
+
+4. **Email Signatures:**
+   - Design space-themed email signatures (matching Cosmiv branding)
+   - Create signature templates for founders and support team
+   - Include: Name, title, contact info, social links
+   - Store templates in `docs/email_signatures.md`
+
+5. **Forwarding Rules:**
+   - Set up forwarding for role-based emails if needed
+   - `hello@` → `info@`
+   - `contact@` → `info@`
+   - `feedback@` → `support@`
+
+**Documentation Help:**
+
+- Ask ChatGPT: "How to set up business email with Google Workspace vs Microsoft 365?"
+- Ask ChatGPT: "SPF, DKIM, DMARC DNS configuration guide for business email"
+- Review: `EMAIL_SETUP_DAAN.md` for detailed setup instructions
+
+**Files to Check/Create:**
+
+- `EMAIL_SETUP_DAAN.md` - Complete setup guide (already exists)
+- `docs/email_provider_selection.md` - Provider comparison and decision
+- `docs/dns_configuration.md` - DNS settings documentation
+- `docs/email_signatures.md` - Signature templates
+
+**Timeline:** Should be completed within 1-2 weeks for professional presence
+
+---
+
 ## 🤝 Collaborative Phases (Pedro + Daan)
 
 These are tasks you can tackle together without coding:
@@ -690,6 +752,7 @@ These are tasks you can tackle together without coding:
 | 2025-01-27 | Hosting platform comparison | ✅     | Created `docs/HOSTING_COMPARISON.md` - Fly.io recommended, compares 4 platforms with pricing |
 | 2025-01-27 | Weekly montage automation   | ✅     | Created `docs/WEEKLY_MONTAGE_AUTOMATION.md` - comprehensive flow documentation |
 | 2025-01-27 | Notification system recommendations | ✅     | Created `docs/NOTIFICATION_SYSTEM.md` - Slack/Email recommendations for alerts |
+| 2025-01-27 | Business email setup task added | 📋     | High priority task for professional email accounts |
 
 ---
 

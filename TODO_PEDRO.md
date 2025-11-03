@@ -504,6 +504,48 @@ This is your **technical development checklist**. These are tasks that require c
 
 ---
 
+### 🎬 Upload Form Refactoring (Priority: Medium)
+
+**Goal:** Clean up and optimize the UploadForm component
+
+**Current Status:**
+- `src/components/UploadForm.jsx` has both sync and async upload methods
+- Some duplicate state management between `clipFile` and `files`
+- Could benefit from consolidation and better error handling
+
+**Steps:**
+
+1. **Consolidate State Management:**
+   - Unify `clipFile` and `files` into a single state structure
+   - Simplify file handling logic to reduce duplication
+   - Clean up unused variables and functions
+
+2. **Improve Error Handling:**
+   - Add better error messages for different failure scenarios
+   - Handle edge cases (network failures, corrupted files, etc.)
+   - Add retry logic for failed uploads
+
+3. **Code Organization:**
+   - Extract upload logic into custom hooks if needed
+   - Separate concerns (file validation, upload, status tracking)
+   - Improve component readability and maintainability
+
+4. **Testing Considerations:**
+   - Make component more testable by extracting logic
+   - Add data-testid attributes where helpful
+   - Consider adding unit tests once test infrastructure is set up
+
+**Files to Modify:**
+
+- `src/components/UploadForm.jsx` - Refactor and optimize
+
+**Help:**
+
+- Use ChatGPT: "How to refactor React component with multiple upload methods?"
+- Use ChatGPT: "Best practices for file upload error handling in React"
+
+---
+
 ## 🧭 Priority Order
 
 1. **High Priority (Do First):**
@@ -581,6 +623,7 @@ BASE_URL=https://yourdomain.com
 | 2025-01-27 | Initial TODO list created           | ✅     | Agent generated tasks  |
 | 2025-01-27 | Fixed package-lock.json conflicts   | ✅     | Regenerated clean file |
 | 2025-01-27 | Fixed config.py trailing whitespace | ✅     | Cleaned up formatting  |
+| 2025-01-27 | Upload Form refactoring task added  | 📋     | New task for code cleanup |
 
 ---
 
