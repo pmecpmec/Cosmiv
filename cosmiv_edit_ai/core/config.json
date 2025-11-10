@@ -1,0 +1,30 @@
+{
+  "auto_train": true,
+  "train_interval_hours": 24,
+  "preferred_editor": "davinci",
+  "learning_rate": 0.3,
+  "max_versions": 10,
+  "youtube_api_key": "",
+  "openai_api_key": "",
+  "data_dir": "data",
+  "renders_dir": "renders",
+  "research_queries": [
+    "viral video editing",
+    "DaVinci Resolve tutorial",
+    "Premiere Pro editing",
+    "CapCut edits",
+    "trending short form editing"
+  ],
+  "trend_sources": {
+    "youtube_shorts": true,
+    "tiktok": false,
+    "instagram_reels": false
+  },
+  "evaluation_metrics": {
+    "pacing_consistency": 0.25,
+    "beat_alignment": 0.25,
+    "clarity": 0.20,
+    "subtitle_rhythm": 0.15,
+    "trend_adherence": 0.15
+  }
+}

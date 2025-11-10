@@ -1,0 +1,27 @@
+# Cosmiv Edit AI - Dependencies
+
+# Core video processing
+moviepy>=1.0.3
+opencv-python-headless>=4.8.0
+ffmpeg-python>=0.2.0
+scenedetect>=0.6.2
+
+# Audio processing for beat detection
+librosa>=0.10.0
+soundfile>=0.12.0
+
+# YouTube API
+google-api-python-client>=2.100.0
+youtube-transcript-api>=0.6.0
+
+# AI/LLM (optional - for rule extraction)
+openai>=1.0.0
+
+# Data processing
+numpy>=1.24.0
+
+# Utilities
+python-dotenv>=1.0.0
+
+# DaVinci Resolve (optional - install separately if using)
+# DaVinci Resolve Python API must be installed via DaVinci Resolve installation
