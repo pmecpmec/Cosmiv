@@ -1,6 +1,7 @@
 """
 API endpoints for AI Video Enhancement System
 """
+
 from fastapi import APIRouter, Depends, HTTPException
 from typing import Optional, List
 from pydantic import BaseModel
@@ -17,7 +18,9 @@ router = APIRouter(prefix="/v2/ai/video", tags=["AI Video"])
 
 class VideoEnhancementRequest(BaseModel):
     job_id: str
-    enhancement_type: str  # captions, transitions, color_grade, effects, motion_graphics
+    enhancement_type: (
+        str  # captions, transitions, color_grade, effects, motion_graphics
+    )
     input_video_path: str
     params: Optional[dict] = None
 
@@ -52,10 +55,12 @@ async def enhance_video(
         input_video_path=request.input_video_path,
         params=request.params,
     )
-    
+
     if not result.get("success"):
-        raise HTTPException(status_code=500, detail=result.get("error", "Enhancement failed"))
-    
+        raise HTTPException(
+            status_code=500, detail=result.get("error", "Enhancement failed")
+        )
+
     return result
 
 
@@ -70,10 +75,12 @@ async def generate_captions(
         style=request.style,
         position=request.position,
     )
-    
+
     if not result.get("success"):
-        raise HTTPException(status_code=500, detail=result.get("error", "Caption generation failed"))
-    
+        raise HTTPException(
+            status_code=500, detail=result.get("error", "Caption generation failed")
+        )
+
     return result
 
 
@@ -88,10 +95,12 @@ async def suggest_edits(
         target_duration=request.target_duration,
         style=request.style,
     )
-    
+
     if not result.get("success"):
-        raise HTTPException(status_code=500, detail=result.get("error", "Suggestion failed"))
-    
+        raise HTTPException(
+            status_code=500, detail=result.get("error", "Suggestion failed")
+        )
+
     return result
 
 
@@ -106,10 +115,12 @@ async def generate_thumbnail(
         style=request.style,
         text=request.text,
     )
-    
+
     if not result.get("success"):
-        raise HTTPException(status_code=500, detail=result.get("error", "Thumbnail generation failed"))
-    
+        raise HTTPException(
+            status_code=500, detail=result.get("error", "Thumbnail generation failed")
+        )
+
     return result
 
 
@@ -120,10 +131,10 @@ async def get_enhancement(
 ):
     """Get a video enhancement record"""
     enhancement = video_enhancer_service.get_enhancement(enhancement_id)
-    
+
     if not enhancement:
         raise HTTPException(status_code=404, detail="Enhancement not found")
-    
+
     return {
         "enhancement_id": enhancement.enhancement_id,
         "job_id": enhancement.job_id,
@@ -132,9 +143,15 @@ async def get_enhancement(
         "output_video_path": enhancement.output_video_path,
         "status": enhancement.status,
         "quality_score": enhancement.quality_score,
-        "params": json.loads(enhancement.enhancement_params) if enhancement.enhancement_params else {},
+        "params": (
+            json.loads(enhancement.enhancement_params)
+            if enhancement.enhancement_params
+            else {}
+        ),
         "created_at": enhancement.created_at.isoformat(),
-        "completed_at": enhancement.completed_at.isoformat() if enhancement.completed_at else None,
+        "completed_at": (
+            enhancement.completed_at.isoformat() if enhancement.completed_at else None
+        ),
     }
 
 
@@ -147,14 +164,16 @@ async def list_enhancements(
     """List video enhancements"""
     with get_session() as session:
         query = select(VideoEnhancement)
-        
+
         if job_id:
             query = query.where(VideoEnhancement.job_id == job_id)
         if enhancement_type:
             query = query.where(VideoEnhancement.enhancement_type == enhancement_type)
-        
-        enhancements = session.exec(query.order_by(VideoEnhancement.created_at.desc())).all()
-        
+
+        enhancements = session.exec(
+            query.order_by(VideoEnhancement.created_at.desc())
+        ).all()
+
         return {
             "enhancements": [
                 {
@@ -168,4 +187,3 @@ async def list_enhancements(
                 for e in enhancements
             ],
         }
-

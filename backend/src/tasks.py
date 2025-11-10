@@ -6,13 +6,29 @@ from typing import List, Tuple, Dict, Any, Optional
 
 from celery import Celery
 from db import get_session
-from models import Job, JobStatus, Render, UserAuth, DiscoveredClip, WeeklyMontage, Entitlement, SocialConnection, SocialPost
+from models import (
+    Job,
+    JobStatus,
+    Render,
+    UserAuth,
+    DiscoveredClip,
+    WeeklyMontage,
+    Entitlement,
+    SocialConnection,
+    SocialPost,
+)
 from storage import job_upload_dir, job_export_dir
 from sqlmodel import select
 
 from config import settings
 from pipeline.preprocess import preprocess_clips
-from pipeline.highlight_detection import detect_scenes_seconds, fused_score, motion_score, SceneSlice, get_highlight_detector
+from pipeline.highlight_detection import (
+    detect_scenes_seconds,
+    fused_score,
+    motion_score,
+    SceneSlice,
+    get_highlight_detector,
+)
 from pipeline.editing import write_ffconcat, render_with_fallback
 from pipeline.music import generate_music_bed
 from pipeline.censor import build_profanity_mute_filters, build_censor_filter_chain
@@ -32,17 +48,22 @@ log_level = getattr(logging, settings.LOG_LEVEL.upper(), logging.INFO)
 logger = logging.getLogger(__name__)
 logging.basicConfig(
     level=log_level,
-    format='[%(asctime)s] [%(levelname)s] [job=%(job_id)s] [stage=%(stage)s] %(message)s'
+    format="[%(asctime)s] [%(levelname)s] [job=%(job_id)s] [stage=%(stage)s] %(message)s",
 )
+
 
 # Custom exceptions for retry logic
 class RetryableException(Exception):
     """Exception that should trigger a retry"""
+
     pass
+
 
 class NonRetryableException(Exception):
     """Exception that should NOT trigger a retry"""
+
     pass
+
 
 REDIS_URL = os.getenv("REDIS_URL", "redis://redis:6379/0")
 CELERY_BROKER_URL = REDIS_URL
@@ -70,6 +91,7 @@ celery_app.conf.beat_schedule = {
         "schedule": 3600.0,  # Every hour - check for tokens expiring soon
     },
 }
+
 
 class RenderPipelineError(Exception):
     """Non-retryable error raised when the pipeline cannot recover."""
@@ -105,7 +127,11 @@ def _list_uploaded_clips(upload_dir: str) -> List[str]:
         names = sorted(os.listdir(upload_dir))
     except FileNotFoundError:
         return []
-    return [os.path.join(upload_dir, name) for name in names if name.lower().endswith(VIDEO_EXTENSIONS)]
+    return [
+        os.path.join(upload_dir, name)
+        for name in names
+        if name.lower().endswith(VIDEO_EXTENSIONS)
+    ]
 
 
 def update_progress(job_id: str, percentage: int, stage: str, message: str):
@@ -123,12 +149,12 @@ def update_progress(job_id: str, percentage: int, stage: str, message: str):
             job.updated_at = datetime.utcnow()
             session.add(job)
             session.commit()
-    
+
     # Log progress
     logger.info(
-        f"Progress: {percentage}% - {message}",
-        extra={"job_id": job_id, "stage": stage}
+        f"Progress: {percentage}% - {message}", extra={"job_id": job_id, "stage": stage}
     )
+
 
 def add_error_detail(job_id: str, category: str, stage: str, error: str):
     """Add detailed error information to job"""
@@ -136,15 +162,18 @@ def add_error_detail(job_id: str, category: str, stage: str, error: str):
         job = session.exec(select(Job).where(Job.job_id == job_id)).first()
         if job:
             existing = json.loads(job.error_detail) if job.error_detail else []
-            existing.append({
-                "category": category,  # CRITICAL, WARNING, INFO
-                "stage": stage,
-                "error": error,
-                "timestamp": datetime.utcnow().isoformat(),
-            })
+            existing.append(
+                {
+                    "category": category,  # CRITICAL, WARNING, INFO
+                    "stage": stage,
+                    "error": error,
+                    "timestamp": datetime.utcnow().isoformat(),
+                }
+            )
             job.error_detail = json.dumps(existing)
             session.add(job)
             session.commit()
+
 
 @celery_app.task(name="sync_all_users_clips")
 def sync_all_users_clips():
@@ -154,10 +183,11 @@ def sync_all_users_clips():
     for uid in user_ids:
         sync_user_clips.delay(uid)
 
+
 @celery_app.task(name="sync_user_clips")
 def sync_user_clips(user_id: str):
     from services.clip_discovery import fetch_recent_clips
-    
+
     with get_session() as session:
         auths = session.exec(select(UserAuth).where(UserAuth.user_id == user_id)).all()
         for a in auths:
@@ -166,7 +196,7 @@ def sync_user_clips(user_id: str):
                 logger.warning(f"Token expired for {a.provider} user {user_id}")
                 # In production, refresh token here
                 continue
-            
+
             # Fetch clips using OAuth token
             clips = fetch_recent_clips(a.provider, user_id, a.access_token)
             for c in clips:
@@ -177,18 +207,25 @@ def sync_user_clips(user_id: str):
                 ).first()
                 if exists:
                     continue
-                session.add(DiscoveredClip(
-                    user_id=user_id,
-                    provider=a.provider,
-                    external_id=c["external_id"],
-                    title=c.get("title"),
-                    url=c.get("url"),
-                ))
+                session.add(
+                    DiscoveredClip(
+                        user_id=user_id,
+                        provider=a.provider,
+                        external_id=c["external_id"],
+                        title=c.get("title"),
+                        url=c.get("url"),
+                    )
+                )
         session.commit()
-        logger.info(f"Synced clips for user {user_id}", extra={"user_id": user_id, "stage": "sync"})
+        logger.info(
+            f"Synced clips for user {user_id}",
+            extra={"user_id": user_id, "stage": "sync"},
+        )
 
 
-def _mux_with_music(video_path: str, music_path: str, output_path: str, mute_chain: str) -> None:
+def _mux_with_music(
+    video_path: str, music_path: str, output_path: str, mute_chain: str
+) -> None:
     filters = []
     if mute_chain and mute_chain != "anull":
         filters.append(f"[0:a]{mute_chain}[a_clean]")
@@ -251,7 +288,13 @@ def render_job(self, job_id: str, target_duration: int):
 
     logger.info("Render job %s started (attempt %s)", job_id, self.request.retries + 1)
     max_attempts = (getattr(self, "max_retries", 3) or 3) + 1
-    update_job_state(job_id, status=JobStatus.PROCESSING, stage="preparing", progress=5, mark_started=True)
+    update_job_state(
+        job_id,
+        status=JobStatus.PROCESSING,
+        stage="preparing",
+        progress=5,
+        mark_started=True,
+    )
 
     video_files = _list_uploaded_clips(upload_dir)
     if not video_files:
@@ -277,7 +320,9 @@ def render_job(self, job_id: str, target_duration: int):
         variants = ["landscape", "portrait"]
         video_outputs = {}
         for idx, variant in enumerate(variants):
-            update_job_state(job_id, stage=f"rendering:{variant}", progress=60 + idx * 5)
+            update_job_state(
+                job_id, stage=f"rendering:{variant}", progress=60 + idx * 5
+            )
             out_path = os.path.join(export_dir, f"video_{variant}.mp4")
             try:
                 render_with_fallback(concat_path, out_path, preset=variant)
@@ -313,28 +358,47 @@ def render_job(self, job_id: str, target_duration: int):
                 try:
                     storage.upload(path, key)  # type: ignore[attr-defined]
                 except Exception as exc:
-                    logger.warning("Upload to object storage failed for %s: %s", path, exc)
+                    logger.warning(
+                        "Upload to object storage failed for %s: %s", path, exc
+                    )
 
-        update_job_state(job_id, status=JobStatus.SUCCESS, stage="completed", progress=100, mark_finished=True)
+        update_job_state(
+            job_id,
+            status=JobStatus.SUCCESS,
+            stage="completed",
+            progress=100,
+            mark_finished=True,
+        )
 
     except (RetryableRenderError, RenderPipelineError) as exc:
-        update_job_state(job_id, status=JobStatus.FAILED, stage="failed", progress=100, error=str(exc), mark_finished=True)
+        update_job_state(
+            job_id,
+            status=JobStatus.FAILED,
+            stage="failed",
+            progress=100,
+            error=str(exc),
+            mark_finished=True,
+        )
         raise
 
 
 # Enhanced render_job with comprehensive error handling
-@celery_app.task(name="render_job_enhanced", bind=True, max_retries=3, default_retry_delay=60)
+@celery_app.task(
+    name="render_job_enhanced", bind=True, max_retries=3, default_retry_delay=60
+)
 def render_job_enhanced(self, job_id: str, target_duration: int):
     """
     Enhanced render job with progress tracking, error handling, and retry logic.
     """
     import time
+
     start_time = time.time()
-    
+
     export_dir = job_export_dir(job_id)
     upload_dir = job_upload_dir(job_id)
 
     from sqlmodel import Session  # local import to avoid circular issues
+
     with get_session() as session:
         job = session.exec(select(Job).where(Job.job_id == job_id)).first()
         if not job:
@@ -354,7 +418,9 @@ def render_job_enhanced(self, job_id: str, target_duration: int):
         if not video_files:
             raise NonRetryableException("No uploaded clips found for job")
 
-        update_progress(job_id, 10, "preprocessing", f"Normalizing {len(video_files)} clips...")
+        update_progress(
+            job_id, 10, "preprocessing", f"Normalizing {len(video_files)} clips..."
+        )
         try:
             preprocessed = preprocess_clips(video_files, export_dir)
             update_progress(job_id, 20, "preprocessing", "Preprocessing complete")
@@ -364,7 +430,9 @@ def render_job_enhanced(self, job_id: str, target_duration: int):
 
         # Stage 2: Scene Detection (20-40%)
         update_progress(job_id, 25, "scene_detection", "Analyzing scenes...")
-        candidates: List[Tuple[str, float, float, float]] = []  # (path, start, dur, score)
+        candidates: List[Tuple[str, float, float, float]] = (
+            []
+        )  # (path, start, dur, score)
         try:
             if settings.USE_HIGHLIGHT_MODEL and get_model:
                 model = get_model()
@@ -372,7 +440,7 @@ def render_job_enhanced(self, job_id: str, target_duration: int):
                     events = model.detect_events(vp)
                     # Boost scenes near detected events
                     scenes = detect_scenes_seconds(vp)
-                    for (s, e) in scenes:
+                    for s, e in scenes:
                         dur = max(0.5, e - s)
                         # Use fused_score for better detection
                         fused = fused_score(vp, s, min(dur, 10.0))
@@ -380,22 +448,34 @@ def render_job_enhanced(self, job_id: str, target_duration: int):
                         proximity_boost = 0.0
                         for ev in events:
                             if abs(ev["time"] - (s + dur / 2)) < 3.0:
-                                proximity_boost = max(proximity_boost, ev["confidence"] * 10.0)
+                                proximity_boost = max(
+                                    proximity_boost, ev["confidence"] * 10.0
+                                )
                         score += proximity_boost
                         candidates.append((vp, s, dur, score))
             else:
                 for vp in preprocessed:
                     scenes = detect_scenes_seconds(vp)
-                    for (s, e) in scenes:
+                    for s, e in scenes:
                         dur = max(0.5, e - s)
                         # Use enhanced fused_score for better detection
                         fused = fused_score(vp, s, min(dur, 10.0))
                         score = fused.get("total", motion_score(vp, s, min(dur, 10.0)))
                         candidates.append((vp, s, dur, score))
-            update_progress(job_id, 40, "scene_detection", f"Found {len(candidates)} candidate scenes")
+            update_progress(
+                job_id,
+                40,
+                "scene_detection",
+                f"Found {len(candidates)} candidate scenes",
+            )
         except Exception as e:
-            add_error_detail(job_id, "WARNING", "scene_detection", f"Scene detection issue: {str(e)}")
-            logger.warning(f"Scene detection failed, using fallback: {str(e)}", extra={"job_id": job_id, "stage": "scene_detection"})
+            add_error_detail(
+                job_id, "WARNING", "scene_detection", f"Scene detection issue: {str(e)}"
+            )
+            logger.warning(
+                f"Scene detection failed, using fallback: {str(e)}",
+                extra={"job_id": job_id, "stage": "scene_detection"},
+            )
             # Fallback to simple motion scoring
             for vp in preprocessed:
                 candidates.append((vp, 0.0, 10.0, 5.0))
@@ -405,7 +485,7 @@ def render_job_enhanced(self, job_id: str, target_duration: int):
         candidates.sort(key=lambda x: x[3], reverse=True)
         selected: List[Tuple[str, float, float]] = []
         total = 0.0
-        for (vp, s, dur, score) in candidates:
+        for vp, s, dur, score in candidates:
             if total >= target_duration:
                 break
             take = min(dur, max(1.0, min(4.0, target_duration - total)))
@@ -414,9 +494,16 @@ def render_job_enhanced(self, job_id: str, target_duration: int):
 
         if not selected:
             # Fallback: take from first file
-            add_error_detail(job_id, "WARNING", "selection", "No scenes selected, using fallback")
+            add_error_detail(
+                job_id, "WARNING", "selection", "No scenes selected, using fallback"
+            )
             selected = [(preprocessed[0], 0.0, float(target_duration))]
-        update_progress(job_id, 50, "selection", f"Selected {len(selected)} highlights ({total:.1f}s)")
+        update_progress(
+            job_id,
+            50,
+            "selection",
+            f"Selected {len(selected)} highlights ({total:.1f}s)",
+        )
 
         # Stage 4: Rendering (50-80%)
         update_progress(job_id, 55, "rendering", "Building video sequence...")
@@ -424,38 +511,60 @@ def render_job_enhanced(self, job_id: str, target_duration: int):
         try:
             write_ffconcat(concat_path, selected)
         except Exception as e:
-            add_error_detail(job_id, "CRITICAL", "rendering", f"Failed to create concat file: {str(e)}")
+            add_error_detail(
+                job_id,
+                "CRITICAL",
+                "rendering",
+                f"Failed to create concat file: {str(e)}",
+            )
             raise RetryableException(f"Concat file creation failed: {str(e)}") from e
 
         variants = ["landscape", "portrait"]
         video_outputs = {}
         for v in variants:
-            update_progress(job_id, 60 + (10 * variants.index(v)), "rendering", f"Rendering {v} format...")
+            update_progress(
+                job_id,
+                60 + (10 * variants.index(v)),
+                "rendering",
+                f"Rendering {v} format...",
+            )
             out_path = os.path.join(export_dir, f"video_{v}.mp4")
             try:
                 render_with_fallback(concat_path, out_path, preset=v)
                 video_outputs[v] = out_path
             except Exception as e:
-                add_error_detail(job_id, "CRITICAL", "rendering", f"Failed to render {v}: {str(e)}")
+                add_error_detail(
+                    job_id, "CRITICAL", "rendering", f"Failed to render {v}: {str(e)}"
+                )
                 raise RetryableException(f"Rendering {v} failed: {str(e)}") from e
         update_progress(job_id, 80, "rendering", "Rendering complete")
 
         # Stage 5: Post-processing (80-95%)
         update_progress(job_id, 85, "postprocessing", "Generating AI music bed...")
         music_path = os.path.join(export_dir, "music.mp3")
-        
+
         # Get style from job if available
         job_style = None
         with get_session() as session:
             job = session.exec(select(Job).where(Job.job_id == job_id)).first()
             if job and job.style_id:
                 job_style = job.style_id
-        
+
         try:
-            generate_music_bed(total or target_duration, music_path, style=job_style or "gaming")
+            generate_music_bed(
+                total or target_duration, music_path, style=job_style or "gaming"
+            )
         except Exception as e:
-            add_error_detail(job_id, "WARNING", "postprocessing", f"Music generation failed: {str(e)}")
-            logger.warning(f"Music generation failed, continuing without music: {str(e)}", extra={"job_id": job_id, "stage": "postprocessing"})
+            add_error_detail(
+                job_id,
+                "WARNING",
+                "postprocessing",
+                f"Music generation failed: {str(e)}",
+            )
+            logger.warning(
+                f"Music generation failed, continuing without music: {str(e)}",
+                extra={"job_id": job_id, "stage": "postprocessing"},
+            )
             music_path = None  # Continue without music
 
         # STT transcription for profanity mute spans (stub)
@@ -464,15 +573,29 @@ def render_job_enhanced(self, job_id: str, target_duration: int):
             transcript = transcribe_audio(preprocessed[0])
             mute_chain = build_profanity_mute_filters(transcript.get("profanity", []))
         except Exception as e:
-            add_error_detail(job_id, "WARNING", "postprocessing", f"Profanity detection failed: {str(e)}")
+            add_error_detail(
+                job_id,
+                "WARNING",
+                "postprocessing",
+                f"Profanity detection failed: {str(e)}",
+            )
             mute_chain = ""  # Continue without muting
-            logger.warning(f"Profanity detection failed: {str(e)}", extra={"job_id": job_id, "stage": "postprocessing"})
+            logger.warning(
+                f"Profanity detection failed: {str(e)}",
+                extra={"job_id": job_id, "stage": "postprocessing"},
+            )
 
         # Mix music into each variant with mute + optional watermark
         import subprocess
+
         final_outputs = {}
         for v, vid in video_outputs.items():
-            update_progress(job_id, 90 + (3 * list(video_outputs.keys()).index(v)), "postprocessing", f"Finalizing {v} format...")
+            update_progress(
+                job_id,
+                90 + (3 * list(video_outputs.keys()).index(v)),
+                "postprocessing",
+                f"Finalizing {v} format...",
+            )
             final_path = os.path.join(export_dir, f"final_{v}.mp4")
             try:
                 # Base audio chain: mute profanities then amix music (if available)
@@ -480,37 +603,69 @@ def render_job_enhanced(self, job_id: str, target_duration: int):
                     af_base = f"[0:a]{mute_chain}[aclean];[aclean]volume=1.0[a0]"
                 else:
                     af_base = "[0:a]volume=1.0[a0]"
-                
+
                 if music_path and os.path.exists(music_path):
                     af = f"{af_base};[1:a]volume=0.2[a1];[a0][a1]amix=inputs=2:duration=shortest[aout]"
                     music_input = ["-i", music_path]
                 else:
                     af = f"{af_base}[aout]"
                     music_input = []
-                
+
                 vf_overlay = "null"
                 if settings.WATERMARK_TEXT:
                     # Simple drawtext watermark bottom-right
                     pos = "x=w-tw-20:y=h-th-20"
                     vf_overlay = f"drawtext=text='{settings.WATERMARK_TEXT}':fontcolor=white:fontsize=24:{pos}:alpha=0.5"
-                
-                cmd = [
-                    "ffmpeg", "-y", "-i", vid
-                ] + music_input + [
-                    "-filter_complex", af + (";[0:v]"+vf_overlay+"[vout]" if vf_overlay!="null" else ""),
-                    "-map", "0:v" if vf_overlay=="null" else "[vout]",
-                    "-map", "[aout]",
-                    "-c:v", "copy" if vf_overlay=="null" else "libx264", "-preset", "veryfast", "-crf", "20",
-                    "-c:a", "aac", "-b:a", "192k", "-shortest", final_path
-                ]
+
+                cmd = (
+                    ["ffmpeg", "-y", "-i", vid]
+                    + music_input
+                    + [
+                        "-filter_complex",
+                        af
+                        + (
+                            ";[0:v]" + vf_overlay + "[vout]"
+                            if vf_overlay != "null"
+                            else ""
+                        ),
+                        "-map",
+                        "0:v" if vf_overlay == "null" else "[vout]",
+                        "-map",
+                        "[aout]",
+                        "-c:v",
+                        "copy" if vf_overlay == "null" else "libx264",
+                        "-preset",
+                        "veryfast",
+                        "-crf",
+                        "20",
+                        "-c:a",
+                        "aac",
+                        "-b:a",
+                        "192k",
+                        "-shortest",
+                        final_path,
+                    ]
+                )
                 subprocess.run(cmd, check=True, capture_output=True)
                 final_outputs[v] = final_path
             except subprocess.CalledProcessError as e:
-                add_error_detail(job_id, "CRITICAL", "postprocessing", f"FFmpeg failed for {v}: {str(e)}")
+                add_error_detail(
+                    job_id,
+                    "CRITICAL",
+                    "postprocessing",
+                    f"FFmpeg failed for {v}: {str(e)}",
+                )
                 raise RetryableException(f"FFmpeg failed for {v}: {str(e)}") from e
             except Exception as e:
-                add_error_detail(job_id, "CRITICAL", "postprocessing", f"Post-processing failed for {v}: {str(e)}")
-                raise RetryableException(f"Post-processing failed for {v}: {str(e)}") from e
+                add_error_detail(
+                    job_id,
+                    "CRITICAL",
+                    "postprocessing",
+                    f"Post-processing failed for {v}: {str(e)}",
+                )
+                raise RetryableException(
+                    f"Post-processing failed for {v}: {str(e)}"
+                ) from e
 
         # Stage 6: Upload (95-100%)
         update_progress(job_id, 95, "upload", "Uploading to storage...")
@@ -525,22 +680,29 @@ def render_job_enhanced(self, job_id: str, target_duration: int):
                         storage.upload(path, key)  # type: ignore
                         public_map[v] = storage.presigned_url(key)  # type: ignore
                     except Exception as e:
-                        add_error_detail(job_id, "WARNING", "upload", f"Object storage upload failed for {v}: {str(e)}")
+                        add_error_detail(
+                            job_id,
+                            "WARNING",
+                            "upload",
+                            f"Object storage upload failed for {v}: {str(e)}",
+                        )
                         public_map[v] = path  # Fallback to local path
             else:
                 for v, path in final_outputs.items():
                     public_map[v] = path
         except Exception as e:
-            add_error_detail(job_id, "WARNING", "upload", f"Storage upload issue: {str(e)}")
+            add_error_detail(
+                job_id, "WARNING", "upload", f"Storage upload issue: {str(e)}"
+            )
             # Use local paths as fallback
             for v, path in final_outputs.items():
                 public_map[v] = path
 
         update_progress(job_id, 100, "complete", "Job completed successfully!")
-        
+
         # Calculate processing time
         processing_time = time.time() - start_time
-        
+
         with get_session() as session:
             job = session.exec(select(Job).where(Job.job_id == job_id)).first()
             job.status = JobStatus.SUCCESS
@@ -549,22 +711,24 @@ def render_job_enhanced(self, job_id: str, target_duration: int):
                 session.add(Render(job_id=job_id, output_path=path, format=v))
             session.add(job)
             session.commit()
-            
+
             # Update analytics after commit
             if job.user_id and job.style_id:
                 from services.analytics import update_style_performance
+
                 try:
                     update_style_performance(job.style_id, job_id)
                 except Exception as e:
                     logger.warning(f"Failed to update style performance: {str(e)}")
-            
+
             if job.user_id:
                 from services.analytics import update_user_analytics
+
                 try:
                     update_user_analytics(job.user_id)
                 except Exception as e:
                     logger.warning(f"Failed to update user analytics: {str(e)}")
-            
+
             # If this is a weekly montage job, update the montage record
             montage = session.exec(
                 select(WeeklyMontage).where(WeeklyMontage.job_id == job_id)
@@ -573,32 +737,41 @@ def render_job_enhanced(self, job_id: str, target_duration: int):
                 montage.render_path_landscape = final_outputs.get("landscape")
                 montage.render_path_portrait = final_outputs.get("portrait")
                 session.add(montage)
-                
+
                 # Auto-post weekly montages for Creator+ users with auto_post_weekly enabled
                 creator_connections = session.exec(
                     select(SocialConnection).where(
                         SocialConnection.auto_post_weekly == True,
-                        SocialConnection.is_active == True
+                        SocialConnection.is_active == True,
                     )
                 ).all()
-                
+
                 for conn in creator_connections:
                     # Post portrait to TikTok/Instagram, landscape to YouTube
-                    format_to_use = "portrait" if conn.platform in ["tiktok", "instagram"] else "landscape"
-                    video_path = montage.render_path_portrait if format_to_use == "portrait" else montage.render_path_landscape
-                    
+                    format_to_use = (
+                        "portrait"
+                        if conn.platform in ["tiktok", "instagram"]
+                        else "landscape"
+                    )
+                    video_path = (
+                        montage.render_path_portrait
+                        if format_to_use == "portrait"
+                        else montage.render_path_landscape
+                    )
+
                     if video_path:
                         post = SocialPost(
                             user_id=conn.user_id,
                             weekly_montage_id=montage.id,
                             platform=conn.platform,
-                            caption=montage.title or f"Weekly Highlights - {montage.week_start.strftime('%B %d, %Y')} 🎬",
+                            caption=montage.title
+                            or f"Weekly Highlights - {montage.week_start.strftime('%B %d, %Y')} 🎬",
                             status="pending",
                         )
                         session.add(post)
                         session.commit()
                         session.refresh(post)
-                        
+
                         # Trigger async posting
                         post_to_social_async.delay(
                             post.id,
@@ -608,14 +781,18 @@ def render_job_enhanced(self, job_id: str, target_duration: int):
                             platform=conn.platform,
                             user_id=conn.user_id,
                             platform_user_id=conn.platform_user_id,
-                            instagram_account_id=conn.platform_user_id if conn.platform == "instagram" else None,
+                            instagram_account_id=(
+                                conn.platform_user_id
+                                if conn.platform == "instagram"
+                                else None
+                            ),
                         )
-            
+
             # Check for auto-post connections for this job
             # Try to get user_id from job metadata or infer from job_id structure
             # For now, we'll skip auto-posting regular jobs (users can manually post)
             # This can be enhanced later when we add user_id to Job model
-            
+
             session.commit()
 
         # Save a small marker file for URLs (optional)
@@ -628,14 +805,19 @@ def render_job_enhanced(self, job_id: str, target_duration: int):
 
     except RetryableException as e:
         # Retryable error - attempt retry with exponential backoff
-        logger.warning(f"Retryable error in job {job_id}: {str(e)}", extra={"job_id": job_id, "stage": "error"})
+        logger.warning(
+            f"Retryable error in job {job_id}: {str(e)}",
+            extra={"job_id": job_id, "stage": "error"},
+        )
         add_error_detail(job_id, "WARNING", "retry", f"Retryable error: {str(e)}")
-        
+
         # Check retry count
-        retries = self.request.retries if hasattr(self, 'request') else 0
+        retries = self.request.retries if hasattr(self, "request") else 0
         if retries < 3:
-            countdown = 60 * (2 ** retries)  # Exponential backoff: 60s, 120s, 240s
-            logger.info(f"Scheduling retry {retries + 1}/3 for job {job_id} in {countdown}s")
+            countdown = 60 * (2**retries)  # Exponential backoff: 60s, 120s, 240s
+            logger.info(
+                f"Scheduling retry {retries + 1}/3 for job {job_id} in {countdown}s"
+            )
             raise self.retry(exc=e, countdown=countdown)
         else:
             # Max retries reached - fail the job
@@ -647,10 +829,13 @@ def render_job_enhanced(self, job_id: str, target_duration: int):
                     session.add(job)
                     session.commit()
             raise
-    
+
     except (NonRetryableException, ValueError) as e:
         # Non-retryable error - fail immediately
-        logger.error(f"Non-retryable error in job {job_id}: {str(e)}", extra={"job_id": job_id, "stage": "error"})
+        logger.error(
+            f"Non-retryable error in job {job_id}: {str(e)}",
+            extra={"job_id": job_id, "stage": "error"},
+        )
         add_error_detail(job_id, "CRITICAL", "validation", str(e))
         with get_session() as session:
             job = session.exec(select(Job).where(Job.job_id == job_id)).first()
@@ -677,11 +862,24 @@ def render_job_enhanced(self, job_id: str, target_duration: int):
             max_attempts,
             exc,
         )
-        update_job_state(job_id, status=JobStatus.RETRYING, stage="retrying", progress=95, error=str(exc))
+        update_job_state(
+            job_id,
+            status=JobStatus.RETRYING,
+            stage="retrying",
+            progress=95,
+            error=str(exc),
+        )
         raise
     except RenderPipelineError as exc:
         logger.error("Render job %s failed: %s", job_id, exc)
-        update_job_state(job_id, status=JobStatus.FAILED, stage="failed", progress=100, error=str(exc), mark_finished=True)
+        update_job_state(
+            job_id,
+            status=JobStatus.FAILED,
+            stage="failed",
+            progress=100,
+            error=str(exc),
+            mark_finished=True,
+        )
         raise
     except FFmpegExecutionError as exc:
         mapped = _classify_ffmpeg_error(exc)
@@ -694,25 +892,51 @@ def render_job_enhanced(self, job_id: str, target_duration: int):
                 max_attempts,
                 mapped,
             )
-            update_job_state(job_id, status=JobStatus.RETRYING, stage="retrying", progress=95, error=str(mapped))
+            update_job_state(
+                job_id,
+                status=JobStatus.RETRYING,
+                stage="retrying",
+                progress=95,
+                error=str(mapped),
+            )
             raise mapped
         logger.error("Render job %s ffmpeg failure: %s", job_id, mapped)
-        update_job_state(job_id, status=JobStatus.FAILED, stage="failed", progress=100, error=str(mapped), mark_finished=True)
+        update_job_state(
+            job_id,
+            status=JobStatus.FAILED,
+            stage="failed",
+            progress=100,
+            error=str(mapped),
+            mark_finished=True,
+        )
         raise mapped
     except Exception as exc:
         logger.exception("Render job %s unexpected failure", job_id)
-        update_job_state(job_id, status=JobStatus.FAILED, stage="failed", progress=100, error=str(exc), mark_finished=True)
+        update_job_state(
+            job_id,
+            status=JobStatus.FAILED,
+            stage="failed",
+            progress=100,
+            error=str(exc),
+            mark_finished=True,
+        )
         raise
-    
+
     except Exception as e:
         # Unknown error - treat as retryable by default
-        logger.error(f"Unexpected error in job {job_id}: {str(e)}", extra={"job_id": job_id, "stage": "error"}, exc_info=True)
+        logger.error(
+            f"Unexpected error in job {job_id}: {str(e)}",
+            extra={"job_id": job_id, "stage": "error"},
+            exc_info=True,
+        )
         add_error_detail(job_id, "CRITICAL", "unknown", str(e))
-        
-        retries = self.request.retries if hasattr(self, 'request') else 0
+
+        retries = self.request.retries if hasattr(self, "request") else 0
         if retries < 2:  # Only retry unknown errors twice
-            countdown = 60 * (2 ** retries)
-            logger.info(f"Scheduling retry {retries + 1}/2 for unexpected error in job {job_id}")
+            countdown = 60 * (2**retries)
+            logger.info(
+                f"Scheduling retry {retries + 1}/2 for unexpected error in job {job_id}"
+            )
             raise self.retry(exc=RetryableException(str(e)), countdown=countdown)
         else:
             with get_session() as session:
@@ -734,66 +958,81 @@ def compile_weekly_montage():
     from datetime import timedelta
     from storage import new_job_id
     import shutil
-    
-    logger.info("Starting weekly montage compilation", extra={"job_id": "weekly", "stage": "compile"})
-    
+
+    logger.info(
+        "Starting weekly montage compilation",
+        extra={"job_id": "weekly", "stage": "compile"},
+    )
+
     # Calculate week start (Monday)
     now = datetime.utcnow()
     days_since_monday = (now.weekday()) % 7
     week_start = now - timedelta(days=days_since_monday)
     week_start = week_start.replace(hour=0, minute=0, second=0, microsecond=0)
     week_end = week_start + timedelta(days=7)
-    
+
     # Check if montage already exists for this week
     with get_session() as session:
         existing = session.exec(
             select(WeeklyMontage).where(WeeklyMontage.week_start == week_start)
         ).first()
         if existing:
-            logger.info(f"Weekly montage for week {week_start} already exists", 
-                       extra={"job_id": "weekly", "stage": "compile"})
+            logger.info(
+                f"Weekly montage for week {week_start} already exists",
+                extra={"job_id": "weekly", "stage": "compile"},
+            )
             return {"status": "exists", "week_start": week_start.isoformat()}
-        
+
         # 1. Get successful jobs from past week
         recent_jobs = session.exec(
-            select(Job).where(
+            select(Job)
+            .where(
                 Job.status == JobStatus.SUCCESS,
                 Job.created_at >= week_start,
                 Job.created_at < week_end,
-            ).order_by(Job.created_at.desc())
+            )
+            .order_by(Job.created_at.desc())
         ).all()
-        
+
         if not recent_jobs:
-            logger.warning("No successful jobs found for weekly montage", 
-                          extra={"job_id": "weekly", "stage": "compile"})
+            logger.warning(
+                "No successful jobs found for weekly montage",
+                extra={"job_id": "weekly", "stage": "compile"},
+            )
             return {"status": "no_clips", "week_start": week_start.isoformat()}
-        
+
         # 2. Get renders from these jobs (prioritize landscape for compilation)
         clip_paths = []
         featured_users = set()
-        
+
         for job in recent_jobs[:50]:  # Limit to 50 most recent
             renders = session.exec(
-                select(Render).where(Render.job_id == job.job_id, Render.format == "landscape")
+                select(Render).where(
+                    Render.job_id == job.job_id, Render.format == "landscape"
+                )
             ).first()
             if renders and os.path.exists(renders.output_path):
-                clip_paths.append({
-                    "path": renders.output_path,
-                    "created_at": job.created_at,
-                })
-        
+                clip_paths.append(
+                    {
+                        "path": renders.output_path,
+                        "created_at": job.created_at,
+                    }
+                )
+
         if not clip_paths:
-            logger.warning("No renders found for weekly montage", 
-                          extra={"job_id": "weekly", "stage": "compile"})
+            logger.warning(
+                "No renders found for weekly montage",
+                extra={"job_id": "weekly", "stage": "compile"},
+            )
             return {"status": "no_clips", "week_start": week_start.isoformat()}
-        
+
         # Sort by creation date (newest first)
         clip_paths.sort(key=lambda x: x["created_at"], reverse=True)
-        
+
         # Take top 10-15 clips for compilation (~3 minutes)
         selected_clips = clip_paths[:15]
         target_duration = 180  # 3 minutes
-        
+
         # Create weekly montage record
         montage = WeeklyMontage(
             week_start=week_start,
@@ -805,12 +1044,12 @@ def compile_weekly_montage():
         session.add(montage)
         session.commit()
         session.refresh(montage)
-        
+
         # Create compilation job
         job_id = new_job_id()
         export_dir = job_export_dir(job_id)
         upload_dir = job_upload_dir(job_id)
-        
+
         # Copy clips to upload directory
         os.makedirs(upload_dir, exist_ok=True)
         for i, clip_info in enumerate(selected_clips):
@@ -820,7 +1059,7 @@ def compile_weekly_montage():
             except Exception as e:
                 logger.warning(f"Failed to copy clip {clip_info['path']}: {str(e)}")
                 continue
-        
+
         # Create job
         job = Job(
             job_id=job_id,
@@ -828,18 +1067,20 @@ def compile_weekly_montage():
             target_duration=target_duration,
         )
         session.add(job)
-        
+
         # Update montage with job_id
         montage.job_id = job_id
         session.add(montage)
         session.commit()
-    
+
     # Process compilation asynchronously
-    logger.info(f"Created weekly montage job {job_id} with {len(selected_clips)} clips",
-               extra={"job_id": job_id, "stage": "compile"})
-    
+    logger.info(
+        f"Created weekly montage job {job_id} with {len(selected_clips)} clips",
+        extra={"job_id": job_id, "stage": "compile"},
+    )
+
     render_job.delay(job_id, target_duration)
-    
+
     return {
         "status": "created",
         "job_id": job_id,
@@ -864,32 +1105,37 @@ def post_to_social_async(
     """
     from services.social_posters import post_to_social_media
     import os
-    
-    logger.info(f"Posting to {platform}", extra={"job_id": f"social_{post_id}", "stage": "posting"})
-    
+
+    logger.info(
+        f"Posting to {platform}",
+        extra={"job_id": f"social_{post_id}", "stage": "posting"},
+    )
+
     try:
         # Verify video file exists
         if not os.path.exists(video_path):
             raise Exception(f"Video file not found: {video_path}")
-        
+
         # Post to platform
         kwargs = {}
         if platform == "instagram" and instagram_account_id:
             kwargs["instagram_account_id"] = instagram_account_id
         elif platform == "tiktok" and platform_user_id:
             kwargs["user_id"] = platform_user_id
-        
+
         result = post_to_social_media(
             platform=platform,
             video_path=video_path,
             caption=caption,
             access_token=access_token,
-            **kwargs
+            **kwargs,
         )
-        
+
         # Update post record
         with get_session() as session:
-            post = session.exec(select(SocialPost).where(SocialPost.id == post_id)).first()
+            post = session.exec(
+                select(SocialPost).where(SocialPost.id == post_id)
+            ).first()
             if post:
                 post.status = "posted" if result.get("success") else "failed"
                 post.platform_post_id = result.get("post_id")
@@ -899,22 +1145,27 @@ def post_to_social_async(
                     post.error = result.get("error", "Unknown error")
                 session.add(post)
                 session.commit()
-        
-        logger.info(f"Posted to {platform} successfully", extra={"job_id": f"social_{post_id}", "stage": "complete"})
+
+        logger.info(
+            f"Posted to {platform} successfully",
+            extra={"job_id": f"social_{post_id}", "stage": "complete"},
+        )
         return result
-        
+
     except Exception as e:
         logger.error(f"Failed to post to {platform}: {str(e)}", exc_info=True)
-        
+
         # Update post record with error
         with get_session() as session:
-            post = session.exec(select(SocialPost).where(SocialPost.id == post_id)).first()
+            post = session.exec(
+                select(SocialPost).where(SocialPost.id == post_id)
+            ).first()
             if post:
                 post.status = "failed"
                 post.error = str(e)
                 session.add(post)
                 session.commit()
-        
+
         raise
 
 
@@ -927,70 +1178,76 @@ def refresh_expiring_platform_tokens():
     from services.platform_oauth import get_oauth_handler
     from datetime import datetime, timedelta
     import requests
-    
+
     logger.info("Checking for expiring platform tokens...")
-    
+
     with get_session() as session:
         # Find tokens expiring in the next 24 hours
         expiry_threshold = datetime.utcnow() + timedelta(hours=24)
-        
+
         expiring_tokens = session.exec(
             select(UserAuth).where(
                 UserAuth.expires_at.isnot(None),
                 UserAuth.expires_at <= expiry_threshold,
-                UserAuth.refresh_token.isnot(None)
+                UserAuth.refresh_token.isnot(None),
             )
         ).all()
-        
+
         refreshed_count = 0
         failed_count = 0
-        
+
         for user_auth in expiring_tokens:
             try:
                 provider = user_auth.provider.lower()
                 handler = get_oauth_handler(provider)
-                
+
                 if not handler:
                     logger.warning(f"No OAuth handler for provider: {provider}")
                     continue
-                
+
                 # Skip Steam (doesn't use refresh tokens)
                 if provider == "steam":
                     continue
-                
+
                 # Check if token has refresh method
                 if not hasattr(handler, "refresh_token"):
                     logger.warning(f"Provider {provider} doesn't support token refresh")
                     continue
-                
+
                 # Refresh the token
-                logger.info(f"Refreshing token for user {user_auth.user_id}, provider {provider}")
-                
+                logger.info(
+                    f"Refreshing token for user {user_auth.user_id}, provider {provider}"
+                )
+
                 # Call static method
                 new_token_data = handler.refresh_token(user_auth.refresh_token)
-                
+
                 # Update in database
-                user_auth.access_token = new_token_data.get("access_token", user_auth.access_token)
+                user_auth.access_token = new_token_data.get(
+                    "access_token", user_auth.access_token
+                )
                 if new_token_data.get("refresh_token"):
                     user_auth.refresh_token = new_token_data["refresh_token"]
                 if new_token_data.get("expires_at"):
-                    user_auth.expires_at = datetime.fromisoformat(new_token_data["expires_at"])
-                
+                    user_auth.expires_at = datetime.fromisoformat(
+                        new_token_data["expires_at"]
+                    )
+
                 session.add(user_auth)
                 session.commit()
-                
+
                 refreshed_count += 1
                 logger.info(f"Successfully refreshed token for {provider}")
-                
+
             except Exception as e:
                 failed_count += 1
                 logger.error(
                     f"Failed to refresh token for user {user_auth.user_id}, provider {user_auth.provider}: {str(e)}",
-                    exc_info=True
+                    exc_info=True,
                 )
                 # Continue with next token even if one fails
-        
+
         logger.info(
             f"Token refresh complete: {refreshed_count} refreshed, {failed_count} failed",
-            extra={"refreshed": refreshed_count, "failed": failed_count}
+            extra={"refreshed": refreshed_count, "failed": failed_count},
         )

@@ -7,8 +7,9 @@ from fastapi.testclient import TestClient
 
 
 @pytest.fixture
-def client():
+def client(in_memory_db):
     """Create test FastAPI client"""
+    # in_memory_db fixture ensures database is set up first
     from main import app
     return TestClient(app)
 

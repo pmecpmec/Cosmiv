@@ -18,7 +18,9 @@ class FFmpegExecutionError(RuntimeError):
         return f"ffmpeg command failed (code {self.returncode}): {cmd}\n{self.stderr.strip()}"
 
 
-def run_ffmpeg(command: Sequence[str], *, check: bool = True, capture: bool = True) -> subprocess.CompletedProcess:
+def run_ffmpeg(
+    command: Sequence[str], *, check: bool = True, capture: bool = True
+) -> subprocess.CompletedProcess:
     """Run an ffmpeg command with structured logging and error handling."""
     log_line = " ".join(shlex.quote(part) for part in command)
     logger.debug("Executing ffmpeg: %s", log_line)
@@ -31,5 +33,7 @@ def run_ffmpeg(command: Sequence[str], *, check: bool = True, capture: bool = Tr
     if result.returncode != 0 and check:
         stderr = result.stderr or result.stdout or ""
         logger.warning("ffmpeg command failed: %s", log_line)
-        raise FFmpegExecutionError(command=list(command), returncode=result.returncode, stderr=stderr)
+        raise FFmpegExecutionError(
+            command=list(command), returncode=result.returncode, stderr=stderr
+        )
     return result

@@ -1,0 +1,44 @@
+{
+  "version": "1.0.0",
+  "last_updated": null,
+  "rules": {
+    "cut_timing": {
+      "fast_cut_threshold": 0.5,
+      "medium_cut_threshold": 2.0,
+      "slow_cut_threshold": 5.0,
+      "beat_sync": true
+    },
+    "pacing": {
+      "opening_hook_duration": 3.0,
+      "peak_action_duration": 5.0,
+      "transition_smoothness": 0.3
+    },
+    "transitions": {
+      "cut": 0.4,
+      "fade": 0.2,
+      "zoom": 0.2,
+      "whip": 0.1,
+      "glitch": 0.1
+    },
+    "text_styles": {
+      "subtitle_duration": 1.5,
+      "subtitle_position": "bottom",
+      "font_size": 48,
+      "highlight_words": true,
+      "animation": "fade_in_out"
+    },
+    "effects": {
+      "speed_ramp_enabled": true,
+      "color_grade": "vibrant",
+      "zoom_intensity": 1.2,
+      "shake_on_beat": false
+    }
+  },
+  "meta_patterns": {
+    "beat_cuts": true,
+    "filter_styles": "warm",
+    "speed_ramps": "moderate",
+    "subtitles": "always",
+    "zooms": "frequent"
+  }
+}

@@ -29,7 +29,8 @@ def update_job_state(
         if stage is not None:
             job.stage = stage
         if progress is not None:
-            job.progress = max(0, min(int(progress), 100))
+            # Job model stores progress as string, convert int to string
+            job.progress = str(max(0, min(int(progress), 100)))
         if error is not None:
             job.error = error
             job.last_error_at = now

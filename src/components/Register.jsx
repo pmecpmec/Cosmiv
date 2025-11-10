@@ -163,7 +163,7 @@ export default function Register({ onSwitchToLogin }) {
           </button>
         </p>
       </div>
-    </div>
+    </AnimatedContainer>
   )
 }
 

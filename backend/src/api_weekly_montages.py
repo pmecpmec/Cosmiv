@@ -1,6 +1,7 @@
 """
 API endpoints for weekly montages
 """
+
 from fastapi import APIRouter, Depends, HTTPException, Body, Form
 from sqlmodel import select, func, or_
 from typing import List, Optional
@@ -25,14 +26,14 @@ def list_weekly_montages(
     """
     with get_session() as session:
         query = select(WeeklyMontage)
-        
+
         if featured_only:
             query = query.where(WeeklyMontage.is_featured == True)
-        
+
         montages = session.exec(
             query.order_by(WeeklyMontage.week_start.desc()).limit(limit)
         ).all()
-        
+
         result = []
         for m in montages:
             # Get render URLs if job completed
@@ -43,19 +44,23 @@ def list_weekly_montages(
                 ).all()
                 for r in renders:
                     render_paths[r.format] = r.output_path
-            
-            result.append({
-                "id": m.id,
-                "week_start": m.week_start.isoformat(),
-                "title": m.title,
-                "clip_count": m.clip_count,
-                "total_duration": m.total_duration,
-                "is_featured": m.is_featured,
-                "created_at": m.created_at.isoformat(),
-                "featured_user_ids": json.loads(m.featured_user_ids) if m.featured_user_ids else [],
-                "renders": render_paths,
-            })
-        
+
+            result.append(
+                {
+                    "id": m.id,
+                    "week_start": m.week_start.isoformat(),
+                    "title": m.title,
+                    "clip_count": m.clip_count,
+                    "total_duration": m.total_duration,
+                    "is_featured": m.is_featured,
+                    "created_at": m.created_at.isoformat(),
+                    "featured_user_ids": (
+                        json.loads(m.featured_user_ids) if m.featured_user_ids else []
+                    ),
+                    "renders": render_paths,
+                }
+            )
+
         return {"montages": result}
 
 
@@ -66,10 +71,10 @@ def get_latest_montage():
         montage = session.exec(
             select(WeeklyMontage).order_by(WeeklyMontage.week_start.desc()).limit(1)
         ).first()
-        
+
         if not montage:
             raise HTTPException(status_code=404, detail="No weekly montages found")
-        
+
         # Get renders
         render_paths = {}
         if montage.job_id:
@@ -78,7 +83,7 @@ def get_latest_montage():
             ).all()
             for r in renders:
                 render_paths[r.format] = r.output_path
-        
+
         return {
             "id": montage.id,
             "week_start": montage.week_start.isoformat(),
@@ -87,7 +92,11 @@ def get_latest_montage():
             "total_duration": montage.total_duration,
             "is_featured": montage.is_featured,
             "created_at": montage.created_at.isoformat(),
-            "featured_user_ids": json.loads(montage.featured_user_ids) if montage.featured_user_ids else [],
+            "featured_user_ids": (
+                json.loads(montage.featured_user_ids)
+                if montage.featured_user_ids
+                else []
+            ),
             "renders": render_paths,
         }
 
@@ -99,10 +108,10 @@ def get_montage(montage_id: int):
         montage = session.exec(
             select(WeeklyMontage).where(WeeklyMontage.id == montage_id)
         ).first()
-        
+
         if not montage:
             raise HTTPException(status_code=404, detail="Montage not found")
-        
+
         # Get renders
         render_paths = {}
         if montage.job_id:
@@ -111,7 +120,7 @@ def get_montage(montage_id: int):
             ).all()
             for r in renders:
                 render_paths[r.format] = r.output_path
-        
+
         return {
             "id": montage.id,
             "week_start": montage.week_start.isoformat(),
@@ -120,7 +129,11 @@ def get_montage(montage_id: int):
             "total_duration": montage.total_duration,
             "is_featured": montage.is_featured,
             "created_at": montage.created_at.isoformat(),
-            "featured_user_ids": json.loads(montage.featured_user_ids) if montage.featured_user_ids else [],
+            "featured_user_ids": (
+                json.loads(montage.featured_user_ids)
+                if montage.featured_user_ids
+                else []
+            ),
             "renders": render_paths,
         }
 
@@ -139,7 +152,9 @@ async def trigger_compilation(
             "task_id": result.id,
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to start compilation: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to start compilation: {str(e)}"
+        )
 
 
 @router.patch("/{montage_id}/feature")
@@ -153,14 +168,14 @@ async def toggle_feature(
         montage = session.exec(
             select(WeeklyMontage).where(WeeklyMontage.id == montage_id)
         ).first()
-        
+
         if not montage:
             raise HTTPException(status_code=404, detail="Montage not found")
-        
+
         montage.is_featured = is_featured
         session.add(montage)
         session.commit()
-        
+
         return {
             "id": montage.id,
             "is_featured": montage.is_featured,
@@ -178,16 +193,15 @@ async def update_title(
         montage = session.exec(
             select(WeeklyMontage).where(WeeklyMontage.id == montage_id)
         ).first()
-        
+
         if not montage:
             raise HTTPException(status_code=404, detail="Montage not found")
-        
+
         montage.title = title
         session.add(montage)
         session.commit()
-        
+
         return {
             "id": montage.id,
             "title": montage.title,
         }
-

@@ -40,6 +40,7 @@ def test_update_job_state_persists_progress():
         stored = session.exec(select(Job).where(Job.job_id == "test-job")).first()
         assert stored is not None
         assert stored.stage == "preprocessing"
-        assert stored.progress == 33
+        # Job model stores progress as string
+        assert stored.progress == "33"
         assert stored.status == JobStatus.PROCESSING
         assert stored.started_at is not None

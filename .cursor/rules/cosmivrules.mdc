@@ -1,0 +1,18 @@
+---
+alwaysApply: false
+---
+
+# PROJECT RULES — Cosmiv
+
+- Cosmiv is a futuristic AI-powered gaming montage platform with a cosmic, Space inspired, sleek, and futuristic inspired vibe.
+- Visual aesthetic: neon cyan, violet, deep blue, subtle glitch overlays, dark sci-fi mood.
+- Tech stack:
+  - Frontend: React + Vite + TailwindCSS + Framer Motion
+  - Backend: FastAPI + Celery + Redis + Postgres
+  - ML: PyTorch, Whisper, Riffusion, MusicGen
+- Every visual component should feel alive, glowing, slightly animated, and modern.
+- Branding tone: futuristic, creative, and confident — not corporate.
+- The platform’s UX should be seamless, immersive, and optimized for performance.
+- The AI should feel like a companion (a glowing cosmic orb).
+- All internal files should be well documented in Markdown.
+- Cursor must maintain cosmic consistency across all code, comments, and commits.

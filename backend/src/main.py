@@ -40,16 +40,23 @@ cors_origins = [origin.strip() for origin in cors_origins_str.split(",")]
 # Security validation for production
 if settings.ENVIRONMENT == "production":
     if any("localhost" in origin or "127.0.0.1" in origin for origin in cors_origins):
-        raise ValueError("Localhost origins not allowed in production CORS configuration")
+        raise ValueError(
+            "Localhost origins not allowed in production CORS configuration"
+        )
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],  # Explicit methods only
-    allow_headers=["Content-Type", "Authorization", "X-CSRF-Token"],  # Explicit headers only
+    allow_headers=[
+        "Content-Type",
+        "Authorization",
+        "X-CSRF-Token",
+    ],  # Explicit headers only
     max_age=3600,  # Cache preflight requests for 1 hour
 )
+
 
 # Security headers middleware
 @app.middleware("http")
@@ -63,12 +70,22 @@ async def add_security_headers(request, call_next):
     response.headers["X-XSS-Protection"] = "1; mode=block"
     # HSTS for production
     if settings.ENVIRONMENT == "production":
-        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        response.headers["Strict-Transport-Security"] = (
+            "max-age=31536000; includeSubDomains"
+        )
     return response
 
+
 @app.on_event("startup")
-def on_startup():
-    init_db()
+async def on_startup():
+    # Only initialize DB if not in test mode
+    # Tests will set up their own database via conftest
+    import os
+
+    # Skip DB initialization during tests - conftest handles it
+    if os.getenv("PYTEST_CURRENT_TEST") is None and not os.getenv("TESTING"):
+        init_db()
+
 
 @app.get("/health")
 async def health_check():
@@ -76,12 +93,9 @@ async def health_check():
     import redis
     from config import settings
     from services.storage_adapters import get_storage
-    
-    health = {
-        "status": "healthy",
-        "checks": {}
-    }
-    
+
+    health = {"status": "healthy", "checks": {}}
+
     # Check database
     try:
         with get_session() as session:
@@ -90,7 +104,7 @@ async def health_check():
     except Exception as e:
         health["checks"]["database"] = f"error: {str(e)}"
         health["status"] = "degraded"
-    
+
     # Check Redis
     try:
         r = redis.from_url(settings.REDIS_URL)
@@ -99,7 +113,7 @@ async def health_check():
     except Exception as e:
         health["checks"]["redis"] = f"error: {str(e)}"
         health["status"] = "degraded"
-    
+
     # Check storage
     try:
         storage = get_storage()
@@ -107,8 +121,9 @@ async def health_check():
         health["checks"]["storage"] = "ok"
     except Exception as e:
         health["checks"]["storage"] = f"warning: {str(e)}"
-    
+
     return health
+
 
 # Existing endpoints
 @app.post("/upload")
@@ -123,14 +138,17 @@ async def upload_zip(file: UploadFile = File(...), target_duration: int = Form(6
             highlight_path,
             filename="highlight.mp4",
             media_type="video/mp4",
-            background=BackgroundTask(shutil.rmtree, workdir, True)
+            background=BackgroundTask(shutil.rmtree, workdir, True),
         )
     except Exception as e:
         shutil.rmtree(workdir, ignore_errors=True)
         return JSONResponse({"error": str(e)}, status_code=500)
 
+
 @app.post("/upload-clips")
-async def upload_clips(files: List[UploadFile] = File(...), target_duration: int = Form(60)):
+async def upload_clips(
+    files: List[UploadFile] = File(...), target_duration: int = Form(60)
+):
     workdir = tempfile.mkdtemp()
     try:
         saved_paths: List[str] = []
@@ -146,15 +164,18 @@ async def upload_clips(files: List[UploadFile] = File(...), target_duration: int
             highlight_path,
             filename="highlight.mp4",
             media_type="video/mp4",
-            background=BackgroundTask(shutil.rmtree, workdir, True)
+            background=BackgroundTask(shutil.rmtree, workdir, True),
         )
     except Exception as e:
         shutil.rmtree(workdir, ignore_errors=True)
         return JSONResponse({"error": str(e)}, status_code=500)
 
+
 # Job endpoints
 @app.post("/jobs")
-async def create_job(files: List[UploadFile] = File(...), target_duration: int = Form(60)):
+async def create_job(
+    files: List[UploadFile] = File(...), target_duration: int = Form(60)
+):
     jid = new_job_id()
     uploads_dir = job_upload_dir(jid)
 
@@ -170,7 +191,13 @@ async def create_job(files: List[UploadFile] = File(...), target_duration: int =
 
     render_job.delay(jid, target_duration)
 
-    return {"job_id": jid, "status": JobStatus.PENDING, "stage": job.stage, "progress": job.progress}
+    return {
+        "job_id": jid,
+        "status": JobStatus.PENDING,
+        "stage": job.stage,
+        "progress": job.progress,
+    }
+
 
 @app.get("/jobs/{job_id}/status")
 def job_status(job_id: str):
@@ -189,6 +216,7 @@ def job_status(job_id: str):
             "updated_at": job.updated_at.isoformat() if job.updated_at else None,
         }
 
+
 @app.get("/jobs/{job_id}/download")
 def job_download(job_id: str, format: str = "landscape"):
     export_dir = job_export_dir(job_id)
@@ -198,17 +226,23 @@ def job_download(job_id: str, format: str = "landscape"):
         return JSONResponse({"error": "file not ready"}, status_code=404)
     return FileResponse(path, filename="highlight.mp4", media_type="video/mp4")
 
+
 @app.get("/analytics/summary")
 def analytics_summary():
     with get_session() as session:
         total = session.exec(select(func.count()).select_from(Job)).one()
-        success = session.exec(select(func.count()).select_from(Job).where(Job.status == JobStatus.SUCCESS)).one()
-        failed = session.exec(select(func.count()).select_from(Job).where(Job.status == JobStatus.FAILED)).one()
+        success = session.exec(
+            select(func.count()).select_from(Job).where(Job.status == JobStatus.SUCCESS)
+        ).one()
+        failed = session.exec(
+            select(func.count()).select_from(Job).where(Job.status == JobStatus.FAILED)
+        ).one()
         return {
             "total_jobs": total,
             "success_jobs": success,
             "failed_jobs": failed,
         }
+
 
 app.include_router(v2_router)
 app.include_router(accounts_v2_router)

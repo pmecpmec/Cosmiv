@@ -11,7 +11,7 @@ import hmac
 import hashlib
 from typing import Optional
 
-router = APIRouter(prefix="/v2/billing")
+router = APIRouter(prefix="/api/v2/billing")
 
 # Initialize Stripe (only if key is provided)
 if settings.STRIPE_SECRET_KEY:
@@ -38,10 +38,17 @@ PLANS = [
         "id": "creator",
         "name": "Creator+",
         "price": 19,
-        "features": ["Unlimited duration", "No watermark", "All styles", "Top priority", "Weekly montage inclusion"],
+        "features": [
+            "Unlimited duration",
+            "No watermark",
+            "All styles",
+            "Top priority",
+            "Weekly montage inclusion",
+        ],
         "stripe_price_id": settings.STRIPE_PRICE_ID_CREATOR,
     },
 ]
+
 
 @router.get("/plans")
 def plans():
@@ -57,6 +64,7 @@ def get_plan(plan_id: str):
         raise HTTPException(status_code=404, detail="Plan not found")
     return plan
 
+
 @router.post("/checkout")
 async def create_checkout(
     plan: str = Form(...),
@@ -67,22 +75,26 @@ async def create_checkout(
     Returns checkout URL for frontend to redirect.
     """
     if plan == "free":
-        raise HTTPException(status_code=400, detail="Free plan doesn't require checkout")
-    
+        raise HTTPException(
+            status_code=400, detail="Free plan doesn't require checkout"
+        )
+
     plan_data = next((p for p in PLANS if p["id"] == plan), None)
     if not plan_data:
         raise HTTPException(status_code=404, detail="Plan not found")
-    
+
     if not plan_data["stripe_price_id"]:
-        raise HTTPException(status_code=400, detail="Plan not configured with Stripe price ID")
-    
+        raise HTTPException(
+            status_code=400, detail="Plan not configured with Stripe price ID"
+        )
+
     if not stripe:
         # Mock mode - return mock URL
         return {
             "checkout_url": f"https://checkout.stripe.com/mock/{plan}/{current_user.user_id}",
-            "mode": "mock"
+            "mode": "mock",
         }
-    
+
     try:
         # Create Stripe checkout session
         checkout_session = stripe.checkout.Session.create(
@@ -106,16 +118,18 @@ async def create_checkout(
                     "user_id": current_user.user_id,
                     "plan": plan,
                 }
-            }
+            },
         )
-        
+
         return {
             "checkout_url": checkout_session.url,
             "session_id": checkout_session.id,
-            "mode": "stripe"
+            "mode": "stripe",
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to create checkout: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to create checkout: {str(e)}"
+        )
 
 
 @router.post("/checkout/success")
@@ -137,7 +151,7 @@ async def checkout_success(
                 ent = Entitlement(
                     user_id=current_user.user_id,
                     plan="pro",
-                    expires_at=datetime.utcnow() + timedelta(days=30)
+                    expires_at=datetime.utcnow() + timedelta(days=30),
                 )
             else:
                 ent.plan = "pro"
@@ -145,26 +159,26 @@ async def checkout_success(
             session.add(ent)
             session.commit()
         return {"success": True, "message": "Subscription activated (mock mode)"}
-    
+
     try:
         # Retrieve session from Stripe
         session_obj = stripe.checkout.Session.retrieve(session_id)
-        
+
         if session_obj.payment_status != "paid":
             raise HTTPException(status_code=400, detail="Payment not completed")
-        
+
         # Get plan from metadata
         plan = session_obj.metadata.get("plan", "pro")
-        
+
         # Update entitlement
         with get_session() as session:
             ent = session.exec(
                 select(Entitlement).where(Entitlement.user_id == current_user.user_id)
             ).first()
-            
+
             # Calculate expiration (1 month from now for subscriptions)
             expires_at = datetime.utcnow() + timedelta(days=30)
-            
+
             if not ent:
                 ent = Entitlement(
                     user_id=current_user.user_id,
@@ -174,13 +188,16 @@ async def checkout_success(
             else:
                 ent.plan = plan
                 ent.expires_at = expires_at
-            
+
             session.add(ent)
             session.commit()
-        
+
         return {"success": True, "message": "Subscription activated"}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to process checkout: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to process checkout: {str(e)}"
+        )
+
 
 @router.post("/webhook")
 async def stripe_webhook(
@@ -192,11 +209,11 @@ async def stripe_webhook(
     Processes subscription updates, cancellations, and payment failures.
     """
     payload = await request.body()
-    
+
     if not stripe or not settings.STRIPE_WEBHOOK_SECRET:
         # Mock mode
         return JSONResponse({"ok": True, "mode": "mock"})
-    
+
     try:
         # Verify webhook signature
         if stripe_signature:
@@ -206,18 +223,19 @@ async def stripe_webhook(
         else:
             # In development, can skip signature verification
             import json
+
             event = json.loads(payload)
-        
+
         # Handle event
         event_type = event.get("type", "")
         event_data = event.get("data", {}).get("object", {})
-        
+
         if event_type == "checkout.session.completed":
             # Checkout completed
             metadata = event_data.get("metadata", {})
             user_id = metadata.get("user_id")
             plan = metadata.get("plan", "pro")
-            
+
             if user_id:
                 with get_session() as session:
                     ent = session.exec(
@@ -234,20 +252,22 @@ async def stripe_webhook(
                         ent.expires_at = datetime.utcnow() + timedelta(days=30)
                     session.add(ent)
                     session.commit()
-        
+
         elif event_type == "customer.subscription.updated":
             # Subscription updated (plan change, renewal)
             subscription_id = event_data.get("id")
             customer_id = event_data.get("customer")
             metadata = event_data.get("metadata", {})
             user_id = metadata.get("user_id")
-            
+
             # Get plan from subscription items
             items = event_data.get("items", {}).get("data", [])
             plan = metadata.get("plan", "pro")  # Default from metadata
-            
+
             if user_id:
-                expires_at = datetime.fromtimestamp(event_data.get("current_period_end", 0))
+                expires_at = datetime.fromtimestamp(
+                    event_data.get("current_period_end", 0)
+                )
                 with get_session() as session:
                     ent = session.exec(
                         select(Entitlement).where(Entitlement.user_id == user_id)
@@ -257,12 +277,12 @@ async def stripe_webhook(
                         ent.expires_at = expires_at
                         session.add(ent)
                         session.commit()
-        
+
         elif event_type == "customer.subscription.deleted":
             # Subscription cancelled - downgrade to free
             metadata = event_data.get("metadata", {})
             user_id = metadata.get("user_id")
-            
+
             if user_id:
                 with get_session() as session:
                     ent = session.exec(
@@ -273,37 +293,48 @@ async def stripe_webhook(
                         ent.expires_at = None
                         session.add(ent)
                         session.commit()
-        
+
         elif event_type == "invoice.payment_failed":
             # Payment failed - could downgrade or send notification
             subscription_id = event_data.get("subscription")
             # Handle payment failure (e.g., send email, mark for downgrade)
             pass
-        
+
         return JSONResponse({"ok": True, "event": event_type})
-    
+
     except ValueError as e:
         # Invalid payload
         raise HTTPException(status_code=400, detail=f"Invalid payload: {str(e)}")
     except Exception as e:
         error_type = type(e).__name__
-        if "SignatureVerificationError" in error_type or "SignatureVerificationError" in str(type(e)):
+        if (
+            "SignatureVerificationError" in error_type
+            or "SignatureVerificationError" in str(type(e))
+        ):
             raise HTTPException(status_code=400, detail=f"Invalid signature: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Webhook error: {str(e)}")
+
 
 @router.post("/entitlements")
 def set_entitlement(user_id: str = Form(...), plan: str = Form("pro")):
     # Admin/test endpoint to set entitlement
     with get_session() as session:
-        ent = session.exec(select(Entitlement).where(Entitlement.user_id == user_id)).first()
+        ent = session.exec(
+            select(Entitlement).where(Entitlement.user_id == user_id)
+        ).first()
         if not ent:
-            ent = Entitlement(user_id=user_id, plan=plan, expires_at=datetime.utcnow() + timedelta(days=30))
+            ent = Entitlement(
+                user_id=user_id,
+                plan=plan,
+                expires_at=datetime.utcnow() + timedelta(days=30),
+            )
         else:
             ent.plan = plan
             ent.expires_at = datetime.utcnow() + timedelta(days=30)
         session.add(ent)
         session.commit()
     return {"user_id": user_id, "plan": plan}
+
 
 @router.get("/entitlements")
 def get_entitlement(
@@ -314,7 +345,7 @@ def get_entitlement(
         ent = session.exec(
             select(Entitlement).where(Entitlement.user_id == current_user.user_id)
         ).first()
-        
+
         if not ent:
             return {
                 "user_id": current_user.user_id,
@@ -322,7 +353,7 @@ def get_entitlement(
                 "expires_at": None,
                 "is_active": True,
             }
-        
+
         # Check if expired
         is_active = True
         if ent.expires_at and ent.expires_at < datetime.utcnow():
@@ -332,7 +363,7 @@ def get_entitlement(
                 ent.plan = "free"
                 session.add(ent)
                 session.commit()
-        
+
         return {
             "user_id": current_user.user_id,
             "plan": ent.plan,

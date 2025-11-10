@@ -27,12 +27,18 @@ def _parse_metadata(raw_metadata: Optional[str]) -> Optional[Dict[str, Any]]:
     try:
         parsed = json.loads(raw_metadata)
     except json.JSONDecodeError as exc:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="metadata must be valid JSON") from exc
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="metadata must be valid JSON",
+        ) from exc
 
     if parsed is None:
         return None
     if not isinstance(parsed, dict):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="metadata must be a JSON object")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="metadata must be a JSON object",
+        )
     return parsed
 
 
@@ -42,14 +48,19 @@ async def upload_manual_clip(
     metadata: Optional[str] = Form(None),
 ):
     if not file.filename:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="file must include a filename")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="file must include a filename",
+        )
 
     validate_video_file(file.filename, file.content_type)
 
     try:
         safe_name = sanitize_filename(file.filename)
     except ValueError as exc:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)
+        ) from exc
 
     original_name = file.filename
     content_type = file.content_type
@@ -84,7 +95,10 @@ async def upload_manual_clip(
                     buffer.write(chunk)
 
             if bytes_written == 0:
-                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="uploaded file is empty")
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="uploaded file is empty",
+                )
 
             if settings.USE_OBJECT_STORAGE:
                 try:
@@ -98,8 +112,13 @@ async def upload_manual_clip(
                 except HTTPException:
                     raise
                 except Exception as exc:
-                    logger.exception("failed to upload manual clip to object storage", exc_info=exc)
-                    raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="failed to persist uploaded clip") from exc
+                    logger.exception(
+                        "failed to upload manual clip to object storage", exc_info=exc
+                    )
+                    raise HTTPException(
+                        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                        detail="failed to persist uploaded clip",
+                    ) from exc
             else:
                 try:
                     storage_path = storage.save(temp_path, dest_rel_path)  # type: ignore[attr-defined]
@@ -111,13 +130,21 @@ async def upload_manual_clip(
                 except HTTPException:
                     raise
                 except Exception as exc:
-                    logger.exception("failed to save manual clip to local storage", exc_info=exc)
-                    raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="failed to persist uploaded clip") from exc
+                    logger.exception(
+                        "failed to save manual clip to local storage", exc_info=exc
+                    )
+                    raise HTTPException(
+                        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                        detail="failed to persist uploaded clip",
+                    ) from exc
     finally:
         await file.close()
 
     if not storage_path:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="unable to determine storage path")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="unable to determine storage path",
+        )
 
     with get_session() as session:
         record = UploadedClip(

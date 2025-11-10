@@ -1,7 +1,6 @@
 import { useState, lazy, Suspense } from 'react'
 import ScrollReveal from './ScrollReveal'
 import { motion } from 'framer-motion'
-import CosmicBackground from './CosmicBackground'
 import Planet3DBackground from './Planet3DBackground'
 import useEasterEggs from '../hooks/useEasterEggs'
 import { InlineLoader } from './ui/LoadingOverlay'
@@ -10,6 +9,7 @@ import AnimatedHeroText from './AnimatedHeroText'
 import FloatingElements from './FloatingElements'
 import StatsCounter from './StatsCounter'
 import InteractiveDemo from './InteractiveDemo'
+import ParallaxSection from './ParallaxSection'
 
 // Lazy load the game (it's a hidden feature)
 const CosmicGame = lazy(() => import('./game/CosmicGame'))
@@ -235,7 +235,7 @@ export default function LandingPage({ onGetStarted }) {
                   initial={{ opacity: 0, y: 50, rotateX: -15 }}
                   whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
                   viewport={{ once: true, margin: "-100px" }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                  transition={{ duration: 0.6, delay: index * 0.1, type: "spring", stiffness: 300, damping: 20 }}
                   whileHover={{ 
                     y: -12, 
                     scale: 1.05,
@@ -244,7 +244,6 @@ export default function LandingPage({ onGetStarted }) {
                     z: 20,
                     boxShadow: "0 30px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(139, 92, 246, 0.4), 0 0 60px rgba(0, 255, 255, 0.3), inset 0 0 30px rgba(0, 255, 255, 0.2)"
                   }}
-                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
                 >
                   {/* Card glow on hover */}
                   <motion.div
@@ -268,7 +267,6 @@ export default function LandingPage({ onGetStarted }) {
                       rotate: [0, 10, -10, 0],
                       filter: 'brightness(1.5)',
                     }}
-                    transition={{ type: "spring", stiffness: 400 }}
                     animate={{
                       y: [0, -5, 0],
                     }}
@@ -366,7 +364,7 @@ export default function LandingPage({ onGetStarted }) {
                   initial={{ opacity: 0, y: 60, rotateY: -20 }}
                   whileInView={{ opacity: 1, y: 0, rotateY: 0 }}
                   viewport={{ once: true, margin: "-50px" }}
-                  transition={{ duration: 0.6, delay: index * 0.15 }}
+                  transition={{ duration: 0.6, delay: index * 0.15, type: "spring", stiffness: 250, damping: 20 }}
                   whileHover={{ 
                     y: -12, 
                     scale: 1.06,
@@ -375,7 +373,6 @@ export default function LandingPage({ onGetStarted }) {
                     z: 30,
                     boxShadow: "0 30px 60px rgba(0, 0, 0, 0.5), 0 0 50px rgba(139, 92, 246, 0.5), 0 0 70px rgba(0, 255, 255, 0.4), inset 0 0 40px rgba(0, 255, 255, 0.2)"
                   }}
-                  transition={{ type: "spring", stiffness: 250, damping: 20 }}
                 >
                   {/* Enhanced shimmer effect */}
                   <motion.div
@@ -417,7 +414,6 @@ export default function LandingPage({ onGetStarted }) {
                       rotate: [0, 15, -15, 0],
                       filter: 'brightness(1.8) drop-shadow(0 0 20px rgba(0, 255, 255, 0.8))',
                     }}
-                    transition={{ type: "spring", stiffness: 400 }}
                     animate={{
                       y: [0, -8, 0],
                       rotate: [0, 5, -5, 0],
@@ -593,6 +589,7 @@ export default function LandingPage({ onGetStarted }) {
           </ScrollReveal>
         </div>
       </section>
+      </ParallaxSection>
 
       {/* Hidden Constellation Pattern - Click stars in order */}
       <div className="fixed top-20 right-8 z-20 opacity-30 hover:opacity-60 transition-opacity cursor-pointer">

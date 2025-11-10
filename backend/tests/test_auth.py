@@ -5,6 +5,7 @@ Tests for JWT token generation, login, register, and token validation
 import pytest
 from fastapi.testclient import TestClient
 from sqlmodel import Session, select
+# Import db here so it can be patched by conftest
 from db import get_session
 from models import User
 from auth import (
@@ -19,9 +20,10 @@ import os
 
 
 @pytest.fixture
-def client():
+def client(in_memory_db):
     """Create test FastAPI client"""
     # Import here to avoid circular imports
+    # in_memory_db fixture ensures database is set up first
     from main import app
     return TestClient(app)
 
@@ -90,8 +92,17 @@ class TestPasswordHashing:
 class TestUserRegistration:
     """Test user registration endpoint"""
     
-    def test_register_success(self, client):
+    def test_register_success(self, client, in_memory_db):
         """Test successful user registration"""
+        # Verify database is set up before making the request
+        from db import get_session
+        from sqlalchemy import inspect
+        test_session = get_session()
+        inspector = inspect(test_session.bind)
+        tables = inspector.get_table_names()
+        assert "user" in tables, f"User table not found! Tables: {tables}"
+        test_session.close()
+        
         response = client.post(
             "/auth/register",
             json={"email": "newuser@example.com", "password": "SecurePass123!"}

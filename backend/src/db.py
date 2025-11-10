@@ -7,32 +7,70 @@ if settings.USE_POSTGRES:
     engine = create_engine(settings.POSTGRES_DSN, pool_pre_ping=True)
 else:
     os.makedirs(os.path.dirname(settings.DB_PATH), exist_ok=True)
-    engine = create_engine(f"sqlite:///{settings.DB_PATH}", connect_args={"check_same_thread": False})
+    engine = create_engine(
+        f"sqlite:///{settings.DB_PATH}", connect_args={"check_same_thread": False}
+    )
 
 
 def init_db():
     """Initialize database with all models"""
     # Import all models to register them with SQLModel
     from models import (
-        Job, Clip, Render, User, AuthProvider, UserAuth, DiscoveredClip,
-        Entitlement, WeeklyMontage, SocialConnection, SocialPost,
-        JobEngagement, SocialPostEngagement, StylePerformance, UserAnalytics
+        Job,
+        Clip,
+        Render,
+        User,
+        AuthProvider,
+        UserAuth,
+        DiscoveredClip,
+        Entitlement,
+        WeeklyMontage,
+        SocialConnection,
+        SocialPost,
+        JobEngagement,
+        SocialPostEngagement,
+        StylePerformance,
+        UserAnalytics,
     )
     from models_community import (
-        Server, Channel, ServerMember, Message, DirectMessage,
-        ServerInvite, Post, Follow, LinkedProfile,
-        PostLike, FeedAlgorithm, FeedCache
+        Server,
+        Channel,
+        ServerMember,
+        Message,
+        DirectMessage,
+        ServerInvite,
+        Post,
+        Follow,
+        LinkedProfile,
+        PostLike,
+        FeedAlgorithm,
+        FeedCache,
     )
     from models_ai import (
-        ContentVersion, CodeGeneration, UXAnalysis, AITask, VideoEnhancement
+        ContentVersion,
+        CodeGeneration,
+        UXAnalysis,
+        AITask,
+        VideoEnhancement,
     )
-    
+
     SQLModel.metadata.create_all(engine)
     _apply_migrations()
 
 
 def get_session() -> Session:
-    return Session(engine)
+    """
+    Get a database session.
+    Always uses the current engine value at runtime.
+    This allows tests to patch db.engine and have it work correctly.
+    """
+    # Access engine via sys.modules to ensure we always get the current value
+    # This is critical for test compatibility - tests can patch db.engine
+    # and this function will use the patched engine
+    import sys
+
+    db_module = sys.modules[__name__]
+    return Session(db_module.engine)
 
 
 def _apply_migrations() -> None:

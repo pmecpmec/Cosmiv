@@ -2,19 +2,29 @@
 Enhanced Analytics API endpoints
 Engagement tracking, performance metrics, AI learning insights
 """
+
 from fastapi import APIRouter, Depends, Query
 from typing import Optional, List
 from datetime import datetime, timedelta
 from sqlmodel import select, func
 from db import get_session
 from models import (
-    Job, JobEngagement, SocialPostEngagement, SocialPost,
-    StylePerformance, UserAnalytics, JobStatus, User
+    Job,
+    JobEngagement,
+    SocialPostEngagement,
+    SocialPost,
+    StylePerformance,
+    UserAnalytics,
+    JobStatus,
+    User,
 )
 from auth import get_current_user
 from services.analytics import (
-    track_job_view, update_social_engagement, get_top_styles,
-    get_time_series_metrics, update_user_analytics
+    track_job_view,
+    update_social_engagement,
+    get_top_styles,
+    get_time_series_metrics,
+    update_user_analytics,
 )
 
 router = APIRouter(prefix="/v2/analytics", tags=["analytics"])
@@ -65,7 +75,7 @@ async def update_social_metrics(
         metrics["watch_time_minutes"] = watch_time_minutes
     if subscribers_gained is not None:
         metrics["subscribers_gained"] = subscribers_gained
-    
+
     update_social_engagement(post_id, platform, metrics)
     return {"success": True, "message": "Metrics updated"}
 
@@ -81,14 +91,18 @@ async def get_job_engagement(
         job = session.exec(select(Job).where(Job.job_id == job_id)).first()
         if not job:
             return {"error": "Job not found"}
-        
-        if job.user_id and job.user_id != current_user.user_id and not current_user.is_admin:
+
+        if (
+            job.user_id
+            and job.user_id != current_user.user_id
+            and not current_user.is_admin
+        ):
             return {"error": "Unauthorized"}
-        
+
         engagement = session.exec(
             select(JobEngagement).where(JobEngagement.job_id == job_id)
         ).first()
-        
+
         if not engagement:
             return {
                 "job_id": job_id,
@@ -97,27 +111,31 @@ async def get_job_engagement(
                 "shares": 0,
                 "comments": 0,
             }
-        
+
         # Get social posts for this job
         posts = session.exec(
             select(SocialPost).where(SocialPost.job_id == job_id)
         ).all()
-        
+
         post_engagements = []
         for post in posts:
             post_eng = session.exec(
-                select(SocialPostEngagement).where(SocialPostEngagement.post_id == post.id)
+                select(SocialPostEngagement).where(
+                    SocialPostEngagement.post_id == post.id
+                )
             ).first()
             if post_eng:
-                post_engagements.append({
-                    "platform": post.platform,
-                    "views": post_eng.views,
-                    "likes": post_eng.likes,
-                    "shares": post_eng.shares,
-                    "comments": post_eng.comments,
-                    "engagement_rate": post_eng.engagement_rate,
-                })
-        
+                post_engagements.append(
+                    {
+                        "platform": post.platform,
+                        "views": post_eng.views,
+                        "likes": post_eng.likes,
+                        "shares": post_eng.shares,
+                        "comments": post_eng.comments,
+                        "engagement_rate": post_eng.engagement_rate,
+                    }
+                )
+
         return {
             "job_id": job_id,
             "views": engagement.views,
@@ -128,8 +146,16 @@ async def get_job_engagement(
             "avg_watch_time": engagement.avg_watch_time_seconds,
             "completion_rate": engagement.completion_rate,
             "style_id": engagement.style_id,
-            "first_viewed_at": engagement.first_viewed_at.isoformat() if engagement.first_viewed_at else None,
-            "last_viewed_at": engagement.last_viewed_at.isoformat() if engagement.last_viewed_at else None,
+            "first_viewed_at": (
+                engagement.first_viewed_at.isoformat()
+                if engagement.first_viewed_at
+                else None
+            ),
+            "last_viewed_at": (
+                engagement.last_viewed_at.isoformat()
+                if engagement.last_viewed_at
+                else None
+            ),
             "social_posts": post_engagements,
         }
 
@@ -143,14 +169,16 @@ async def get_user_stats(
         user_analytics = session.exec(
             select(UserAnalytics).where(UserAnalytics.user_id == current_user.user_id)
         ).first()
-        
+
         if not user_analytics:
             # Create if doesn't exist
             update_user_analytics(current_user.user_id)
             user_analytics = session.exec(
-                select(UserAnalytics).where(UserAnalytics.user_id == current_user.user_id)
+                select(UserAnalytics).where(
+                    UserAnalytics.user_id == current_user.user_id
+                )
             ).first()
-        
+
         return {
             "user_id": current_user.user_id,
             "jobs": {
@@ -173,7 +201,11 @@ async def get_user_stats(
             "insights": {
                 "best_performing_style": user_analytics.best_performing_style,
             },
-            "last_activity": user_analytics.last_activity_at.isoformat() if user_analytics.last_activity_at else None,
+            "last_activity": (
+                user_analytics.last_activity_at.isoformat()
+                if user_analytics.last_activity_at
+                else None
+            ),
         }
 
 
@@ -199,17 +231,21 @@ async def get_style_performance(
         style = session.exec(
             select(StylePerformance).where(StylePerformance.style_id == style_id)
         ).first()
-        
+
         if not style:
             return {"error": "Style not found"}
-        
+
         return {
             "style_id": style.style_id,
             "style_name": style.style_name,
             "usage": {
                 "total_jobs": style.total_jobs,
                 "successful_jobs": style.successful_jobs,
-                "success_rate": (style.successful_jobs / style.total_jobs * 100) if style.total_jobs > 0 else 0,
+                "success_rate": (
+                    (style.successful_jobs / style.total_jobs * 100)
+                    if style.total_jobs > 0
+                    else 0
+                ),
             },
             "performance": {
                 "total_views": style.total_views,
@@ -250,7 +286,7 @@ async def get_style_recommendation(
         user_analytics = session.exec(
             select(UserAnalytics).where(UserAnalytics.user_id == current_user.user_id)
         ).first()
-        
+
         if not user_analytics or not user_analytics.best_performing_style:
             # Fallback to top overall style
             top_styles = get_top_styles(1)
@@ -261,14 +297,14 @@ async def get_style_recommendation(
                     "confidence": 0.7,
                 }
             return {"recommended_style": None, "reason": "No data available"}
-        
+
         # Get user's best performing style details
         style = session.exec(
             select(StylePerformance).where(
                 StylePerformance.style_id == user_analytics.best_performing_style
             )
         ).first()
-        
+
         if style:
             return {
                 "recommended_style": style.style_id,
@@ -276,10 +312,9 @@ async def get_style_recommendation(
                 "confidence": 0.9,
                 "performance_score": style.performance_score,
             }
-        
+
         return {
             "recommended_style": user_analytics.best_performing_style,
             "reason": "Based on your historical performance",
             "confidence": 0.8,
         }
-

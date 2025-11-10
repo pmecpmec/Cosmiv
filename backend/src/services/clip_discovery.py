@@ -12,14 +12,16 @@ def list_providers() -> List[Dict[str, str]]:
     return providers_list
 
 
-def fetch_recent_clips(provider: str, user_id: str, access_token: str) -> List[Dict[str, str]]:
+def fetch_recent_clips(
+    provider: str, user_id: str, access_token: str
+) -> List[Dict[str, str]]:
     """
     Fetch recent clips from gaming platform.
     Mock mode by default, real API when enabled.
     """
     if provider not in MOCK_PROVIDERS:
         return []
-    
+
     # Check if real API is enabled for this provider
     if provider == "steam" and not settings.STEAM_API_ENABLED:
         return mock_fetch_recent_clips(provider, user_id)
@@ -29,7 +31,7 @@ def fetch_recent_clips(provider: str, user_id: str, access_token: str) -> List[D
         return mock_fetch_recent_clips(provider, user_id)
     elif provider == "switch" and not settings.NINTENDO_API_ENABLED:
         return mock_fetch_recent_clips(provider, user_id)
-    
+
     # Real API implementation would go here
     # For now, return mock even if enabled (would need actual API implementation)
     return mock_fetch_recent_clips(provider, user_id)

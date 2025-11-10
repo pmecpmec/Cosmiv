@@ -6,14 +6,18 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlmodel import select
 
-from main import app
+# Import main inside fixtures to ensure database is patched first
 from db import get_session
 from models import UploadedClip
 from services.storage_adapters import LocalStorage
 
 
 @pytest.fixture
-def client():
+def client(in_memory_db):
+    """Create test FastAPI client with database setup"""
+    # Import here to ensure database is patched first
+    from main import app
+    # in_memory_db fixture ensures database is set up first
     with TestClient(app) as c:
         yield c
 

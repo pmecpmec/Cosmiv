@@ -1,6 +1,7 @@
 """
 Enhanced accounts API with OAuth flow support
 """
+
 from fastapi import APIRouter, Form, Depends, HTTPException, Query
 from fastapi.responses import RedirectResponse, JSONResponse
 from typing import Optional
@@ -15,7 +16,7 @@ import secrets
 from datetime import datetime
 from config import settings
 
-router = APIRouter(prefix="/v2/accounts", tags=["accounts"])
+router = APIRouter(prefix="/api/v2/accounts", tags=["accounts"])
 
 
 # Store OAuth state temporarily (in production, use Redis)
@@ -26,25 +27,39 @@ oauth_states = {}
 def providers():
     """List available gaming platforms"""
     providers_list = list_providers()
-    
+
     # Add platform metadata
     platform_info = {
         "steam": {"icon": "🎮", "color": "bg-blue-600", "description": "Steam Library"},
-        "xbox": {"icon": "🟢", "color": "bg-green-600", "description": "Xbox Game Clips"},
-        "playstation": {"icon": "🔵", "color": "bg-blue-800", "description": "PlayStation Share"},
-        "switch": {"icon": "🔴", "color": "bg-red-600", "description": "Nintendo Switch"},
+        "xbox": {
+            "icon": "🟢",
+            "color": "bg-green-600",
+            "description": "Xbox Game Clips",
+        },
+        "playstation": {
+            "icon": "🔵",
+            "color": "bg-blue-800",
+            "description": "PlayStation Share",
+        },
+        "switch": {
+            "icon": "🔴",
+            "color": "bg-red-600",
+            "description": "Nintendo Switch",
+        },
     }
-    
+
     enhanced = []
     for p in providers_list:
         info = platform_info.get(p["id"], {})
-        enhanced.append({
-            **p,
-            "icon": info.get("icon", "🎮"),
-            "color": info.get("color", "bg-gray-600"),
-            "description": info.get("description", f"Link {p['name']} account"),
-        })
-    
+        enhanced.append(
+            {
+                **p,
+                "icon": info.get("icon", "🎮"),
+                "color": info.get("color", "bg-gray-600"),
+                "description": info.get("description", f"Link {p['name']} account"),
+            }
+        )
+
     return {"providers": enhanced}
 
 
@@ -60,7 +75,7 @@ async def start_oauth(
     handler = get_oauth_handler(provider)
     if not handler:
         raise HTTPException(status_code=404, detail="Platform not supported")
-    
+
     # Generate state for CSRF protection
     state = secrets.token_urlsafe(32)
     oauth_states[state] = {
@@ -68,13 +83,13 @@ async def start_oauth(
         "provider": provider,
         "created_at": datetime.utcnow(),
     }
-    
+
     # Get redirect URI
     redirect_uri = f"{settings.BASE_URL}/api/v2/accounts/oauth/{provider}/callback"
-    
+
     # Get authorization URL
     auth_url = handler.get_authorize_url(redirect_uri, state)
-    
+
     return RedirectResponse(url=auth_url)
 
 
@@ -91,25 +106,21 @@ async def oauth_callback(
     """
     if error:
         # OAuth error
-        return RedirectResponse(
-            url=f"{settings.BASE_URL}/accounts?error={error}"
-        )
-    
+        return RedirectResponse(url=f"{settings.BASE_URL}/accounts?error={error}")
+
     # Verify state
     if not state or state not in oauth_states:
-        return RedirectResponse(
-            url=f"{settings.BASE_URL}/accounts?error=invalid_state"
-        )
-    
+        return RedirectResponse(url=f"{settings.BASE_URL}/accounts?error=invalid_state")
+
     state_data = oauth_states.pop(state)
     user_id = state_data["user_id"]
-    
+
     handler = get_oauth_handler(provider)
     if not handler:
         return RedirectResponse(
             url=f"{settings.BASE_URL}/accounts?error=invalid_platform"
         )
-    
+
     try:
         # Exchange code for tokens (or use mock data)
         if mock == "true" or not code:
@@ -123,23 +134,24 @@ async def oauth_callback(
             }
         else:
             # Real OAuth exchange
-            redirect_uri = f"{settings.BASE_URL}/api/v2/accounts/oauth/{provider}/callback"
+            redirect_uri = (
+                f"{settings.BASE_URL}/api/v2/accounts/oauth/{provider}/callback"
+            )
             platform_data = await handler.exchange_code(code, redirect_uri)
-        
+
         # Save connection to database
         with get_session() as session:
             # Check if connection exists
             existing = session.exec(
                 select(UserAuth).where(
-                    UserAuth.user_id == user_id,
-                    UserAuth.provider == provider
+                    UserAuth.user_id == user_id, UserAuth.provider == provider
                 )
             ).first()
-            
+
             expires_at = None
             if platform_data.get("expires_at"):
                 expires_at = datetime.fromisoformat(platform_data["expires_at"])
-            
+
             if existing:
                 # Update existing
                 existing.access_token = platform_data["access_token"]
@@ -160,19 +172,15 @@ async def oauth_callback(
                     platform_username=platform_data["platform_username"],
                 )
                 session.add(connection)
-            
+
             session.commit()
-        
+
         # Trigger initial sync
         sync_user_clips.delay(user_id)
-        
-        return RedirectResponse(
-            url=f"{settings.BASE_URL}/accounts?success={provider}"
-        )
+
+        return RedirectResponse(url=f"{settings.BASE_URL}/accounts?success={provider}")
     except Exception as e:
-        return RedirectResponse(
-            url=f"{settings.BASE_URL}/accounts?error={str(e)}"
-        )
+        return RedirectResponse(url=f"{settings.BASE_URL}/accounts?error={str(e)}")
 
 
 @router.post("/link")
@@ -206,7 +214,7 @@ def list_links(
         links = session.exec(
             select(UserAuth).where(UserAuth.user_id == current_user.user_id)
         ).all()
-        
+
         return {
             "links": [
                 {
@@ -215,7 +223,8 @@ def list_links(
                     "platform_user_id": l.platform_user_id,
                     "created_at": l.created_at.isoformat(),
                     "expires_at": l.expires_at.isoformat() if l.expires_at else None,
-                    "is_active": l.expires_at is None or l.expires_at > datetime.utcnow(),
+                    "is_active": l.expires_at is None
+                    or l.expires_at > datetime.utcnow(),
                 }
                 for l in links
             ]
@@ -231,17 +240,16 @@ def unlink_account(
     with get_session() as session:
         link = session.exec(
             select(UserAuth).where(
-                UserAuth.user_id == current_user.user_id,
-                UserAuth.provider == provider
+                UserAuth.user_id == current_user.user_id, UserAuth.provider == provider
             )
         ).first()
-        
+
         if not link:
             raise HTTPException(status_code=404, detail="Account not linked")
-        
+
         session.delete(link)
         session.commit()
-        
+
         return {"unlinked": True, "provider": provider}
 
 
@@ -256,14 +264,14 @@ def list_discovered_clips(
         query = select(DiscoveredClip).where(
             DiscoveredClip.user_id == current_user.user_id
         )
-        
+
         if provider:
             query = query.where(DiscoveredClip.provider == provider)
-        
+
         clips = session.exec(
             query.order_by(DiscoveredClip.discovered_at.desc()).limit(limit)
         ).all()
-        
+
         return {
             "clips": [
                 {
@@ -291,15 +299,15 @@ def sync_now(
             link = session.exec(
                 select(UserAuth).where(
                     UserAuth.user_id == current_user.user_id,
-                    UserAuth.provider == provider
+                    UserAuth.provider == provider,
                 )
             ).first()
             if not link:
                 raise HTTPException(status_code=404, detail="Account not linked")
-        
+
         sync_user_clips.delay(current_user.user_id)
     else:
         # Sync all providers
         sync_user_clips.delay(current_user.user_id)
-    
+
     return {"scheduled": True, "message": "Sync started in background"}

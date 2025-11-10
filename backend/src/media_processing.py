@@ -10,15 +10,17 @@ from typing import List
 import re
 from dataclasses import dataclass
 
+
 def find_video_files(directory: str):
     """Find all video files in a directory."""
-    video_extensions = {'.mp4', '.mov', '.avi', '.mkv', '.webm', '.m4v'}
+    video_extensions = {".mp4", ".mov", ".avi", ".mkv", ".webm", ".m4v"}
     video_files = []
     for root, dirs, files in os.walk(directory):
         for file in files:
             if Path(file).suffix.lower() in video_extensions:
                 video_files.append(os.path.join(root, file))
     return sorted(video_files)
+
 
 @dataclass
 class SceneCandidate:
@@ -47,15 +49,22 @@ def detect_scenes_seconds(video_path: str):
     return results
 
 
-def measure_audio_mean_db(video_path: str, start_seconds: float, duration_seconds: float) -> float:
+def measure_audio_mean_db(
+    video_path: str, start_seconds: float, duration_seconds: float
+) -> float:
     """Use ffmpeg volumedetect to get mean_volume (dB) for a segment."""
     cmd = [
         "ffmpeg",
-        "-ss", str(max(0.0, start_seconds)),
-        "-t", str(max(0.1, duration_seconds)),
-        "-i", video_path,
-        "-af", "volumedetect",
-        "-f", "null",
+        "-ss",
+        str(max(0.0, start_seconds)),
+        "-t",
+        str(max(0.1, duration_seconds)),
+        "-i",
+        video_path,
+        "-af",
+        "volumedetect",
+        "-f",
+        "null",
         "-",
     ]
     proc = subprocess.run(cmd, capture_output=True, text=True)
@@ -70,12 +79,14 @@ def measure_audio_mean_db(video_path: str, start_seconds: float, duration_second
     return -30.0
 
 
-def build_top_scenes_across_files(video_files: List[str], target_duration: int) -> List[SceneCandidate]:
+def build_top_scenes_across_files(
+    video_files: List[str], target_duration: int
+) -> List[SceneCandidate]:
     candidates: List[SceneCandidate] = []
     # Collect scene candidates with audio-based scores
     for vp in video_files:
         scenes = detect_scenes_seconds(vp)
-        for (s, e) in scenes:
+        for s, e in scenes:
             dur = max(0.1, e - s)
             # For long scenes, sample up to first 15s for speed
             sample_dur = min(dur, 15.0)
@@ -102,7 +113,7 @@ def build_top_scenes_across_files(video_files: List[str], target_duration: int) 
 
 def write_ffconcat(workdir: str, selected: List[SceneCandidate]) -> str:
     concat_file = os.path.join(workdir, "concat_list.txt")
-    with open(concat_file, 'w') as f:
+    with open(concat_file, "w") as f:
         f.write("ffconcat version 1.0\n\n")
         for c in selected:
             escaped_path = c.video_path.replace("'", "'\\''")
@@ -119,7 +130,7 @@ def process_zip_highlight(zip_path: str, target_duration: int, workdir: str = No
     try:
         extract_dir = os.path.join(workdir, "extracted")
         os.makedirs(extract_dir, exist_ok=True)
-        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+        with zipfile.ZipFile(zip_path, "r") as zip_ref:
             zip_ref.extractall(extract_dir)
         video_files = find_video_files(extract_dir)
         if not video_files:
@@ -132,7 +143,9 @@ def process_zip_highlight(zip_path: str, target_duration: int, workdir: str = No
 
 
 # Replace clips flow to use multi-file + audio scoring
-def process_clips_highlight(video_files: List[str], target_duration: int, workdir: str) -> str:
+def process_clips_highlight(
+    video_files: List[str], target_duration: int, workdir: str
+) -> str:
     if not video_files:
         raise ValueError("No video files provided")
 
@@ -143,10 +156,14 @@ def process_clips_highlight(video_files: List[str], target_duration: int, workdi
 
     cmd = [
         "ffmpeg",
-        "-f", "concat",
-        "-safe", "0",
-        "-i", concat_file,
-        "-c", "copy",
+        "-f",
+        "concat",
+        "-safe",
+        "0",
+        "-i",
+        concat_file,
+        "-c",
+        "copy",
         "-y",
         output_path,
     ]
