@@ -1,6 +1,7 @@
 """
 API endpoints for AI UX/UI Analysis System
 """
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import Optional, List
 from pydantic import BaseModel
@@ -52,10 +53,10 @@ async def analyze_component(
         page_url=request.page_url,
         analysis_type=request.analysis_type,
     )
-    
+
     if not result.get("success"):
         raise HTTPException(status_code=500, detail=result.get("error", "Analysis failed"))
-    
+
     return result
 
 
@@ -69,10 +70,10 @@ async def analyze_behavior(
         user_id=request.user_id,
         time_range_days=request.time_range_days,
     )
-    
+
     if not result.get("success"):
         raise HTTPException(status_code=500, detail=result.get("error", "Analysis failed"))
-    
+
     return result
 
 
@@ -87,10 +88,10 @@ async def generate_improvements(
         issues=request.issues,
         context=request.context,
     )
-    
+
     if not result.get("success"):
         raise HTTPException(status_code=500, detail=result.get("error", "Generation failed"))
-    
+
     return result
 
 
@@ -103,10 +104,10 @@ async def analyze_accessibility(
     result = ux_analyzer_service.analyze_accessibility(
         component_code=request.component_code,
     )
-    
+
     if not result.get("success"):
         raise HTTPException(status_code=500, detail=result.get("error", "Analysis failed"))
-    
+
     return result
 
 
@@ -120,10 +121,10 @@ async def suggest_ab_tests(
         component_path=request.component_path,
         metrics=request.metrics,
     )
-    
+
     if not result.get("success"):
         raise HTTPException(status_code=500, detail=result.get("error", "Suggestion failed"))
-    
+
     return result
 
 
@@ -134,10 +135,10 @@ async def get_analysis(
 ):
     """Get a UX analysis record"""
     analysis = ux_analyzer_service.get_analysis(analysis_id)
-    
+
     if not analysis:
         raise HTTPException(status_code=404, detail="Analysis not found")
-    
+
     return {
         "analysis_id": analysis.analysis_id,
         "component_path": analysis.component_path,
@@ -145,7 +146,9 @@ async def get_analysis(
         "analysis_type": analysis.analysis_type,
         "metrics": json.loads(analysis.metrics) if analysis.metrics else {},
         "status": analysis.status,
-        "improvement_suggestions": json.loads(analysis.improvement_suggestions) if analysis.improvement_suggestions else None,
+        "improvement_suggestions": (
+            json.loads(analysis.improvement_suggestions) if analysis.improvement_suggestions else None
+        ),
         "analyzed_at": analysis.analyzed_at.isoformat() if analysis.analyzed_at else None,
         "improved_at": analysis.improved_at.isoformat() if analysis.improved_at else None,
     }
@@ -160,14 +163,14 @@ async def list_analyses(
     """List all UX analyses"""
     with get_session() as session:
         query = select(UXAnalysis)
-        
+
         if component_path:
             query = query.where(UXAnalysis.component_path == component_path)
         if status:
             query = query.where(UXAnalysis.status == status)
-        
+
         analyses = session.exec(query.order_by(UXAnalysis.analyzed_at.desc())).all()
-        
+
         return {
             "analyses": [
                 {
@@ -180,4 +183,3 @@ async def list_analyses(
                 for a in analyses
             ],
         }
-

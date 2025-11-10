@@ -1,6 +1,7 @@
 """
 API endpoints for AI Content Renewal System
 """
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import Optional, List
 from pydantic import BaseModel
@@ -43,10 +44,10 @@ async def generate_content(
         context=request.context,
         style=request.style,
     )
-    
+
     if not result.get("success"):
         raise HTTPException(status_code=500, detail=result.get("error", "Generation failed"))
-    
+
     return result
 
 
@@ -61,10 +62,10 @@ async def renew_content(
         content_type=request.content_type,
         force=request.force,
     )
-    
+
     if not result.get("success"):
         raise HTTPException(status_code=500, detail=result.get("error", "Renewal failed"))
-    
+
     return result
 
 
@@ -80,7 +81,7 @@ async def get_content_versions(
             .where(ContentVersion.content_id == content_id)
             .order_by(ContentVersion.version.desc())
         ).all()
-        
+
         return {
             "content_id": content_id,
             "versions": [
@@ -104,10 +105,10 @@ async def get_latest_content(
 ):
     """Get the latest published version of content"""
     latest = content_renewal_service.get_latest_version(content_id)
-    
+
     if not latest:
         raise HTTPException(status_code=404, detail="Content not found")
-    
+
     return {
         "content_id": latest.content_id,
         "content_type": latest.content_type,
@@ -128,10 +129,10 @@ async def publish_version(
         content_id=request.content_id,
         version=request.version,
     )
-    
+
     if not success:
         raise HTTPException(status_code=404, detail="Version not found or publish failed")
-    
+
     return {"success": True, "message": f"Version {request.version} published"}
 
 
@@ -141,9 +142,8 @@ async def schedule_renewals(
 ):
     """Manually trigger scheduled content renewals"""
     result = content_renewal_service.schedule_renewals()
-    
+
     if not result.get("success"):
         raise HTTPException(status_code=500, detail=result.get("error", "Scheduling failed"))
-    
-    return result
 
+    return result

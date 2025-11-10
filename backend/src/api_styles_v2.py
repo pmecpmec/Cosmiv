@@ -6,9 +6,11 @@ import os
 
 router = APIRouter(prefix="/v2/styles")
 
+
 @router.get("")
 def list_styles():
     return {"presets": list(STYLE_PRESETS.keys())}
+
 
 @router.post("/reference")
 async def upload_reference(name: str = Form("custom"), file: UploadFile = File(...)):

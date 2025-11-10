@@ -1,6 +1,7 @@
 """
 Authentication API endpoints: Register, Login, Refresh, Current User
 """
+
 from fastapi import APIRouter, HTTPException, status, Depends, Form
 from fastapi.security import HTTPBearer
 from pydantic import EmailStr
@@ -32,35 +33,25 @@ async def register(
 ):
     """
     Register a new user.
-    
+
     Username and email must be unique.
     Password must be at least 8 characters.
     """
     with get_session() as session:
         # Check if username exists
-        existing_user = session.exec(
-            select(User).where(User.username == username)
-        ).first()
+        existing_user = session.exec(select(User).where(User.username == username)).first()
         if existing_user:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Username already registered"
-            )
-        
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Username already registered")
+
         # Check if email exists
-        existing_email = session.exec(
-            select(User).where(User.email == email)
-        ).first()
+        existing_email = session.exec(select(User).where(User.email == email)).first()
         if existing_email:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Email already registered"
-            )
-        
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
+
         # Create new user
         user_id = str(uuid.uuid4())
         password_hash = get_password_hash(password)
-        
+
         # Set role based on username
         if username.lower() == "pmec":
             role = UserRole.OWNER
@@ -70,7 +61,7 @@ async def register(
             role = UserRole.USER
             is_admin = False
             storage_limit_mb = 5120.0  # 5 GB default (Free tier)
-        
+
         user = User(
             user_id=user_id,
             username=username,
@@ -81,15 +72,15 @@ async def register(
             is_active=True,
             storage_limit_mb=storage_limit_mb,
         )
-        
+
         session.add(user)
         session.commit()
         session.refresh(user)
-        
+
         # Generate tokens
         access_token = create_access_token(data={"sub": user.user_id, "username": user.username})
         refresh_token = create_refresh_token(data={"sub": user.user_id})
-        
+
         return {
             "access_token": access_token,
             "refresh_token": refresh_token,
@@ -100,7 +91,7 @@ async def register(
                 "email": user.email,
                 "is_admin": user.is_admin,
                 "role": user.role.value if user.role else "user",
-            }
+            },
         }
 
 
@@ -120,11 +111,11 @@ async def login(
             detail="Incorrect username/email or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
+
     # Generate tokens
     access_token = create_access_token(data={"sub": user.user_id, "username": user.username})
     refresh_token = create_refresh_token(data={"sub": user.user_id})
-    
+
     return {
         "access_token": access_token,
         "refresh_token": refresh_token,
@@ -134,7 +125,7 @@ async def login(
             "username": user.username,
             "email": user.email,
             "is_admin": user.is_admin,
-        }
+        },
     }
 
 
@@ -144,38 +135,26 @@ async def refresh_token(refresh_token: str = Form(...)):
     Refresh an access token using a refresh token.
     """
     payload = decode_token(refresh_token)
-    
+
     if payload is None or payload.get("type") != "refresh":
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid refresh token"
-        )
-    
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token")
+
     user_id = payload.get("sub")
     if not user_id:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid token payload"
-        )
-    
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token payload")
+
     # Verify user exists and is active
     with get_session() as session:
         user = session.exec(select(User).where(User.user_id == user_id)).first()
         if not user or not user.is_active:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="User not found or inactive"
-            )
-        
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found or inactive")
+
         username = user.username or ""
-    
+
     # Generate new access token
     new_access_token = create_access_token(data={"sub": user_id, "username": username})
-    
-    return {
-        "access_token": new_access_token,
-        "token_type": "bearer"
-    }
+
+    return {"access_token": new_access_token, "token_type": "bearer"}
 
 
 @router.get("/me")
@@ -209,14 +188,11 @@ async def change_password(
     Change password for the current user.
     """
     from auth import verify_password
-    
+
     # Verify current password
     if not current_user.password_hash or not verify_password(current_password, current_user.password_hash):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect current password"
-        )
-    
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect current password")
+
     # Update password
     with get_session() as session:
         user = session.exec(select(User).where(User.user_id == current_user.user_id)).first()
@@ -224,6 +200,5 @@ async def change_password(
             user.password_hash = get_password_hash(new_password)
             session.add(user)
             session.commit()
-    
-    return {"message": "Password changed successfully"}
 
+    return {"message": "Password changed successfully"}

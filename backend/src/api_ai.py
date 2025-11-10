@@ -2,6 +2,7 @@
 AI Services API Endpoints
 Provides endpoints for all AI-powered features
 """
+
 from fastapi import APIRouter, Depends, HTTPException, Body
 from typing import Optional, Dict, Any, List
 from pydantic import BaseModel
@@ -67,7 +68,7 @@ async def ai_chat(
 ):
     """
     AI Chatbot endpoint for customer support and questions
-    
+
     Routes to human admin/owner if they're online, otherwise uses AI.
     Supports conversation context if conversation_id is provided
     """
@@ -75,71 +76,75 @@ async def ai_chat(
         from db import get_session
         from sqlmodel import select, and_, or_
         from models import UserRole
-        
+
         # Check if any admin/owner is online
         with get_session() as session:
             online_admins = session.exec(
                 select(User).where(
                     and_(
                         or_(User.role == UserRole.ADMIN, User.role == UserRole.OWNER),
-                        User.is_online == True,
-                        User.is_active == True
+                        User.is_online == True,  # noqa: E712
+                        User.is_active == True,  # noqa: E712
                     )
                 )
             ).all()
-        
+
         # If admin/owner is online, queue message for them instead of AI
         if online_admins:
             # In production, create a support ticket/message for admins
             # For now, we'll still use AI but note admin availability
-            system_prompt = """You are Cosmiv's AI assistant. A human admin is currently online and may respond if needed.
-Answer questions about:
-- How to use the platform
-- Video editing features
-- Uploading clips
-- Subscription plans
-- Technical support
-- Platform integrations (Steam, Xbox, PlayStation, Switch)
-
-Be friendly, concise, and helpful. Mention that admins are available if they need more help.
-"""
+            system_prompt = (
+                "You are Cosmiv's AI assistant. A human admin is currently online "
+                "and may respond if needed.\nAnswer questions about:\n"
+                "- How to use the platform\n"
+                "- Video editing features\n"
+                "- Uploading clips\n"
+                "- Subscription plans\n"
+                "- Technical support\n"
+                "- Platform integrations (Steam, Xbox, PlayStation, Switch)\n\n"
+                "Be friendly, concise, and helpful. Mention that admins are "
+                "available if they need more help."
+            )
         else:
-            system_prompt = """You are Cosmiv's AI assistant - a helpful, professional support agent for our AI Gaming Montage Platform.
-Answer questions about:
-- How to use the platform
-- Video editing features
-- Uploading clips
-- Subscription plans
-- Technical support
-- Platform integrations (Steam, Xbox, PlayStation, Switch)
+            system_prompt = (
+                "You are Cosmiv's AI assistant - a helpful, professional support "
+                "agent for our AI Gaming Montage Platform.\nAnswer questions about:\n"
+                "- How to use the platform\n"
+                "- Video editing features\n"
+                "- Uploading clips\n"
+                "- Subscription plans\n"
+                "- Technical support\n"
+                "- Platform integrations (Steam, Xbox, PlayStation, Switch)\n\n"
+                "Be friendly, concise, and helpful. If you don't know something, "
+                "direct users to our support channels."
+            )
 
-Be friendly, concise, and helpful. If you don't know something, direct users to our support channels.
-"""
-        
         # Build messages
         messages = [{"role": "user", "content": request.message}]
-        
+
         if request.context:
             system_prompt += f"\nAdditional Context: {request.context}\n"
-        
+
         response_text = ai_service.chat(
             messages=messages,
             system_prompt=system_prompt,
             temperature=0.7,
         )
-        
+
         # Add admin availability note if relevant
         if online_admins and not response_text.endswith("admin"):
-            response_text += f"\n\n💡 Note: Our admins are currently online and ready to help if you need additional assistance!"
-        
+            response_text += (
+                "\n\n💡 Note: Our admins are currently online and ready to help " "if you need additional assistance!"
+            )
+
         # Generate conversation ID (in production, store in database)
         conversation_id = request.conversation_id or f"conv_{current_user.user_id if current_user else 'anonymous'}"
-        
+
         return ChatResponse(
             response=response_text,
             conversation_id=conversation_id,
         )
-    
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"AI chat error: {str(e)}")
 
@@ -151,7 +156,7 @@ async def generate_code(
 ):
     """
     AI Code Generator - Generate frontend or backend code
-    
+
     Requires authentication (admin or developer role in production)
     """
     try:
@@ -160,12 +165,12 @@ async def generate_code(
             language=request.language,
             context=request.context,
         )
-        
+
         return CodeGenResponse(
             code=code,
             explanation=None,
         )
-    
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Code generation error: {str(e)}")
 
@@ -177,7 +182,7 @@ async def improve_ui(
 ):
     """
     AI UX/UI Improvement suggestions
-    
+
     Requires authentication
     """
     try:
@@ -185,9 +190,9 @@ async def improve_ui(
             current_ui_description=request.current_ui,
             improvement_request=request.improvement_request,
         )
-        
+
         return result
-    
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"UI improvement error: {str(e)}")
 
@@ -199,7 +204,7 @@ async def renew_content(
 ):
     """
     AI Content Renewal - Automatically renew website content
-    
+
     Requires authentication (admin in production)
     """
     try:
@@ -208,13 +213,13 @@ async def renew_content(
             current_content=request.current_content,
             style=request.style,
         )
-        
+
         return {
             "renewed_content": renewed_content,
             "original_content": request.current_content,
             "content_type": request.content_type,
         }
-    
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Content renewal error: {str(e)}")
 
@@ -226,7 +231,7 @@ async def get_video_editing_suggestions(
 ):
     """
     AI Video Editor - Get editing suggestions for video
-    
+
     Can be used by any user
     """
     try:
@@ -234,9 +239,9 @@ async def get_video_editing_suggestions(
             video_description=request.video_description,
             editing_style=request.editing_style,
         )
-        
+
         return suggestions
-    
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Video editing suggestions error: {str(e)}")
 
@@ -248,7 +253,7 @@ async def generate_music_prompt(
 ):
     """
     AI DJ - Generate music prompt for copyright-free music generation
-    
+
     Can be used by any user
     """
     try:
@@ -257,13 +262,13 @@ async def generate_music_prompt(
             mood=request.mood,
             genre=request.genre,
         )
-        
+
         return {
             "music_prompt": prompt,
             "mood": request.mood,
             "genre": request.genre or "gaming electronic",
         }
-    
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Music prompt generation error: {str(e)}")
 
@@ -276,4 +281,3 @@ async def ai_status():
         "available": ai_service._client is not None,
         "model": ai_service.default_model,
     }
-

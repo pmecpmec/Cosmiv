@@ -2,6 +2,7 @@
 Authentication endpoints for Cosmiv
 Handles user registration, login, and token management
 """
+
 from fastapi import APIRouter, HTTPException, Depends, status, Header
 from pydantic import BaseModel, EmailStr
 from passlib.context import CryptContext
@@ -24,7 +25,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 class UserRegister(BaseModel):
     email: EmailStr
     password: str
-    
+
 
 class UserLogin(BaseModel):
     email: EmailStr
@@ -39,6 +40,7 @@ class Token(BaseModel):
 
 class PasswordHash(BaseModel):
     """Store hashed passwords - to be added to User model"""
+
     password_hash: str
 
 
@@ -61,26 +63,25 @@ def authenticate_user(username_or_email: str, password: str) -> Optional[User]:
     """Authenticate a user by username/email and password."""
     with get_session() as session:
         # Try email first (username field may not exist)
-        user = session.exec(
-            select(User).where(User.email == username_or_email)
-        ).first()
-        
+        user = session.exec(select(User).where(User.email == username_or_email)).first()
+
         if not user:
             return None
-        
+
         # Note: password_hash field needs to be added to User model
         # For now, this is a placeholder
         # if not user.password_hash:
         #     return None
         # if not verify_password(password, user.password_hash):
         #     return None
-        
+
         return user
 
 
 def create_refresh_token(data: dict) -> str:
     """Create a JWT refresh token."""
     from security import create_access_token
+
     return create_access_token(data=data, expires_delta=timedelta(days=7))
 
 
@@ -89,6 +90,7 @@ def decode_token(token: str) -> Optional[dict]:
     try:
         from jose import jwt, JWTError
         import os
+
         secret = os.getenv("JWT_SECRET_KEY") or "INSECURE_DEV_KEY_CHANGE_IN_PRODUCTION"
         payload = jwt.decode(token, secret, algorithms=["HS256"])
         return payload
@@ -105,10 +107,7 @@ async def get_current_user(authorization: str = Header(None, alias="Authorizatio
     with get_session() as session:
         user = session.exec(select(User).where(User.user_id == user_id)).first()
         if not user:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="User not found"
-            )
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
         return user
 
 
@@ -129,11 +128,10 @@ async def get_current_admin_user(current_user: User = Depends(get_current_user))
     """Get the current user and verify they are an admin."""
     # Check if user has admin role (assuming User model has is_admin or role field)
     # For now, allow all authenticated users (adjust based on your User model)
-    if hasattr(current_user, 'is_admin') and not current_user.is_admin:
-        if hasattr(current_user, 'role') and current_user.role not in ['ADMIN', 'OWNER']:
+    if hasattr(current_user, "is_admin") and not current_user.is_admin:
+        if hasattr(current_user, "role") and current_user.role not in ["ADMIN", "OWNER"]:
             raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Not enough permissions - admin access required"
+                status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions - admin access required"
             )
     return current_user
 
@@ -142,7 +140,7 @@ async def get_current_admin_user(current_user: User = Depends(get_current_user))
 async def register(user_data: UserRegister):
     """
     Register a new user
-    
+
     NOTE: This is a simplified implementation for the security audit.
     In production, add:
     - Email verification
@@ -152,25 +150,16 @@ async def register(user_data: UserRegister):
     """
     with get_session() as session:
         # Check if user already exists
-        existing = session.exec(
-            select(User).where(User.email == user_data.email)
-        ).first()
-        
+        existing = session.exec(select(User).where(User.email == user_data.email)).first()
+
         if existing:
-            log_security_event(
-                "REGISTRATION_ATTEMPT_DUPLICATE",
-                None,
-                {"email": user_data.email}
-            )
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Email already registered"
-            )
-        
+            log_security_event("REGISTRATION_ATTEMPT_DUPLICATE", None, {"email": user_data.email})
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
+
         # Create new user
         user_id = secrets.token_urlsafe(16)
         password_hash = hash_password(user_data.password)
-        
+
         new_user = User(
             user_id=user_id,
             email=user_data.email,
@@ -178,30 +167,20 @@ async def register(user_data: UserRegister):
         )
         session.add(new_user)
         session.commit()
-        
-        log_security_event(
-            "USER_REGISTERED",
-            user_id,
-            {"email": user_data.email}
-        )
-        
+
+        log_security_event("USER_REGISTERED", user_id, {"email": user_data.email})
+
         # Create access token
-        access_token = create_access_token(
-            data={"sub": user_id, "email": user_data.email}
-        )
-        
-        return Token(
-            access_token=access_token,
-            token_type="bearer",
-            user_id=user_id
-        )
+        access_token = create_access_token(data={"sub": user_id, "email": user_data.email})
+
+        return Token(access_token=access_token, token_type="bearer", user_id=user_id)
 
 
 @router.post("/login", response_model=Token)
 async def login(credentials: UserLogin):
     """
     Login with email and password
-    
+
     NOTE: In production, add:
     - Rate limiting to prevent brute force
     - Account lockout after failed attempts
@@ -209,36 +188,17 @@ async def login(credentials: UserLogin):
     - Login attempt logging
     """
     with get_session() as session:
-        user = session.exec(
-            select(User).where(User.email == credentials.email)
-        ).first()
+        user = session.exec(select(User).where(User.email == credentials.email)).first()
 
         if not user:
-            log_security_event(
-                "LOGIN_FAILED_USER_NOT_FOUND",
-                None,
-                {"email": credentials.email}
-            )
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Incorrect email or password"
-            )
+            log_security_event("LOGIN_FAILED_USER_NOT_FOUND", None, {"email": credentials.email})
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect email or password")
 
-        log_security_event(
-            "USER_LOGGED_IN",
-            user.user_id,
-            {"email": credentials.email}
-        )
+        log_security_event("USER_LOGGED_IN", user.user_id, {"email": credentials.email})
 
-        access_token = create_access_token(
-            data={"sub": user.user_id, "email": user.email}
-        )
+        access_token = create_access_token(data={"sub": user.user_id, "email": user.email})
 
-        return Token(
-            access_token=access_token,
-            token_type="bearer",
-            user_id=user.user_id
-        )
+        return Token(access_token=access_token, token_type="bearer", user_id=user.user_id)
 
 
 @router.post("/dev-token")
@@ -248,18 +208,10 @@ async def create_dev_token(user_id: str = "dev-user"):
     This endpoint should be REMOVED or DISABLED in production
     """
     import os
+
     if os.getenv("ENVIRONMENT") == "production":
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Not found"
-        )
-    
-    access_token = create_access_token(
-        data={"sub": user_id, "email": f"{user_id}@dev.local"}
-    )
-    
-    return Token(
-        access_token=access_token,
-        token_type="bearer",
-        user_id=user_id
-    )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
+
+    access_token = create_access_token(data={"sub": user_id, "email": f"{user_id}@dev.local"})
+
+    return Token(access_token=access_token, token_type="bearer", user_id=user_id)

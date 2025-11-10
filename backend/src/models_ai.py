@@ -1,6 +1,7 @@
 """
 AI System Models for Phase 14
 """
+
 from sqlmodel import SQLModel, Field
 from typing import Optional, Dict, Any
 from datetime import datetime
@@ -9,6 +10,7 @@ import json
 
 class ContentVersion(SQLModel, table=True):
     """Version tracking for AI-generated content"""
+
     id: Optional[int] = Field(default=None, primary_key=True)
     content_id: str = Field(index=True)  # e.g., "landing_hero", "feature_1"
     content_type: str = Field(index=True)  # "landing", "feature", "blog", etc.
@@ -23,6 +25,7 @@ class ContentVersion(SQLModel, table=True):
 
 class CodeGeneration(SQLModel, table=True):
     """Track AI-generated code"""
+
     id: Optional[int] = Field(default=None, primary_key=True)
     generation_id: str = Field(index=True, unique=True)
     code_type: str = Field(index=True)  # "frontend", "backend", "component", "endpoint"
@@ -39,6 +42,7 @@ class CodeGeneration(SQLModel, table=True):
 
 class UXAnalysis(SQLModel, table=True):
     """Store UX analysis results and improvements"""
+
     id: Optional[int] = Field(default=None, primary_key=True)
     analysis_id: str = Field(index=True, unique=True)
     component_path: Optional[str] = None  # Frontend component path
@@ -54,6 +58,7 @@ class UXAnalysis(SQLModel, table=True):
 
 class AITask(SQLModel, table=True):
     """Track AI system tasks and their status"""
+
     id: Optional[int] = Field(default=None, primary_key=True)
     task_id: str = Field(index=True, unique=True)
     task_type: str = Field(index=True)  # "content_renewal", "code_generation", "ux_analysis", "video_enhancement"
@@ -69,6 +74,7 @@ class AITask(SQLModel, table=True):
 
 class VideoEnhancement(SQLModel, table=True):
     """Track AI video enhancement operations"""
+
     id: Optional[int] = Field(default=None, primary_key=True)
     enhancement_id: str = Field(index=True, unique=True)
     job_id: Optional[str] = Field(index=True)  # Link to original job
@@ -80,4 +86,3 @@ class VideoEnhancement(SQLModel, table=True):
     quality_score: Optional[float] = None  # AI-evaluated quality improvement
     created_at: datetime = Field(default_factory=datetime.utcnow)
     completed_at: Optional[datetime] = None
-

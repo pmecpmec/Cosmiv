@@ -3,6 +3,7 @@ Gaming platform OAuth integrations
 Supports Steam, Xbox, PlayStation, and Nintendo Switch
 Mock mode by default, real OAuth when configured
 """
+
 import os
 import logging
 import requests
@@ -15,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 class SteamOAuth:
     """Steam OpenID OAuth integration"""
-    
+
     @staticmethod
     def get_authorize_url(redirect_uri: str, state: str) -> str:
         """
@@ -25,12 +26,12 @@ class SteamOAuth:
         if not settings.STEAM_API_ENABLED:
             # Mock mode - return mock URL
             return f"http://localhost:3000/auth/steam/callback?mock=true&state={state}"
-        
+
         try:
             # Steam OpenID discovery
-            realm = redirect_uri.split('?')[0]
+            realm = redirect_uri.split("?")[0]
             return_url = f"{redirect_uri}?state={state}"
-            
+
             # Steam OpenID endpoint
             steam_login_url = "https://steamcommunity.com/openid/login"
             params = {
@@ -41,14 +42,15 @@ class SteamOAuth:
                 "openid.identity": "http://specs.openid.net/auth/2.0/identifier_select",
                 "openid.claimed_id": "http://specs.openid.net/auth/2.0/identifier_select",
             }
-            
+
             # Build URL
             from urllib.parse import urlencode
+
             return f"{steam_login_url}?{urlencode(params)}"
         except Exception as e:
             logger.error(f"Steam OAuth URL generation failed: {str(e)}")
             raise
-    
+
     @staticmethod
     def verify_callback(params: Dict[str, Any], redirect_uri: str) -> Dict[str, Any]:
         """Verify Steam OpenID callback and extract Steam ID"""
@@ -61,21 +63,23 @@ class SteamOAuth:
                 "refresh_token": None,
                 "expires_at": None,
             }
-        
+
         try:
             # Steam OpenID verification (simplified)
             # In production, you'd verify the OpenID response
             steam_id = params.get("openid.claimed_id", "").split("/")[-1]
-            
+
             # Get user info from Steam API
             api_key = settings.STEAM_API_KEY
-            summary_url = f"http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key={api_key}&steamids={steam_id}"
+            summary_url = (
+                f"http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key={api_key}&steamids={steam_id}"
+            )
             response = requests.get(summary_url)
             response.raise_for_status()
             data = response.json()
-            
+
             player = data.get("response", {}).get("players", [{}])[0]
-            
+
             return {
                 "platform_user_id": steam_id,
                 "platform_username": player.get("personaname", "Steam User"),
@@ -90,17 +94,17 @@ class SteamOAuth:
 
 class XboxOAuth:
     """Xbox Live OAuth integration"""
-    
+
     @staticmethod
     def get_authorize_url(redirect_uri: str, state: str) -> str:
         """Generate Xbox Live OAuth authorization URL"""
         if not settings.XBOX_API_ENABLED:
             return f"http://localhost:3000/auth/xbox/callback?mock=true&state={state}"
-        
+
         try:
             client_id = settings.XBOX_CLIENT_ID
             scope = "XboxLive.signin XboxLive.offline_access"
-            
+
             auth_url = "https://login.live.com/oauth20_authorize.srf"
             params = {
                 "client_id": client_id,
@@ -109,13 +113,14 @@ class XboxOAuth:
                 "scope": scope,
                 "state": state,
             }
-            
+
             from urllib.parse import urlencode
+
             return f"{auth_url}?{urlencode(params)}"
         except Exception as e:
             logger.error(f"Xbox OAuth URL generation failed: {str(e)}")
             raise
-    
+
     @staticmethod
     async def exchange_code(code: str, redirect_uri: str) -> Dict[str, Any]:
         """Exchange authorization code for Xbox tokens"""
@@ -127,11 +132,11 @@ class XboxOAuth:
                 "refresh_token": "mock_xbox_refresh",
                 "expires_at": (datetime.utcnow() + timedelta(days=90)).isoformat(),
             }
-        
+
         try:
             client_id = settings.XBOX_CLIENT_ID
             client_secret = settings.XBOX_CLIENT_SECRET
-            
+
             # Exchange code for tokens
             token_url = "https://login.live.com/oauth20_token.srf"
             data = {
@@ -141,18 +146,18 @@ class XboxOAuth:
                 "grant_type": "authorization_code",
                 "redirect_uri": redirect_uri,
             }
-            
+
             response = requests.post(token_url, data=data)
             response.raise_for_status()
             token_data = response.json()
-            
+
             # Get Xbox user info
             user_url = "https://userinfo.xboxlive.com/users/me/profile"
             headers = {"Authorization": f"Bearer {token_data['access_token']}"}
             user_response = requests.get(user_url, headers=headers)
             user_response.raise_for_status()
             user_data = user_response.json()
-            
+
             return {
                 "platform_user_id": user_data.get("id", ""),
                 "platform_username": user_data.get("Gamertag", "Xbox User"),
@@ -167,17 +172,17 @@ class XboxOAuth:
 
 class PlayStationOAuth:
     """PlayStation Network OAuth integration"""
-    
+
     @staticmethod
     def get_authorize_url(redirect_uri: str, state: str) -> str:
         """Generate PSN OAuth authorization URL"""
         if not settings.PLAYSTATION_API_ENABLED:
             return f"http://localhost:3000/auth/playstation/callback?mock=true&state={state}"
-        
+
         try:
             client_id = settings.PLAYSTATION_CLIENT_ID
             scope = "psn:clientapp"
-            
+
             auth_url = "https://auth.api.sonyentertainmentnetwork.com/2.0/oauth/authorize"
             params = {
                 "client_id": client_id,
@@ -186,13 +191,14 @@ class PlayStationOAuth:
                 "scope": scope,
                 "state": state,
             }
-            
+
             from urllib.parse import urlencode
+
             return f"{auth_url}?{urlencode(params)}"
         except Exception as e:
             logger.error(f"PlayStation OAuth URL generation failed: {str(e)}")
             raise
-    
+
     @staticmethod
     async def exchange_code(code: str, redirect_uri: str) -> Dict[str, Any]:
         """Exchange authorization code for PSN tokens"""
@@ -204,11 +210,11 @@ class PlayStationOAuth:
                 "refresh_token": "mock_psn_refresh",
                 "expires_at": (datetime.utcnow() + timedelta(hours=1)).isoformat(),
             }
-        
+
         try:
             client_id = settings.PLAYSTATION_CLIENT_ID
             client_secret = settings.PLAYSTATION_CLIENT_SECRET
-            
+
             token_url = "https://auth.api.sonyentertainmentnetwork.com/2.0/oauth/token"
             data = {
                 "grant_type": "authorization_code",
@@ -217,18 +223,18 @@ class PlayStationOAuth:
                 "client_id": client_id,
                 "client_secret": client_secret,
             }
-            
+
             response = requests.post(token_url, data=data)
             response.raise_for_status()
             token_data = response.json()
-            
+
             # Get PSN user info
             user_url = "https://us-prof.np.community.playstation.net/userProfile/v1/users/me/profile2"
             headers = {"Authorization": f"Bearer {token_data['access_token']}"}
             user_response = requests.get(user_url, headers=headers)
             user_response.raise_for_status()
             user_data = user_response.json()
-            
+
             return {
                 "platform_user_id": user_data.get("onlineId", ""),
                 "platform_username": user_data.get("onlineId", "PSN User"),
@@ -243,17 +249,17 @@ class PlayStationOAuth:
 
 class NintendoOAuth:
     """Nintendo Switch OAuth integration"""
-    
+
     @staticmethod
     def get_authorize_url(redirect_uri: str, state: str) -> str:
         """Generate Nintendo OAuth authorization URL"""
         if not settings.NINTENDO_API_ENABLED:
             return f"http://localhost:3000/auth/nintendo/callback?mock=true&state={state}"
-        
+
         try:
             client_id = settings.NINTENDO_CLIENT_ID
             scope = "openid user"
-            
+
             auth_url = "https://accounts.nintendo.com/connect/1.0.0/authorize"
             params = {
                 "client_id": client_id,
@@ -262,13 +268,14 @@ class NintendoOAuth:
                 "scope": scope,
                 "state": state,
             }
-            
+
             from urllib.parse import urlencode
+
             return f"{auth_url}?{urlencode(params)}"
         except Exception as e:
             logger.error(f"Nintendo OAuth URL generation failed: {str(e)}")
             raise
-    
+
     @staticmethod
     async def exchange_code(code: str, redirect_uri: str) -> Dict[str, Any]:
         """Exchange authorization code for Nintendo tokens"""
@@ -280,11 +287,11 @@ class NintendoOAuth:
                 "refresh_token": "mock_nintendo_refresh",
                 "expires_at": (datetime.utcnow() + timedelta(hours=1)).isoformat(),
             }
-        
+
         try:
             client_id = settings.NINTENDO_CLIENT_ID
             client_secret = settings.NINTENDO_CLIENT_SECRET
-            
+
             token_url = "https://accounts.nintendo.com/connect/1.0.0/api/token"
             data = {
                 "grant_type": "authorization_code",
@@ -293,18 +300,18 @@ class NintendoOAuth:
                 "client_id": client_id,
                 "client_secret": client_secret,
             }
-            
+
             response = requests.post(token_url, data=data)
             response.raise_for_status()
             token_data = response.json()
-            
+
             # Get Nintendo user info
             user_url = "https://api.accounts.nintendo.com/2.0.0/users/me"
             headers = {"Authorization": f"Bearer {token_data['access_token']}"}
             user_response = requests.get(user_url, headers=headers)
             user_response.raise_for_status()
             user_data = user_response.json()
-            
+
             return {
                 "platform_user_id": user_data.get("id", ""),
                 "platform_username": user_data.get("nickname", "Nintendo User"),
@@ -330,6 +337,7 @@ def get_oauth_handler(provider: str):
 
 # Add refresh_token methods to OAuth handlers that support it
 
+
 def _xbox_refresh_token(refresh_token: str) -> Dict[str, Any]:
     """Refresh Xbox Live OAuth token"""
     if not settings.XBOX_API_ENABLED:
@@ -339,7 +347,7 @@ def _xbox_refresh_token(refresh_token: str) -> Dict[str, Any]:
             "refresh_token": refresh_token,
             "expires_at": (datetime.utcnow() + timedelta(hours=1)).isoformat(),
         }
-    
+
     try:
         token_url = "https://login.live.com/oauth20_token.srf"
         data = {
@@ -351,7 +359,7 @@ def _xbox_refresh_token(refresh_token: str) -> Dict[str, Any]:
         response = requests.post(token_url, data=data)
         response.raise_for_status()
         token_data = response.json()
-        
+
         return {
             "access_token": token_data["access_token"],
             "refresh_token": token_data.get("refresh_token", refresh_token),
@@ -360,6 +368,7 @@ def _xbox_refresh_token(refresh_token: str) -> Dict[str, Any]:
     except Exception as e:
         logger.error(f"Xbox token refresh failed: {str(e)}")
         raise
+
 
 # Attach refresh methods to classes as static methods
 XboxOAuth.refresh_token = staticmethod(_xbox_refresh_token)
@@ -374,7 +383,7 @@ def _playstation_refresh_token(refresh_token: str) -> Dict[str, Any]:
             "refresh_token": refresh_token,
             "expires_at": (datetime.utcnow() + timedelta(hours=1)).isoformat(),
         }
-    
+
     try:
         token_url = "https://auth.api.sonyentertainmentnetwork.com/2.0/oauth/token"
         data = {
@@ -386,7 +395,7 @@ def _playstation_refresh_token(refresh_token: str) -> Dict[str, Any]:
         response = requests.post(token_url, data=data)
         response.raise_for_status()
         token_data = response.json()
-        
+
         return {
             "access_token": token_data["access_token"],
             "refresh_token": token_data.get("refresh_token", refresh_token),
@@ -395,6 +404,7 @@ def _playstation_refresh_token(refresh_token: str) -> Dict[str, Any]:
     except Exception as e:
         logger.error(f"PlayStation token refresh failed: {str(e)}")
         raise
+
 
 PlayStationOAuth.refresh_token = staticmethod(_playstation_refresh_token)
 
@@ -408,7 +418,7 @@ def _nintendo_refresh_token(refresh_token: str) -> Dict[str, Any]:
             "refresh_token": refresh_token,
             "expires_at": (datetime.utcnow() + timedelta(hours=1)).isoformat(),
         }
-    
+
     try:
         token_url = "https://accounts.nintendo.com/connect/1.0.0/api/token"
         data = {
@@ -420,7 +430,7 @@ def _nintendo_refresh_token(refresh_token: str) -> Dict[str, Any]:
         response = requests.post(token_url, data=data)
         response.raise_for_status()
         token_data = response.json()
-        
+
         return {
             "access_token": token_data["access_token"],
             "refresh_token": token_data.get("refresh_token", refresh_token),
@@ -430,5 +440,5 @@ def _nintendo_refresh_token(refresh_token: str) -> Dict[str, Any]:
         logger.error(f"Nintendo token refresh failed: {str(e)}")
         raise
 
-NintendoOAuth.refresh_token = staticmethod(_nintendo_refresh_token)
 
+NintendoOAuth.refresh_token = staticmethod(_nintendo_refresh_token)

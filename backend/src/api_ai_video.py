@@ -1,6 +1,7 @@
 """
 API endpoints for AI Video Enhancement System
 """
+
 from fastapi import APIRouter, Depends, HTTPException
 from typing import Optional, List
 from pydantic import BaseModel
@@ -52,10 +53,10 @@ async def enhance_video(
         input_video_path=request.input_video_path,
         params=request.params,
     )
-    
+
     if not result.get("success"):
         raise HTTPException(status_code=500, detail=result.get("error", "Enhancement failed"))
-    
+
     return result
 
 
@@ -70,10 +71,10 @@ async def generate_captions(
         style=request.style,
         position=request.position,
     )
-    
+
     if not result.get("success"):
         raise HTTPException(status_code=500, detail=result.get("error", "Caption generation failed"))
-    
+
     return result
 
 
@@ -88,10 +89,10 @@ async def suggest_edits(
         target_duration=request.target_duration,
         style=request.style,
     )
-    
+
     if not result.get("success"):
         raise HTTPException(status_code=500, detail=result.get("error", "Suggestion failed"))
-    
+
     return result
 
 
@@ -106,10 +107,10 @@ async def generate_thumbnail(
         style=request.style,
         text=request.text,
     )
-    
+
     if not result.get("success"):
         raise HTTPException(status_code=500, detail=result.get("error", "Thumbnail generation failed"))
-    
+
     return result
 
 
@@ -120,10 +121,10 @@ async def get_enhancement(
 ):
     """Get a video enhancement record"""
     enhancement = video_enhancer_service.get_enhancement(enhancement_id)
-    
+
     if not enhancement:
         raise HTTPException(status_code=404, detail="Enhancement not found")
-    
+
     return {
         "enhancement_id": enhancement.enhancement_id,
         "job_id": enhancement.job_id,
@@ -147,14 +148,14 @@ async def list_enhancements(
     """List video enhancements"""
     with get_session() as session:
         query = select(VideoEnhancement)
-        
+
         if job_id:
             query = query.where(VideoEnhancement.job_id == job_id)
         if enhancement_type:
             query = query.where(VideoEnhancement.enhancement_type == enhancement_type)
-        
+
         enhancements = session.exec(query.order_by(VideoEnhancement.created_at.desc())).all()
-        
+
         return {
             "enhancements": [
                 {
@@ -168,4 +169,3 @@ async def list_enhancements(
                 for e in enhancements
             ],
         }
-
