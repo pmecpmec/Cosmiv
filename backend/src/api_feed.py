@@ -2,6 +2,7 @@
 Feed API Endpoints
 TikTok/Medal/YouTube-style feed with algorithm
 """
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import Optional, List, Dict, Any
 from pydantic import BaseModel
@@ -85,7 +86,7 @@ async def create_post(
     with get_session() as session:
         # Generate post ID
         post_id = f"post_{secrets.token_urlsafe(12)}"
-        
+
         # Create post
         post = Post(
             post_id=post_id,
@@ -96,19 +97,19 @@ async def create_post(
             hashtags=json.dumps(request.hashtags) if request.hashtags else None,
             is_published=True,
         )
-        
+
         session.add(post)
-        
+
         # Update user post count
         current_user.posts_count += 1
         session.add(current_user)
-        
+
         session.commit()
         session.refresh(post)
-        
+
         # Calculate initial scores
         FeedAlgorithmService.update_post_scores(post.post_id)
-        
+
         return {
             "post_id": post.post_id,
             "message": "Post created successfully",
@@ -124,19 +125,14 @@ async def like_post(
     with get_session() as session:
         # Check if already liked
         existing_like = session.exec(
-            select(PostLike).where(
-                PostLike.post_id == post_id,
-                PostLike.user_id == current_user.user_id
-            )
+            select(PostLike).where(PostLike.post_id == post_id, PostLike.user_id == current_user.user_id)
         ).first()
-        
-        post = session.exec(
-            select(Post).where(Post.post_id == post_id)
-        ).first()
-        
+
+        post = session.exec(select(Post).where(Post.post_id == post_id)).first()
+
         if not post:
             raise HTTPException(status_code=404, detail="Post not found")
-        
+
         if existing_like:
             # Unlike
             session.delete(existing_like)
@@ -151,13 +147,13 @@ async def like_post(
             session.add(like)
             post.likes += 1
             liked = True
-        
+
         session.add(post)
         session.commit()
-        
+
         # Update scores
         FeedAlgorithmService.update_post_scores(post_id)
-        
+
         return {"liked": liked, "likes": post.likes}
 
 
@@ -168,21 +164,19 @@ async def track_view(
 ):
     """Track a post view"""
     with get_session() as session:
-        post = session.exec(
-            select(Post).where(Post.post_id == post_id)
-        ).first()
-        
+        post = session.exec(select(Post).where(Post.post_id == post_id)).first()
+
         if not post:
             raise HTTPException(status_code=404, detail="Post not found")
-        
+
         post.views += 1
         session.add(post)
         session.commit()
-        
+
         # Update scores periodically (not on every view)
         if post.views % 10 == 0:
             FeedAlgorithmService.update_post_scores(post_id)
-        
+
         return {"views": post.views}
 
 
@@ -194,38 +188,33 @@ async def follow_user(
     """Follow a user"""
     if user_id == current_user.user_id:
         raise HTTPException(status_code=400, detail="Cannot follow yourself")
-    
+
     with get_session() as session:
         # Check if already following
         existing = session.exec(
-            select(Follow).where(
-                Follow.follower_id == current_user.user_id,
-                Follow.following_id == user_id
-            )
+            select(Follow).where(Follow.follower_id == current_user.user_id, Follow.following_id == user_id)
         ).first()
-        
+
         if existing:
             raise HTTPException(status_code=400, detail="Already following")
-        
+
         # Create follow relationship
         follow = Follow(
             follower_id=current_user.user_id,
             following_id=user_id,
         )
         session.add(follow)
-        
+
         # Update counts
         current_user.following_count += 1
-        target_user = session.exec(
-            select(User).where(User.user_id == user_id)
-        ).first()
+        target_user = session.exec(select(User).where(User.user_id == user_id)).first()
         if target_user:
             target_user.follower_count += 1
             session.add(target_user)
-        
+
         session.add(current_user)
         session.commit()
-        
+
         return {"following": True, "following_id": user_id}
 
 
@@ -237,28 +226,22 @@ async def unfollow_user(
     """Unfollow a user"""
     with get_session() as session:
         follow = session.exec(
-            select(Follow).where(
-                Follow.follower_id == current_user.user_id,
-                Follow.following_id == user_id
-            )
+            select(Follow).where(Follow.follower_id == current_user.user_id, Follow.following_id == user_id)
         ).first()
-        
+
         if not follow:
             raise HTTPException(status_code=404, detail="Not following this user")
-        
+
         session.delete(follow)
-        
+
         # Update counts
         current_user.following_count = max(0, current_user.following_count - 1)
-        target_user = session.exec(
-            select(User).where(User.user_id == user_id)
-        ).first()
+        target_user = session.exec(select(User).where(User.user_id == user_id)).first()
         if target_user:
             target_user.follower_count = max(0, target_user.follower_count - 1)
             session.add(target_user)
-        
+
         session.add(current_user)
         session.commit()
-        
-        return {"following": False, "following_id": user_id}
 
+        return {"following": False, "following_id": user_id}

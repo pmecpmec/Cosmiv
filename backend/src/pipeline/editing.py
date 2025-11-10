@@ -12,7 +12,7 @@ _nvenc_available = False
 
 
 def write_ffconcat(concat_path: str, clips: List[Tuple[str, float, float]]):
-    with open(concat_path, 'w') as f:
+    with open(concat_path, "w") as f:
         f.write("ffconcat version 1.0\n\n")
         for path, start, dur in clips:
             escaped = path.replace("'", "'\\''")
@@ -72,9 +72,9 @@ def render_with_fallback(concat_path: str, output_path: str, preset: str = "land
     return output_path
 
 
-def render_matrix(concat_path: str, out_dir: str, presets: List[str]) -> List[Tuple[str,str]]:
+def render_matrix(concat_path: str, out_dir: str, presets: List[str]) -> List[Tuple[str, str]]:
     os.makedirs(out_dir, exist_ok=True)
-    outputs: List[Tuple[str,str]] = []
+    outputs: List[Tuple[str, str]] = []
     for p in presets:
         out_path = os.path.join(out_dir, f"video_{p}.mp4")
         render_with_fallback(concat_path, out_path, preset=p)

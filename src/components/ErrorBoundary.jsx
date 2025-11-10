@@ -41,7 +41,7 @@ class ErrorBoundaryClass extends Component {
 function ErrorFallback({ error, errorInfo, onReset }) {
   return (
     <div className="min-h-screen bg-pure-black text-pure-white flex items-center justify-center px-4 py-16">
-      <div className="max-w-2xl w-full broken-planet-card rounded-2xl p-8 border-2 border-red-500">
+      <div className="max-w-2xl w-full cosmic-card rounded-2xl p-8 border-2 border-red-500">
         <div className="text-center mb-6">
           <div className="text-6xl mb-4">⚠️</div>
           <h2 className="text-3xl font-black gradient-text-cosmic mb-4 tracking-poppr">

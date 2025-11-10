@@ -2,6 +2,7 @@
 Profile API Endpoints
 User profiles, customization, and linked accounts
 """
+
 from fastapi import APIRouter, Depends, HTTPException, Body, Form
 from typing import Optional, List, Dict, Any
 from pydantic import BaseModel
@@ -41,10 +42,7 @@ async def get_my_profile(
     linked_profiles = []
     with get_session() as session:
         links = session.exec(
-            select(LinkedProfile).where(
-                LinkedProfile.user_id == current_user.user_id,
-                LinkedProfile.is_public == True
-            )
+            select(LinkedProfile).where(LinkedProfile.user_id == current_user.user_id, LinkedProfile.is_public == True)
         ).all()
         linked_profiles = [
             {
@@ -55,7 +53,7 @@ async def get_my_profile(
             }
             for lp in links
         ]
-    
+
     return {
         "user_id": current_user.user_id,
         "username": current_user.username,
@@ -83,46 +81,35 @@ async def get_profile(
     """Get a user's public profile by custom URL or user_id"""
     with get_session() as session:
         # Try custom URL first, then user_id
-        user = session.exec(
-            select(User).where(User.custom_url == custom_url_or_user_id)
-        ).first()
-        
+        user = session.exec(select(User).where(User.custom_url == custom_url_or_user_id)).first()
+
         if not user:
-            user = session.exec(
-                select(User).where(User.user_id == custom_url_or_user_id)
-            ).first()
-        
+            user = session.exec(select(User).where(User.user_id == custom_url_or_user_id)).first()
+
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
-        
+
         # Get public posts
         posts = session.exec(
-            select(Post).where(
-                Post.user_id == user.user_id,
-                Post.is_published == True
-            ).order_by(Post.created_at.desc())
+            select(Post)
+            .where(Post.user_id == user.user_id, Post.is_published == True)
+            .order_by(Post.created_at.desc())
             .limit(20)
         ).all()
-        
+
         # Get linked profiles
         links = session.exec(
-            select(LinkedProfile).where(
-                LinkedProfile.user_id == user.user_id,
-                LinkedProfile.is_public == True
-            )
+            select(LinkedProfile).where(LinkedProfile.user_id == user.user_id, LinkedProfile.is_public == True)
         ).all()
-        
+
         # Check if current user follows this user
         is_following = False
         if current_user:
             follow = session.exec(
-                select(Follow).where(
-                    Follow.follower_id == current_user.user_id,
-                    Follow.following_id == user.user_id
-                )
+                select(Follow).where(Follow.follower_id == current_user.user_id, Follow.following_id == user.user_id)
             ).first()
             is_following = follow is not None
-        
+
         return {
             "user_id": user.user_id,
             "username": user.username,
@@ -165,13 +152,11 @@ async def update_profile(
 ):
     """Update current user's profile"""
     with get_session() as session:
-        user = session.exec(
-            select(User).where(User.user_id == current_user.user_id)
-        ).first()
-        
+        user = session.exec(select(User).where(User.user_id == current_user.user_id)).first()
+
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
-        
+
         # Update fields
         if request.bio is not None:
             user.bio = request.bio
@@ -182,10 +167,7 @@ async def update_profile(
         if request.custom_url is not None:
             # Check uniqueness
             existing = session.exec(
-                select(User).where(
-                    User.custom_url == request.custom_url,
-                    User.user_id != current_user.user_id
-                )
+                select(User).where(User.custom_url == request.custom_url, User.user_id != current_user.user_id)
             ).first()
             if existing:
                 raise HTTPException(status_code=400, detail="Custom URL already taken")
@@ -194,10 +176,10 @@ async def update_profile(
             user.theme_colors = json.dumps(request.theme_colors)
         if request.profile_effects is not None:
             user.profile_effects = json.dumps(request.profile_effects)
-        
+
         session.add(user)
         session.commit()
-        
+
         return {"message": "Profile updated successfully"}
 
 
@@ -211,11 +193,10 @@ async def link_profile(
         # Check if already linked
         existing = session.exec(
             select(LinkedProfile).where(
-                LinkedProfile.user_id == current_user.user_id,
-                LinkedProfile.profile_type == request.profile_type
+                LinkedProfile.user_id == current_user.user_id, LinkedProfile.profile_type == request.profile_type
             )
         ).first()
-        
+
         if existing:
             # Update existing
             existing.profile_username = request.profile_username
@@ -234,9 +215,9 @@ async def link_profile(
                 is_public=request.is_public,
             )
             session.add(link)
-        
+
         session.commit()
-        
+
         return {"message": "Profile linked successfully"}
 
 
@@ -249,17 +230,16 @@ async def unlink_profile(
     with get_session() as session:
         link = session.exec(
             select(LinkedProfile).where(
-                LinkedProfile.user_id == current_user.user_id,
-                LinkedProfile.profile_type == profile_type
+                LinkedProfile.user_id == current_user.user_id, LinkedProfile.profile_type == profile_type
             )
         ).first()
-        
+
         if not link:
             raise HTTPException(status_code=404, detail="Profile link not found")
-        
+
         session.delete(link)
         session.commit()
-        
+
         return {"message": "Profile unlinked successfully"}
 
 
@@ -270,15 +250,12 @@ async def update_presence(
 ):
     """Update online presence status"""
     with get_session() as session:
-        user = session.exec(
-            select(User).where(User.user_id == current_user.user_id)
-        ).first()
-        
+        user = session.exec(select(User).where(User.user_id == current_user.user_id)).first()
+
         if user:
             user.is_online = is_online
             user.last_seen = datetime.utcnow()
             session.add(user)
             session.commit()
-        
-        return {"is_online": is_online, "last_seen": user.last_seen.isoformat() if user else None}
 
+        return {"is_online": is_online, "last_seen": user.last_seen.isoformat() if user else None}

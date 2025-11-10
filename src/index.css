@@ -59,7 +59,7 @@
     text-stroke: 1px white;
   }
 
-  /* Broken Planet Glitch Effect */
+  /* Cosmic Effect */
   .glitch-effect {
     position: relative;
     filter: blur(0.3px);
@@ -199,8 +199,8 @@
     background-clip: text;
   }
 
-  /* Broken Planet Card Style */
-  .broken-planet-card {
+  /* Cosmic Card Style */
+  .cosmic-card {
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.2);
     backdrop-filter: blur(10px);
@@ -208,7 +208,7 @@
     transition: all 0.3s ease;
   }
 
-  .broken-planet-card:hover {
+  .cosmic-card:hover {
     border-color: rgba(0, 255, 255, 0.5);
     box-shadow: 
       0 0 20px rgba(139, 92, 246, 0.3),
@@ -217,7 +217,7 @@
     transform: translateY(-5px);
   }
 
-  .broken-planet-card::before {
+  .cosmic-card::before {
     content: '';
     position: absolute;
     top: 0;
@@ -233,7 +233,7 @@
     transition: left 0.5s;
   }
 
-  .broken-planet-card:hover::before {
+  .cosmic-card:hover::before {
     left: 100%;
   }
 

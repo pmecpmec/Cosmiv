@@ -2,6 +2,7 @@
 AI Video Enhancer Service
 Advanced AI-powered video editing features
 """
+
 import logging
 from typing import Dict, Any, Optional, List
 from datetime import datetime
@@ -19,17 +20,13 @@ ai_service = AIService()
 
 class VideoEnhancerService:
     """Service for AI-powered video enhancement"""
-    
+
     def enhance_video(
-        self,
-        job_id: str,
-        enhancement_type: str,
-        input_video_path: str,
-        params: Optional[Dict[str, Any]] = None
+        self, job_id: str, enhancement_type: str, input_video_path: str, params: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
         """
         Enhance a video using AI
-        
+
         Args:
             job_id: Original job ID
             enhancement_type: Type of enhancement (captions, transitions, color_grade, effects, motion_graphics)
@@ -39,7 +36,7 @@ class VideoEnhancerService:
         try:
             params = params or {}
             enhancement_id = str(uuid.uuid4())
-            
+
             # Create enhancement record
             with get_session() as session:
                 enhancement = VideoEnhancement(
@@ -53,36 +50,37 @@ class VideoEnhancerService:
                 )
                 session.add(enhancement)
                 session.commit()
-                
+
                 # Create task record
                 task = AITask(
                     task_id=str(uuid.uuid4()),
                     task_type="video_enhancement",
                     status="processing",
-                    input_data=json.dumps({
-                        "enhancement_id": enhancement_id,
-                        "enhancement_type": enhancement_type,
-                        "job_id": job_id,
-                    }),
+                    input_data=json.dumps(
+                        {
+                            "enhancement_id": enhancement_id,
+                            "enhancement_type": enhancement_type,
+                            "job_id": job_id,
+                        }
+                    ),
                     started_at=datetime.utcnow(),
                 )
                 session.add(task)
                 session.commit()
-            
+
             # Process enhancement based on type
             result = self._process_enhancement(
                 enhancement_type=enhancement_type,
                 input_video_path=input_video_path,
                 params=params,
             )
-            
+
             # Update enhancement record
             with get_session() as session:
                 enhancement = session.exec(
-                    select(VideoEnhancement)
-                    .where(VideoEnhancement.enhancement_id == enhancement_id)
+                    select(VideoEnhancement).where(VideoEnhancement.enhancement_id == enhancement_id)
                 ).first()
-                
+
                 if enhancement:
                     if result.get("success"):
                         enhancement.output_video_path = result.get("output_path")
@@ -96,11 +94,11 @@ class VideoEnhancerService:
                         enhancement.status = "failed"
                         task.status = "failed"
                         task.error_message = result.get("error", "Enhancement failed")
-                    
+
                     session.add(enhancement)
                     session.add(task)
                     session.commit()
-            
+
             return {
                 "success": result.get("success", False),
                 "enhancement_id": enhancement_id,
@@ -114,16 +112,11 @@ class VideoEnhancerService:
                 "success": False,
                 "error": str(e),
             }
-    
-    def generate_captions(
-        self,
-        video_path: str,
-        style: str = "gaming",
-        position: str = "bottom"
-    ) -> Dict[str, Any]:
+
+    def generate_captions(self, video_path: str, style: str = "gaming", position: str = "bottom") -> Dict[str, Any]:
         """
         Generate AI-powered captions for video
-        
+
         Args:
             video_path: Path to video
             style: Caption style (gaming, cinematic, bold)
@@ -150,10 +143,10 @@ Focus on high-energy moments, key actions, and engaging text."""
                 system_prompt="You are an expert video editor specializing in gaming montages. Generate engaging, well-timed captions.",
                 temperature=0.7,
             )
-            
+
             # Parse captions from response
             captions = self._parse_captions(response)
-            
+
             return {
                 "success": True,
                 "captions": captions,
@@ -167,16 +160,11 @@ Focus on high-energy moments, key actions, and engaging text."""
                 "success": False,
                 "error": str(e),
             }
-    
-    def suggest_edits(
-        self,
-        video_description: str,
-        target_duration: int,
-        style: str = "cinematic"
-    ) -> Dict[str, Any]:
+
+    def suggest_edits(self, video_description: str, target_duration: int, style: str = "cinematic") -> Dict[str, Any]:
         """
         Suggest video editing improvements
-        
+
         Args:
             video_description: Description of video content
             target_duration: Target duration in seconds
@@ -203,9 +191,9 @@ Provide:
                 system_prompt="You are an expert video editor specializing in gaming montages and highlight reels. Provide detailed, actionable editing suggestions.",
                 temperature=0.6,
             )
-            
+
             suggestions = self._parse_editing_suggestions(response)
-            
+
             return {
                 "success": True,
                 "suggestions": suggestions,
@@ -217,16 +205,11 @@ Provide:
                 "success": False,
                 "error": str(e),
             }
-    
-    def generate_thumbnail(
-        self,
-        video_path: str,
-        style: str = "gaming",
-        text: Optional[str] = None
-    ) -> Dict[str, Any]:
+
+    def generate_thumbnail(self, video_path: str, style: str = "gaming", text: Optional[str] = None) -> Dict[str, Any]:
         """
         Generate AI suggestions for thumbnail design
-        
+
         Args:
             video_path: Path to video
             style: Thumbnail style
@@ -252,7 +235,7 @@ Provide:
                 system_prompt="You are a thumbnail designer specializing in gaming content. Create engaging, click-worthy thumbnail designs.",
                 temperature=0.8,
             )
-            
+
             return {
                 "success": True,
                 "suggestions": response,
@@ -264,46 +247,49 @@ Provide:
                 "success": False,
                 "error": str(e),
             }
-    
+
     def _process_enhancement(
-        self,
-        enhancement_type: str,
-        input_video_path: str,
-        params: Dict[str, Any]
+        self, enhancement_type: str, input_video_path: str, params: Dict[str, Any]
     ) -> Dict[str, Any]:
         """Process video enhancement (stub for now - would integrate with actual video processing)"""
         # In production, this would call actual video processing libraries
         # For now, return a mock result
-        
+
         output_path = input_video_path.replace(".mp4", f"_enhanced_{enhancement_type}.mp4")
-        
+
         return {
             "success": True,
             "output_path": output_path,
             "quality_score": 85.0,
             "enhancement_type": enhancement_type,
         }
-    
+
     def _parse_captions(self, response: str) -> List[Dict[str, Any]]:
         """Parse captions from AI response"""
         captions = []
         lines = response.split("\n")
-        
+
         for line in lines:
             if ":" in line or "," in line:
                 # Try to extract timestamp and text
                 parts = line.split(":", 1) if ":" in line else line.split(",", 1)
                 if len(parts) == 2:
-                    captions.append({
-                        "timestamp": parts[0].strip(),
-                        "text": parts[1].strip(),
-                    })
-        
-        return captions if captions else [
-            {"timestamp": "0:00", "text": "Generated caption"},
-            {"timestamp": "0:05", "text": "Engaging moment"},
-        ]
-    
+                    captions.append(
+                        {
+                            "timestamp": parts[0].strip(),
+                            "text": parts[1].strip(),
+                        }
+                    )
+
+        return (
+            captions
+            if captions
+            else [
+                {"timestamp": "0:00", "text": "Generated caption"},
+                {"timestamp": "0:05", "text": "Engaging moment"},
+            ]
+        )
+
     def _parse_editing_suggestions(self, response: str) -> Dict[str, Any]:
         """Parse editing suggestions from AI response"""
         return {
@@ -312,16 +298,14 @@ Provide:
             "effects": [],
             "raw": response,
         }
-    
+
     def get_enhancement(self, enhancement_id: str) -> Optional[VideoEnhancement]:
         """Get an enhancement record"""
         with get_session() as session:
             return session.exec(
-                select(VideoEnhancement)
-                .where(VideoEnhancement.enhancement_id == enhancement_id)
+                select(VideoEnhancement).where(VideoEnhancement.enhancement_id == enhancement_id)
             ).first()
 
 
 # Global instance
 video_enhancer_service = VideoEnhancerService()
-

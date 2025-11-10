@@ -64,7 +64,7 @@ export default function Dashboard() {
           <SkeletonCard lines={2} />
         </div>
         <SkeletonChart height={200} className="mb-8" />
-        <div className="broken-planet-card p-6">
+        <div className="cosmic-card p-6">
           <div className="text-pure-white font-black mb-4 text-xl tracking-wide uppercase">Recent Jobs</div>
           <SkeletonJobItem />
           <SkeletonJobItem />
@@ -99,7 +99,7 @@ export default function Dashboard() {
       )}
 
       {/* Trend Chart */}
-      <AnimatedCard delay={0.3} className="broken-planet-card p-6 mb-8">
+      <AnimatedCard delay={0.3} className="cosmic-card p-6 mb-8">
         <div className="text-pure-white font-black mb-6 text-xl tracking-wide uppercase">Job Activity Trend</div>
         {chartData && chartData.length > 0 ? (
           <motion.div
@@ -123,7 +123,7 @@ export default function Dashboard() {
       </AnimatedCard>
 
           {/* Recent Jobs */}
-          <AnimatedCard delay={0.4} className="broken-planet-card p-6">
+          <AnimatedCard delay={0.4} className="cosmic-card p-6">
             <div className="text-pure-white font-black mb-4 text-xl tracking-wide uppercase">Recent Jobs</div>
             <StaggeredList className="space-y-3" delay={0.1}>
               {jobs.length === 0 && !loading ? (
@@ -137,7 +137,7 @@ export default function Dashboard() {
               ) : (
                 jobs.map((j, index) => (
                   <StaggeredItem key={j.job_id}>
-                    <div className="flex items-center justify-between text-sm text-pure-white/70 broken-planet-card p-4 mb-3 hover-lift">
+                    <div className="flex items-center justify-between text-sm text-pure-white/70 cosmic-card p-4 mb-3 hover-lift">
                       <div className="flex-1">
                         <div className="text-pure-white font-black text-xs tracking-wide mb-1">{j.job_id}</div>
                         <div className="font-bold">Status: <span className={j.status==="SUCCESS"?"text-pure-white":j.status==="FAILED"?"text-pure-white/50":"text-pure-white/70"}>{j.status}</span></div>
@@ -169,7 +169,7 @@ export default function Dashboard() {
 
 function Card({label, value}){
   return (
-    <div className="broken-planet-card p-6 text-center float">
+    <div className="cosmic-card p-6 text-center float">
       <div className="text-cosmic-neon-cyan/70 text-xs font-black tracking-wide uppercase mb-2">{label}</div>
       <div className="gradient-text-cosmic text-3xl font-black">{value}</div>
     </div>

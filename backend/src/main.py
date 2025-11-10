@@ -51,6 +51,7 @@ app.add_middleware(
     max_age=3600,  # Cache preflight requests for 1 hour
 )
 
+
 # Security headers middleware
 @app.middleware("http")
 async def add_security_headers(request, call_next):
@@ -66,9 +67,11 @@ async def add_security_headers(request, call_next):
         response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
     return response
 
+
 @app.on_event("startup")
 def on_startup():
     init_db()
+
 
 @app.get("/health")
 async def health_check():
@@ -76,12 +79,9 @@ async def health_check():
     import redis
     from config import settings
     from services.storage_adapters import get_storage
-    
-    health = {
-        "status": "healthy",
-        "checks": {}
-    }
-    
+
+    health = {"status": "healthy", "checks": {}}
+
     # Check database
     try:
         with get_session() as session:
@@ -90,7 +90,7 @@ async def health_check():
     except Exception as e:
         health["checks"]["database"] = f"error: {str(e)}"
         health["status"] = "degraded"
-    
+
     # Check Redis
     try:
         r = redis.from_url(settings.REDIS_URL)
@@ -99,7 +99,7 @@ async def health_check():
     except Exception as e:
         health["checks"]["redis"] = f"error: {str(e)}"
         health["status"] = "degraded"
-    
+
     # Check storage
     try:
         storage = get_storage()
@@ -107,8 +107,9 @@ async def health_check():
         health["checks"]["storage"] = "ok"
     except Exception as e:
         health["checks"]["storage"] = f"warning: {str(e)}"
-    
+
     return health
+
 
 # Existing endpoints
 @app.post("/upload")
@@ -123,11 +124,12 @@ async def upload_zip(file: UploadFile = File(...), target_duration: int = Form(6
             highlight_path,
             filename="highlight.mp4",
             media_type="video/mp4",
-            background=BackgroundTask(shutil.rmtree, workdir, True)
+            background=BackgroundTask(shutil.rmtree, workdir, True),
         )
     except Exception as e:
         shutil.rmtree(workdir, ignore_errors=True)
         return JSONResponse({"error": str(e)}, status_code=500)
+
 
 @app.post("/upload-clips")
 async def upload_clips(files: List[UploadFile] = File(...), target_duration: int = Form(60)):
@@ -146,11 +148,12 @@ async def upload_clips(files: List[UploadFile] = File(...), target_duration: int
             highlight_path,
             filename="highlight.mp4",
             media_type="video/mp4",
-            background=BackgroundTask(shutil.rmtree, workdir, True)
+            background=BackgroundTask(shutil.rmtree, workdir, True),
         )
     except Exception as e:
         shutil.rmtree(workdir, ignore_errors=True)
         return JSONResponse({"error": str(e)}, status_code=500)
+
 
 # Job endpoints
 @app.post("/jobs")
@@ -172,6 +175,7 @@ async def create_job(files: List[UploadFile] = File(...), target_duration: int =
 
     return {"job_id": jid, "status": JobStatus.PENDING, "stage": job.stage, "progress": job.progress}
 
+
 @app.get("/jobs/{job_id}/status")
 def job_status(job_id: str):
     with get_session() as session:
@@ -189,6 +193,7 @@ def job_status(job_id: str):
             "updated_at": job.updated_at.isoformat() if job.updated_at else None,
         }
 
+
 @app.get("/jobs/{job_id}/download")
 def job_download(job_id: str, format: str = "landscape"):
     export_dir = job_export_dir(job_id)
@@ -197,6 +202,7 @@ def job_download(job_id: str, format: str = "landscape"):
     if not os.path.exists(path):
         return JSONResponse({"error": "file not ready"}, status_code=404)
     return FileResponse(path, filename="highlight.mp4", media_type="video/mp4")
+
 
 @app.get("/analytics/summary")
 def analytics_summary():
@@ -209,6 +215,7 @@ def analytics_summary():
             "success_jobs": success,
             "failed_jobs": failed,
         }
+
 
 app.include_router(v2_router)
 app.include_router(accounts_v2_router)

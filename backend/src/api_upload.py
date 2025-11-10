@@ -99,7 +99,9 @@ async def upload_manual_clip(
                     raise
                 except Exception as exc:
                     logger.exception("failed to upload manual clip to object storage", exc_info=exc)
-                    raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="failed to persist uploaded clip") from exc
+                    raise HTTPException(
+                        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="failed to persist uploaded clip"
+                    ) from exc
             else:
                 try:
                     storage_path = storage.save(temp_path, dest_rel_path)  # type: ignore[attr-defined]
@@ -112,12 +114,16 @@ async def upload_manual_clip(
                     raise
                 except Exception as exc:
                     logger.exception("failed to save manual clip to local storage", exc_info=exc)
-                    raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="failed to persist uploaded clip") from exc
+                    raise HTTPException(
+                        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="failed to persist uploaded clip"
+                    ) from exc
     finally:
         await file.close()
 
     if not storage_path:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="unable to determine storage path")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="unable to determine storage path"
+        )
 
     with get_session() as session:
         record = UploadedClip(

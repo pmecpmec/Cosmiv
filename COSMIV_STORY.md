@@ -212,18 +212,18 @@ An intelligent chatbot represented as a glowing cosmic orb that helps users navi
 
 Cosmiv's entire visual identity revolves around a **cosmic, futuristic, space-age theme**. Every element—from the background to buttons to text—should evoke the feeling of traveling through space, exploring galaxies, and harnessing cosmic energy.
 
-**Broken Planet Variant (2025):**
+**Space Inspired Aesthetic (2025):**
 
-In 2025, Cosmiv evolved its aesthetic to include the **"Broken Planet"** style—a refined variant that adds:
+In 2025, Cosmiv refined its aesthetic to the **Space inspired, sleek, and futuristict / neon-cosmic aesthetic**—a refined variant that emphasizes:
 
-- **Glitch effects:** Subtle RGB channel separation, chromatic aberration
-- **Scanline overlays:** CRT-style horizontal lines for retro-futuristic vibe
+- **Cosmic effects:** Subtle RGB channel separation, chromatic aberration
+- **Scanline overlays:** Sleek horizontal lines for futuristic vibe
 - **Enhanced neon glows:** More intense luminosity on interactive elements
-- **Broken planet visuals:** Cracked/glitched planet in cosmic backgrounds
-- **Cyberpunk elements:** Space-age meets neon city aesthetics
-- **Glitch pink accents:** `#FF0080` and `#FF00FF` for error states and highlights
+- **Cosmic planet visuals:** Sleek animated planet in cosmic backgrounds
+- **Futuristic elements:** Space-age meets sleek design aesthetics
+- **Vibrant pink accents:** `#FF0080` and `#FF00FF` for error states and highlights
 
-The Broken Planet aesthetic maintains the cosmic foundation while adding cyberpunk edge and visual intensity, perfect for a cutting-edge gaming platform.
+The Space inspired aesthetic maintains the cosmic foundation while adding sleek, futuristic edge and visual intensity, perfect for a cutting-edge gaming platform.
 
 ### Color Palette
 
@@ -241,11 +241,11 @@ The Broken Planet aesthetic maintains the cosmic foundation while adding cyberpu
 - **Pure Black:** `#000000` - Primary background
 - **Pure White:** `#FFFFFF` - Primary text
 
-**Broken Planet Accent Colors:**
+**Space Inspired Accent Colors:**
 
-- **Glitch Pink:** `#FF0080` - Glitch effects, error states, dramatic accents
+- **Vibrant Pink:** `#FF0080` - Cosmic effects, error states, dramatic accents
 - **Hot Pink:** `#FF00FF` - Vibrant highlights, neon glows, intense moments
-- **Enhanced Neon Cyan:** `#00FFFF` - More intense version for Broken Planet variant
+- **Enhanced Neon Cyan:** `#00FFFF` - More intense version for Space inspired variant
 
 **Gradient Usage:**
 Cosmiv heavily uses gradients transitioning from violet → deep blue → neon cyan for:
@@ -291,7 +291,7 @@ This background is rendered in real-time using HTML5 Canvas and provides a dynam
 - Hover effects with glowing borders
 - Smooth transitions (Framer Motion)
 - Glassmorphism effects on some elements
-- **Broken Planet:** Enhanced neon glow, scanline overlay on active states, chromatic aberration on hover
+- **Space Inspired:** Enhanced neon glow, scanline overlay on active states, chromatic aberration on hover
 
 **Cards & Containers:**
 
@@ -299,15 +299,15 @@ This background is rendered in real-time using HTML5 Canvas and provides a dynam
 - Subtle borders (`border-white/20`)
 - Glowing hover states
 - Smooth shadows with cosmic color tints
-- **Broken Planet:** Floating animation, glitch border effects on hover, subtle RGB separation
+- **Space Inspired:** Floating animation, cosmic border effects on hover, subtle RGB separation
 
-**Broken Planet Visual Effects:**
+**Space Inspired Visual Effects:**
 
-- **Scanlines:** CRT-style horizontal lines overlay (~5-10% opacity)
-- **Glitch Effects:** Subtle RGB channel separation on transitions
+- **Scanlines:** Sleek horizontal lines overlay (~5-10% opacity)
+- **Cosmic Effects:** Subtle RGB channel separation on transitions
 - **Chromatic Aberration:** Red/cyan color separation on animations
-- **Broken Planet Element:** Animated planet with crack/glitch effects in cosmic background
-- **Enhanced Motion:** Parallax, floating animations, subtle screen shake
+- **Cosmic Planet Element:** Animated planet with sleek effects in cosmic background
+- **Enhanced Motion:** Parallax, floating animations, smooth interactions
 
 **Icons & Symbols:**
 

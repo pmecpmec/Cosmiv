@@ -1,6 +1,7 @@
 """
 API endpoints for AI Code Generation System
 """
+
 from fastapi import APIRouter, Depends, HTTPException
 from typing import Optional
 from pydantic import BaseModel
@@ -52,10 +53,10 @@ async def generate_frontend(
         style_system=request.style_system,
         context=request.context,
     )
-    
+
     if not result.get("success"):
         raise HTTPException(status_code=500, detail=result.get("error", "Generation failed"))
-    
+
     return result
 
 
@@ -70,10 +71,10 @@ async def generate_backend(
         framework=request.framework,
         context=request.context,
     )
-    
+
     if not result.get("success"):
         raise HTTPException(status_code=500, detail=result.get("error", "Generation failed"))
-    
+
     return result
 
 
@@ -88,10 +89,10 @@ async def optimize_code(
         language=request.language,
         optimization_type=request.optimization_type,
     )
-    
+
     if not result.get("success"):
         raise HTTPException(status_code=500, detail=result.get("error", "Optimization failed"))
-    
+
     return result
 
 
@@ -102,10 +103,10 @@ async def get_generation(
 ):
     """Get a code generation record"""
     generation = code_generator_service.get_generation(generation_id)
-    
+
     if not generation:
         raise HTTPException(status_code=404, detail="Generation not found")
-    
+
     return {
         "generation_id": generation.generation_id,
         "code_type": generation.code_type,
@@ -129,14 +130,14 @@ async def list_generations(
     """List all code generations"""
     with get_session() as session:
         query = select(CodeGeneration)
-        
+
         if code_type:
             query = query.where(CodeGeneration.code_type == code_type)
         if status:
             query = query.where(CodeGeneration.status == status)
-        
+
         generations = session.exec(query.order_by(CodeGeneration.created_at.desc())).all()
-        
+
         return {
             "generations": [
                 {
@@ -163,9 +164,8 @@ async def update_generation(
         review_notes=request.review_notes,
         file_path=request.file_path,
     )
-    
+
     if not success:
         raise HTTPException(status_code=404, detail="Generation not found")
-    
-    return {"success": True, "message": "Generation updated"}
 
+    return {"success": True, "message": "Generation updated"}

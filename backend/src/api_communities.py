@@ -2,6 +2,7 @@
 Community/Server API Endpoints
 Discord-like server and channel management
 """
+
 from fastapi import APIRouter, Depends, HTTPException, Body, Query
 from typing import Optional, List, Dict, Any
 from pydantic import BaseModel
@@ -45,7 +46,7 @@ async def create_server(
     with get_session() as session:
         server_id = f"server_{secrets.token_urlsafe(12)}"
         invite_code = secrets.token_urlsafe(8)
-        
+
         server = Server(
             server_id=server_id,
             name=request.name,
@@ -55,9 +56,9 @@ async def create_server(
             invite_code=invite_code,
             member_count=1,
         )
-        
+
         session.add(server)
-        
+
         # Add owner as member
         member = ServerMember(
             server_id=server_id,
@@ -65,13 +66,13 @@ async def create_server(
             role="owner",
         )
         session.add(member)
-        
+
         # Create default channels
         default_channels = [
             {"name": "general", "type": ChannelType.TEXT},
             {"name": "announcements", "type": ChannelType.ANNOUNCEMENTS},
         ]
-        
+
         for idx, ch_data in enumerate(default_channels):
             channel = Channel(
                 channel_id=f"channel_{secrets.token_urlsafe(12)}",
@@ -81,10 +82,10 @@ async def create_server(
                 position=idx,
             )
             session.add(channel)
-        
+
         session.commit()
         session.refresh(server)
-        
+
         return {
             "server_id": server_id,
             "invite_code": invite_code,
@@ -101,33 +102,29 @@ async def list_servers(
     with get_session() as session:
         if current_user:
             # Get user's servers
-            memberships = session.exec(
-                select(ServerMember).where(ServerMember.user_id == current_user.user_id)
-            ).all()
+            memberships = session.exec(select(ServerMember).where(ServerMember.user_id == current_user.user_id)).all()
             server_ids = [m.server_id for m in memberships]
-            
+
             if server_ids:
-                servers = session.exec(
-                    select(Server).where(Server.server_id.in_(server_ids))
-                ).all()
+                servers = session.exec(select(Server).where(Server.server_id.in_(server_ids))).all()
             else:
                 servers = []
         else:
             # Public servers only
-            servers = session.exec(
-                select(Server).where(Server.server_type == ServerType.PUBLIC)
-            ).limit(50).all()
-        
-        return {"servers": [
-            {
-                "server_id": s.server_id,
-                "name": s.name,
-                "description": s.description,
-                "member_count": s.member_count,
-                "icon_url": s.icon_url,
-            }
-            for s in servers
-        ]}
+            servers = session.exec(select(Server).where(Server.server_type == ServerType.PUBLIC)).limit(50).all()
+
+        return {
+            "servers": [
+                {
+                    "server_id": s.server_id,
+                    "name": s.name,
+                    "description": s.description,
+                    "member_count": s.member_count,
+                    "icon_url": s.icon_url,
+                }
+                for s in servers
+            ]
+        }
 
 
 @router.post("/servers/{server_id}/join")
@@ -138,29 +135,26 @@ async def join_server(
 ):
     """Join a server (requires invite code for private/unlisted)"""
     with get_session() as session:
-        server = session.exec(
-            select(Server).where(Server.server_id == server_id)
-        ).first()
-        
+        server = session.exec(select(Server).where(Server.server_id == server_id)).first()
+
         if not server:
             raise HTTPException(status_code=404, detail="Server not found")
-        
+
         # Check if already member
         existing = session.exec(
             select(ServerMember).where(
-                ServerMember.server_id == server_id,
-                ServerMember.user_id == current_user.user_id
+                ServerMember.server_id == server_id, ServerMember.user_id == current_user.user_id
             )
         ).first()
-        
+
         if existing:
             return {"message": "Already a member", "server_id": server_id}
-        
+
         # Check permissions
         if server.server_type != ServerType.PUBLIC:
             if not invite_code or invite_code != server.invite_code:
                 raise HTTPException(status_code=403, detail="Invalid invite code")
-        
+
         # Join server
         member = ServerMember(
             server_id=server_id,
@@ -168,11 +162,11 @@ async def join_server(
             role="member",
         )
         session.add(member)
-        
+
         server.member_count += 1
         session.add(server)
         session.commit()
-        
+
         return {"message": "Joined server successfully", "server_id": server_id}
 
 
@@ -186,29 +180,27 @@ async def list_channels(
         # Check membership
         member = session.exec(
             select(ServerMember).where(
-                ServerMember.server_id == server_id,
-                ServerMember.user_id == current_user.user_id
+                ServerMember.server_id == server_id, ServerMember.user_id == current_user.user_id
             )
         ).first()
-        
+
         if not member:
             raise HTTPException(status_code=403, detail="Not a member of this server")
-        
-        channels = session.exec(
-            select(Channel).where(Channel.server_id == server_id)
-            .order_by(Channel.position)
-        ).all()
-        
-        return {"channels": [
-            {
-                "channel_id": c.channel_id,
-                "name": c.name,
-                "description": c.description,
-                "channel_type": c.channel_type.value,
-                "message_count": c.message_count,
-            }
-            for c in channels
-        ]}
+
+        channels = session.exec(select(Channel).where(Channel.server_id == server_id).order_by(Channel.position)).all()
+
+        return {
+            "channels": [
+                {
+                    "channel_id": c.channel_id,
+                    "name": c.name,
+                    "description": c.description,
+                    "channel_type": c.channel_type.value,
+                    "message_count": c.message_count,
+                }
+                for c in channels
+            ]
+        }
 
 
 @router.get("/channels/{channel_id}/messages")
@@ -220,50 +212,45 @@ async def get_messages(
 ):
     """Get messages in a channel"""
     with get_session() as session:
-        channel = session.exec(
-            select(Channel).where(Channel.channel_id == channel_id)
-        ).first()
-        
+        channel = session.exec(select(Channel).where(Channel.channel_id == channel_id)).first()
+
         if not channel:
             raise HTTPException(status_code=404, detail="Channel not found")
-        
+
         # Check membership
         member = session.exec(
             select(ServerMember).where(
-                ServerMember.server_id == channel.server_id,
-                ServerMember.user_id == current_user.user_id
+                ServerMember.server_id == channel.server_id, ServerMember.user_id == current_user.user_id
             )
         ).first()
-        
+
         if not member:
             raise HTTPException(status_code=403, detail="Not a member")
-        
+
         # Get messages
-        query = select(Message).where(
-            Message.channel_id == channel_id
-        ).order_by(Message.created_at.desc()).limit(limit)
-        
+        query = select(Message).where(Message.channel_id == channel_id).order_by(Message.created_at.desc()).limit(limit)
+
         if before:
-            before_msg = session.exec(
-                select(Message).where(Message.message_id == before)
-            ).first()
+            before_msg = session.exec(select(Message).where(Message.message_id == before)).first()
             if before_msg:
                 query = query.where(Message.created_at < before_msg.created_at)
-        
+
         messages = session.exec(query).all()
         messages.reverse()  # Oldest first
-        
-        return {"messages": [
-            {
-                "message_id": m.message_id,
-                "user_id": m.user_id,
-                "content": m.content,
-                "attachments": json.loads(m.attachments) if m.attachments else [],
-                "video_id": m.video_id,
-                "created_at": m.created_at.isoformat(),
-            }
-            for m in messages
-        ]}
+
+        return {
+            "messages": [
+                {
+                    "message_id": m.message_id,
+                    "user_id": m.user_id,
+                    "content": m.content,
+                    "attachments": json.loads(m.attachments) if m.attachments else [],
+                    "video_id": m.video_id,
+                    "created_at": m.created_at.isoformat(),
+                }
+                for m in messages
+            ]
+        }
 
 
 @router.post("/channels/{channel_id}/messages")
@@ -274,24 +261,21 @@ async def send_message(
 ):
     """Send a message in a channel"""
     with get_session() as session:
-        channel = session.exec(
-            select(Channel).where(Channel.channel_id == channel_id)
-        ).first()
-        
+        channel = session.exec(select(Channel).where(Channel.channel_id == channel_id)).first()
+
         if not channel:
             raise HTTPException(status_code=404, detail="Channel not found")
-        
+
         # Check membership
         member = session.exec(
             select(ServerMember).where(
-                ServerMember.server_id == channel.server_id,
-                ServerMember.user_id == current_user.user_id
+                ServerMember.server_id == channel.server_id, ServerMember.user_id == current_user.user_id
             )
         ).first()
-        
+
         if not member or member.is_banned or member.is_muted:
             raise HTTPException(status_code=403, detail="Cannot send messages")
-        
+
         # Create message
         message_id = f"msg_{secrets.token_urlsafe(12)}"
         message = Message(
@@ -304,14 +288,13 @@ async def send_message(
             video_id=request.video_id,
             reply_to_id=request.reply_to_id,
         )
-        
+
         session.add(message)
         channel.message_count += 1
         session.add(channel)
         session.commit()
-        
+
         return {
             "message_id": message_id,
             "message": "Message sent successfully",
         }
-

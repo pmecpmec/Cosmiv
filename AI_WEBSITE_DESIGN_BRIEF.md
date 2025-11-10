@@ -3,7 +3,7 @@
 
 **Created for:** Cosmiv Front-End Development  
 **Date:** 2025-01-27  
-**Objective:** Design patterns inspired by leading AI companies, adapted for Cosmiv's Broken Planet neon-cosmic theme
+**Objective:** Design patterns inspired by leading AI companies, adapted for Cosmiv's Space inspired neon-cosmic theme
 
 ---
 
@@ -23,7 +23,7 @@
 
 ## 🎨 COLOR PALETTES & GRADIENT COMBINATIONS
 
-### Primary Palette (Cosmiv Broken Planet)
+### Primary Palette (Cosmiv Space inspired)
 ```css
 /* Cosmic Foundation */
 --cosmic-black: #000000;           /* Pure black base */
@@ -35,7 +35,7 @@
 --cosmic-deep-blue: #1E3A8A;     /* Depth */
 --cosmic-neon-cyan: #00FFFF;     /* Highlights */
 
-/* Broken Planet Accents */
+/* Space inspired Accents */
 --glitch-pink: #FF0080;          /* Glitch effects */
 --hot-pink: #FF00FF;             /* Intense highlights */
 --cosmic-purple: #A855F7;        /* Secondary accent */
@@ -236,7 +236,7 @@ transition={{ duration: 0.6, delay: index * 0.1 }}
 }
 ```
 
-#### 3. **Text Glitch on Hover** (Broken Planet)
+#### 3. **Text Glitch on Hover** (Space inspired)
 ```css
 .text-glitch:hover {
   animation: glitch 0.3s;
@@ -393,7 +393,7 @@ const pageVariants = {
 - Aligns with existing CosmicBackground
 - Clean, focused, spacey
 - Allows sphere to be the hero
-- Works well with Broken Planet aesthetic
+- Works well with Space inspired aesthetic
 
 ---
 
@@ -601,7 +601,7 @@ const pageVariants = {
 - Customer logos with glow effects
 - Testimonial cards with cosmic styling
 - Usage statistics in animated counters
-- Success stories in broken planet cards
+- Success stories in cosmic cards
 
 ### Content Sections Order
 
@@ -693,7 +693,7 @@ const pageVariants = {
 
 ```jsx
 <motion.div
-  className="broken-planet-card p-8 group"
+  className="cosmic-card p-8 group"
   whileHover={{ y: -8, scale: 1.02 }}
   initial={{ opacity: 0, y: 50 }}
   whileInView={{ opacity: 1, y: 0 }}
@@ -725,7 +725,7 @@ const pageVariants = {
 
 ```jsx
 <motion.div
-  className={`broken-planet-card p-8 relative ${
+  className={`cosmic-card p-8 relative ${
     featured ? 'border-cosmic-neon-cyan border-2 neon-glow-cyan' : ''
   }`}
   whileHover={{ y: -5, scale: 1.02 }}
@@ -867,7 +867,7 @@ const pageVariants = {
 - [ ] Active page indicators
 
 ### Content Sections
-- [ ] Feature cards with Broken Planet styling
+- [ ] Feature cards with Space inspired styling
 - [ ] Interactive product demos
 - [ ] Pricing cards with neon accents
 - [ ] Testimonials in cosmic cards
@@ -884,7 +884,7 @@ const pageVariants = {
 
 ## 🎯 UNIQUE COSMIV TWISTS
 
-### Broken Planet Elements to Emphasize:
+### Space inspired Elements to Emphasize:
 1. **Glitch effects** on error states and transitions
 2. **Scanline overlay** across entire site
 3. **Chromatic aberration** on hover

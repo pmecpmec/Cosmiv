@@ -105,7 +105,7 @@ export function CardLoader({ visible = true, message = 'Loading...' }) {
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="broken-planet-card p-12 border-2 border-cosmic-neon-cyan/30 flex items-center justify-center min-h-[200px] relative overflow-hidden"
+      className="cosmic-card p-12 border-2 border-cosmic-neon-cyan/30 flex items-center justify-center min-h-[200px] relative overflow-hidden"
     >
       {/* Subtle background glow */}
       <motion.div

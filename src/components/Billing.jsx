@@ -147,7 +147,7 @@ export default function Billing() {
   };
 
   return (
-    <div className="broken-planet-card rounded-2xl p-12 float">
+    <div className="cosmic-card rounded-2xl p-12 float">
       <h2 className="text-4xl font-black gradient-text-cosmic mb-12 tracking-poppr text-center">💳   B I L L I N G   &   S U B S C R I P T I O N</h2>
       
       {error && (
@@ -171,7 +171,7 @@ export default function Billing() {
       )}
 
       {currentPlan && (
-        <div className="mb-8 p-6 border-2 border-cosmic-neon-cyan/40 bg-cosmic-violet/20 text-pure-white backdrop-blur-sm neon-glow-cyan broken-planet-card">
+        <div className="mb-8 p-6 border-2 border-cosmic-neon-cyan/40 bg-cosmic-violet/20 text-pure-white backdrop-blur-sm neon-glow-cyan cosmic-card">
           <div className="flex items-center justify-between">
             <div>
               <div className="font-black text-xl tracking-wide uppercase mb-2">
@@ -203,7 +203,7 @@ export default function Billing() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             whileHover={{ y: -5, scale: 1.02 }}
-            className={`border-2 p-8 relative broken-planet-card ${getPlanHighlight(p.id)}`}
+            className={`border-2 p-8 relative cosmic-card ${getPlanHighlight(p.id)}`}
           >
             {p.id === "creator" && (
               <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 px-4 py-2 bg-cosmic-neon-cyan text-pure-black border-2 border-cosmic-neon-cyan font-black tracking-wide text-xs neon-glow-cyan">
@@ -251,7 +251,7 @@ export default function Billing() {
       </div>
 
       {/* Info */}
-      <div className="mt-8 p-6 border-2 border-cosmic-neon-cyan/30 bg-cosmic-deep-blue/10 text-cosmic-neon-cyan/90 backdrop-blur-sm broken-planet-card neon-glow-cyan">
+      <div className="mt-8 p-6 border-2 border-cosmic-neon-cyan/30 bg-cosmic-deep-blue/10 text-cosmic-neon-cyan/90 backdrop-blur-sm cosmic-card neon-glow-cyan">
         <div className="font-black mb-3 tracking-wide uppercase text-sm">ℹ️   P A Y M E N T   I N F O R M A T I O N</div>
         <div className="font-bold">
           {process.env.NODE_ENV === "production" ? (
