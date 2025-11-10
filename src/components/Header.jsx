@@ -203,7 +203,7 @@ export default function Header({ activeTab, setActiveTab }) {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
                       transition={{ duration: 0.2 }}
-                      className="absolute top-full left-0 mt-2 bg-gradient-to-br from-cosmic-violet/95 via-cosmic-deep-blue/95 to-cosmic-violet/95 border-2 border-cosmic-neon-cyan/50 min-w-[200px] shadow-2xl shadow-cosmic-neon-cyan/30 backdrop-blur-md broken-planet-card"
+                      className="absolute top-full left-0 mt-2 bg-gradient-to-br from-cosmic-violet/95 via-cosmic-deep-blue/95 to-cosmic-violet/95 border-2 border-cosmic-neon-cyan/50 min-w-[200px] shadow-2xl shadow-cosmic-neon-cyan/30 backdrop-blur-md cosmic-card"
                     >
                       {dropdown.tabs.map((tab, index) => (
                         <motion.button

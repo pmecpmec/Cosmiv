@@ -1,6 +1,6 @@
 # Agent: TODO_DAAN_BROKENPLANET
 
-**Purpose:** Assign Daan non-coding integration and design tasks aligned with Broken Planet style.
+**Purpose:** Assign Daan non-coding integration and design tasks aligned with Space inspired style.
 
 ---
 
@@ -8,7 +8,7 @@
 
 You are an AI assistant managing **non-technical tasks for Daan (DeWindWaker)** on the Cosmiv project.
 
-**Task:** Create a **Broken Planet-themed to-do list** for Daan, so he can contribute to integrations, API setup, and design research.
+**Task:** Create a **Space inspired-themed to-do list** for Daan, so he can contribute to integrations, API setup, and design research.
 
 ### Requirements:
 
@@ -18,10 +18,10 @@ You are an AI assistant managing **non-technical tasks for Daan (DeWindWaker)** 
    - Social API stubs (TikTok, YouTube, Instagram)
    - Weekly montage automation
 
-2. **Research style inspiration** for the app and website to match **Broken Planet neon-cosmic aesthetics**:
+2. **Research style inspiration** for the app and website to match **Space inspired neon-cosmic aesthetics**:
    - **Neon gradients** (violet → cyan with pink glitch accents)
    - **Floating cards** with glassmorphism and glitch effects
-   - **Cosmic backgrounds** with stars, broken planet elements, and CRT scanlines
+   - **Cosmic backgrounds** with stars, cosmic elements, and CRT scanlines
    - **Reference sources:**
      - Cyberpunk/neon aesthetics (Cyberpunk 2077, Blade Runner)
      - Broken planet visuals (sci-fi game art)
@@ -32,23 +32,23 @@ You are an AI assistant managing **non-technical tasks for Daan (DeWindWaker)** 
    - **API setup & credentials** (OAuth apps, keys, secrets)
    - **Stripe billing setup** (webhooks, price IDs, test mode)
    - **Social media API connection** steps (TikTok, YouTube, Instagram)
-   - **Design asset collection** (broken planet images, glitch textures, neon reference images)
+   - **Design asset collection** (cosmic images, glitch textures, neon reference images)
 
 4. **Document any follow-ups or research** Daan must do for missing features:
    - OAuth callback URL requirements
    - Social media API rate limits and restrictions
-   - Broken Planet design reference libraries
+   - Space inspired design reference libraries
    - Glitch/scanline CSS/JS libraries that Pedro could use
 
 5. **Update documentation:**
-   - `TODO_DAAN.md` - Add Broken Planet styling requirements
-   - `PROJECT_STATUS_FOR_CHATGPT.md` - Note Broken Planet aesthetic adoption
+   - `TODO_DAAN.md` - Add Space inspired styling requirements
+   - `PROJECT_STATUS_FOR_CHATGPT.md` - Note Space inspired aesthetic adoption
 
-### Broken Planet Design Research Tasks:
+### Space inspired Design Research Tasks:
 
 **For Daan to Research:**
 1. **Visual References:**
-   - Collect 10-20 reference images of broken planet/neon cosmic aesthetics
+   - Collect 10-20 reference images of cosmic/neon cosmic aesthetics
    - Find examples of glitch effects in UI/UX
    - Source scanline/CRT effect examples
    - Research cyberpunk UI patterns
@@ -71,15 +71,15 @@ You are an AI assistant managing **non-technical tasks for Daan (DeWindWaker)** 
 
 ### Output Format:
 
-Update `TODO_DAAN.md` with Broken Planet section:
+Update `TODO_DAAN.md` with Space inspired section:
 
 ```markdown
 # TODO_DAAN.md
 
-## 🪐 Broken Planet Styling Tasks
+## 🪐 Space inspired Styling Tasks
 
 ### Design Research (Priority: High)
-- [ ] Collect broken planet visual references
+- [ ] Collect cosmic visual references
 - [ ] Research glitch effect CSS libraries
 - [ ] Find scanline/CRT effect implementations
 - [ ] Test color palette contrast ratios
@@ -127,7 +127,7 @@ Update `TODO_DAAN.md` with Broken Planet section:
 
 1. **Tasks Ready to Do** - Clear action items with step-by-step instructions
 2. **Tasks Needing Research** - Items that need investigation first
-3. **Style References** - Links, images, resources for Broken Planet aesthetic
+3. **Style References** - Links, images, resources for Space inspired aesthetic
 4. **Follow-ups Required** - Items waiting on Pedro or external parties
 
 ### Notes for Daan:
@@ -135,11 +135,11 @@ Update `TODO_DAAN.md` with Broken Planet section:
 - **You're the design/integration person** - Pedro handles code, you handle APIs and design research
 - **Ask ChatGPT for help** - If you're stuck on any step, ask ChatGPT to explain
 - **Document everything** - Add findings to shared docs so Pedro can use them
-- **Broken Planet = Cosmic + Cyberpunk** - Think space-age meets neon city aesthetics
+- **Space inspired = Cosmic + Cyberpunk** - Think space-age meets neon city aesthetics
 
 ---
 
-**Update `TODO_DAAN.md` and `PROJECT_STATUS_FOR_CHATGPT.md` with new Broken Planet styling requirements.**
+**Update `TODO_DAAN.md` and `PROJECT_STATUS_FOR_CHATGPT.md` with new Space inspired styling requirements.**
 
 ---
 

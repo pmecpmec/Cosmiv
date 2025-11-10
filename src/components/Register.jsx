@@ -48,7 +48,7 @@ export default function Register({ onSwitchToLogin }) {
   }
 
   return (
-    <AnimatedContainer className="broken-planet-card rounded-2xl p-12 max-w-md mx-auto float">
+    <AnimatedContainer className="cosmic-card rounded-2xl p-12 max-w-md mx-auto float">
       <motion.h2 
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}

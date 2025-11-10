@@ -61,7 +61,7 @@ function SkeletonBase({ className = '', width, height, rounded = 'rounded' }) {
  */
 export function SkeletonCard({ lines = 2 }) {
   return (
-    <div className="broken-planet-card p-6 border-2 border-pure-white/20">
+    <div className="cosmic-card p-6 border-2 border-pure-white/20">
       <SkeletonBase height={20} width="60%" className="mb-4" />
       <div className="space-y-2">
         {Array.from({ length: lines }).map((_, i) => (
@@ -79,7 +79,7 @@ export function SkeletonTable({ rows = 5, columns = 3 }) {
   return (
     <div className="space-y-3">
       {Array.from({ length: rows }).map((_, rowIdx) => (
-        <div key={rowIdx} className="flex gap-4 items-center broken-planet-card p-4 border-2 border-pure-white/20">
+        <div key={rowIdx} className="flex gap-4 items-center cosmic-card p-4 border-2 border-pure-white/20">
           {Array.from({ length: columns }).map((_, colIdx) => (
             <SkeletonBase
               key={colIdx}
@@ -98,7 +98,7 @@ export function SkeletonTable({ rows = 5, columns = 3 }) {
  */
 export function SkeletonChart({ height = 200 }) {
   return (
-    <div className="broken-planet-card p-6 border-2 border-pure-white/20">
+    <div className="cosmic-card p-6 border-2 border-pure-white/20">
       <SkeletonBase height={24} width="40%" className="mb-6" />
       <div className="flex items-end justify-between gap-2" style={{ height }}>
         {Array.from({ length: 7 }).map((_, i) => {
@@ -127,7 +127,7 @@ export function SkeletonChart({ height = 200 }) {
  */
 export function SkeletonForm({ fields = 3 }) {
   return (
-    <div className="space-y-6 broken-planet-card p-6 border-2 border-pure-white/20">
+    <div className="space-y-6 cosmic-card p-6 border-2 border-pure-white/20">
       {Array.from({ length: fields }).map((_, i) => (
         <div key={i} className="space-y-2">
           <SkeletonBase height={16} width="30%" />
@@ -144,7 +144,7 @@ export function SkeletonForm({ fields = 3 }) {
  */
 export function SkeletonJobItem() {
   return (
-    <div className="flex items-center justify-between broken-planet-card p-4 mb-3 border-2 border-pure-white/20">
+    <div className="flex items-center justify-between cosmic-card p-4 mb-3 border-2 border-pure-white/20">
       <div className="flex-1 space-y-2">
         <SkeletonBase height={16} width="40%" />
         <SkeletonBase height={14} width="60%" />
@@ -168,7 +168,7 @@ export function SkeletonList({ items = 5 }) {
   return (
     <div className="space-y-3">
       {Array.from({ length: items }).map((_, i) => (
-        <div key={i} className="flex items-center gap-4 broken-planet-card p-4 border-2 border-pure-white/20">
+        <div key={i} className="flex items-center gap-4 cosmic-card p-4 border-2 border-pure-white/20">
           <SkeletonBase height={40} width={40} rounded="rounded-full" />
           <div className="flex-1 space-y-2">
             <SkeletonBase height={16} width="60%" />

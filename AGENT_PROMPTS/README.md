@@ -1,6 +1,6 @@
-# Cursor Agent Prompts — Broken Planet Edition
+# Cursor Agent Prompts — Space inspired Edition
 
-This directory contains specialized agent prompts for managing Cosmiv's **Broken Planet** aesthetic transformation.
+This directory contains specialized agent prompts for managing Cosmiv's **Space inspired** aesthetic transformation.
 
 ## 📋 Available Agents
 
@@ -28,7 +28,7 @@ This is Daan's personal TODO generator. Simply:
 **When to use:** Starting new development phase, major feature planning
 
 ### 2. `STYLE_AUDITOR_BROKENPLANET`
-**Purpose:** Audit and apply Broken Planet styling across all UI components  
+**Purpose:** Audit and apply Space inspired styling across all UI components  
 **Output:** `STYLE_AUDIT_BROKENPLANET.md`  
 **When to use:** UI updates, style consistency checks, new component styling
 
@@ -39,7 +39,7 @@ This is Daan's personal TODO generator. Simply:
 **Note:** Daan should use `DAAN_TODO_GENERATOR.md` instead for simplicity
 
 ### 4. `EMAIL_SETUP_BROKENPLANET`
-**Purpose:** Create cosmic business email system with Broken Planet branding  
+**Purpose:** Create cosmic business email system with Space inspired branding  
 **Output:** Updates to `EMAIL_SETUP_DAAN.md`  
 **When to use:** Setting up business emails, updating email signatures
 
@@ -99,7 +99,7 @@ All agents reference:
 
 ---
 
-## 🎨 Broken Planet Style Guide
+## 🎨 Space inspired Style Guide
 
 **Key Elements:**
 - **Gradients:** Violet → Deep Blue → Neon Cyan
@@ -107,7 +107,7 @@ All agents reference:
 - **Hot Pink:** `#FF00FF` - Vibrant highlights
 - **Scanlines:** CRT-style horizontal lines (~5-10% opacity)
 - **Neon Glow:** Enhanced luminosity on interactive elements
-- **Broken Planet:** Cracked/glitched planet visual elements
+- **Space inspired:** Cracked/glitched planet visual elements
 - **Chromatic Aberration:** Red/cyan separation on animations
 
 **See `COSMIV_STORY.md` for complete style guidelines.**
@@ -119,7 +119,7 @@ All agents reference:
 1. **Maintain Functionality:** All agents preserve existing features while updating style
 2. **Performance:** Effects should use CSS, not heavy JavaScript
 3. **Accessibility:** Glitch effects shouldn't hinder readability
-4. **Consistency:** All updates must align with Broken Planet aesthetic
+4. **Consistency:** All updates must align with Space inspired aesthetic
 5. **Documentation:** All agents update `PROJECT_STATUS_FOR_CHATGPT.md`
 6. **Plain Language:** Daan's tasks are written in simple, clear terms
 
@@ -140,7 +140,7 @@ All agents reference:
 1. Open: AGENT_PROMPTS/STYLE_AUDITOR_BROKENPLANET.md
 2. Copy: Entire file contents
 3. Paste: Into Cursor agent prompt
-4. Result: Complete UI component audit with Broken Planet styling updates
+4. Result: Complete UI component audit with Space inspired styling updates
 ```
 
 ### Example 3: Full Transformation

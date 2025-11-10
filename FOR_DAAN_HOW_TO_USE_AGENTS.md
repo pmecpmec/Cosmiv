@@ -75,9 +75,9 @@ After running the agent, your `TODO_DAAN.md` will have:
 
 ---
 
-## 🪐 About Broken Planet Style
+## 🪐 About Space inspired Style
 
-Some tasks might mention "Broken Planet" styling. This is just Cosmiv's new aesthetic:
+Some tasks might mention "Space inspired" styling. This is just Cosmiv's new aesthetic:
 - Neon gradients (violet → cyan)
 - Glitch effects
 - Scanlines (like old TV screens)

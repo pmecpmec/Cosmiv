@@ -231,7 +231,7 @@ export default function LandingPage({ onGetStarted }) {
             {pipelineSteps.map((step, index) => (
               <ScrollReveal key={index} delay={index * 0.1} direction="up">
                 <motion.div 
-                  className="broken-planet-card p-8 hover:border-cosmic-neon-cyan transition-all text-center relative group float card-3d overflow-hidden"
+                  className="cosmic-card p-8 hover:border-cosmic-neon-cyan transition-all text-center relative group float card-3d overflow-hidden"
                   initial={{ opacity: 0, y: 50, rotateX: -15 }}
                   whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
                   viewport={{ once: true, margin: "-100px" }}
@@ -362,7 +362,7 @@ export default function LandingPage({ onGetStarted }) {
             {features.map((feature, index) => (
               <ScrollReveal key={index} delay={index * 0.15} direction="up">
                 <motion.div 
-                  className="broken-planet-card p-10 hover:border-cosmic-neon-cyan transition-all group float relative overflow-hidden card-3d"
+                  className="cosmic-card p-10 hover:border-cosmic-neon-cyan transition-all group float relative overflow-hidden card-3d"
                   initial={{ opacity: 0, y: 60, rotateY: -20 }}
                   whileInView={{ opacity: 1, y: 0, rotateY: 0 }}
                   viewport={{ once: true, margin: "-50px" }}
@@ -495,7 +495,7 @@ export default function LandingPage({ onGetStarted }) {
         <div className="container mx-auto text-center relative z-10">
           <ScrollReveal delay={0.3} direction="fade">
             <motion.div 
-              className="broken-planet-card p-16 md:p-20 max-w-5xl mx-auto text-center float relative overflow-hidden"
+              className="cosmic-card p-16 md:p-20 max-w-5xl mx-auto text-center float relative overflow-hidden"
               initial={{ opacity: 0, scale: 0.9 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}

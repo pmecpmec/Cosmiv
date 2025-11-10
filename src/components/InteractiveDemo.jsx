@@ -93,7 +93,7 @@ export default function InteractiveDemo({ autoPlay = true, interval = 4000 }) {
                 animate={{ opacity: 1, scale: 1, rotateY: 0 }}
                 exit={{ opacity: 0, scale: 0.8, rotateY: 90 }}
                 transition={{ duration: 0.6, type: 'spring', stiffness: 100 }}
-                className="broken-planet-card p-12 relative overflow-hidden"
+                className="cosmic-card p-12 relative overflow-hidden"
               >
                 {/* Background glow */}
                 <motion.div
@@ -195,7 +195,7 @@ export default function InteractiveDemo({ autoPlay = true, interval = 4000 }) {
                     )}
 
                     <motion.div
-                      className={`broken-planet-card p-6 cursor-pointer transition-all relative overflow-hidden group ${
+                      className={`cosmic-card p-6 cursor-pointer transition-all relative overflow-hidden group ${
                         isActive ? 'border-cosmic-neon-cyan border-2' : 'border-white/20'
                       }`}
                       whileHover={{

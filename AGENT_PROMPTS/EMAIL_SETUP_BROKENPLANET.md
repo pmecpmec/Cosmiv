@@ -1,6 +1,6 @@
 # Agent: EMAIL_SETUP_BROKENPLANET
 
-**Purpose:** Create a cosmic business email system aligned with the Broken Planet branding.
+**Purpose:** Create a cosmic business email system aligned with the Space inspired branding.
 
 ---
 
@@ -8,7 +8,7 @@
 
 You are managing **Cosmiv business emails**.
 
-**Task:** Implement a **full email setup** with founder and operational emails, keeping the **Broken Planet neon-cosmic identity** in signatures.
+**Task:** Implement a **full email setup** with founder and operational emails, keeping the **Space inspired neon-cosmic identity** in signatures.
 
 ### Requirements:
 
@@ -29,8 +29,8 @@ You are managing **Cosmiv business emails**.
    - `marketing@cosmiv.com` - Marketing inquiries
 
 4. **Design cosmic, neon HTML & plain-text signatures** with:
-   - **Broken Planet aesthetic:** Gradients, glow effects, glitch accents
-   - **Space-themed emojis:** 🌌 (galaxy), ✨ (sparkles), 🚀 (rocket), 🪐 (broken planet)
+   - **Space inspired aesthetic:** Gradients, glow effects, glitch accents
+   - **Space-themed emojis:** 🌌 (galaxy), ✨ (sparkles), 🚀 (rocket), 🪐 (cosmic)
    - **Neon colors:** Violet → cyan gradients, glitch pink accents
    - **Professional yet cosmic:** Maintains business professionalism with cosmic flair
 
@@ -46,10 +46,10 @@ You are managing **Cosmiv business emails**.
    - Account recovery procedures
 
 7. **Update documentation:**
-   - `EMAIL_SETUP_DAAN.md` - Broken Planet signature templates
+   - `EMAIL_SETUP_DAAN.md` - Space inspired signature templates
    - `PROJECT_STATUS_FOR_CHATGPT.md` - Email system status
 
-### Broken Planet Signature Design:
+### Space inspired Signature Design:
 
 **HTML Signature Template:**
 
@@ -67,9 +67,9 @@ You are managing **Cosmiv business emails**.
     <span style="color: #8B5CF6;">[Role/Title]</span> | <span style="color: #00FFFF;">Cosmiv</span><br>
     <br>
     
-    <!-- Broken Planet symbol -->
+    <!-- Space inspired symbol -->
     <span style="font-size: 18px; margin-right: 8px;">🪐</span>
-    <span style="font-size: 14px; color: #A855F7;">Broken Planet Edition</span>
+    <span style="font-size: 14px; color: #A855F7;">Space inspired Edition</span>
     <br><br>
     
     <span style="font-size: 12px; color: #FFFFFF;">Website:</span> 
@@ -85,7 +85,7 @@ You are managing **Cosmiv business emails**.
 [Name]
 [Role/Title] | Cosmiv
 
-🪐 Broken Planet Edition
+🪐 Space inspired Edition
 
 Website: cosmiv.com
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -135,7 +135,7 @@ Value: v=spf1 include:_spf.google.com ~all
 
 Update `EMAIL_SETUP_DAAN.md` with:
 
-1. **Broken Planet Signature Templates** (HTML & plain-text)
+1. **Space inspired Signature Templates** (HTML & plain-text)
 2. **Email Address List** (all founder and operational emails)
 3. **DNS Setup Guide** (step-by-step instructions)
 4. **Security Checklist** (2FA, passwords, recovery)
@@ -147,11 +147,11 @@ Update `EMAIL_SETUP_DAAN.md` with:
 - **Fallback to plain-text** if HTML doesn't render
 - **Mobile-friendly** design (responsive signatures)
 - **Accessibility:** Ensure contrast ratios meet WCAG standards
-- **Brand consistency:** All signatures should reflect Broken Planet aesthetic
+- **Brand consistency:** All signatures should reflect Space inspired aesthetic
 
 ---
 
-**Update `EMAIL_SETUP_DAAN.md` and `PROJECT_STATUS_FOR_CHATGPT.md` with Broken Planet email system.**
+**Update `EMAIL_SETUP_DAAN.md` and `PROJECT_STATUS_FOR_CHATGPT.md` with Space inspired email system.**
 
 ---
 
