@@ -1,0 +1,50 @@
+{
+  "model": {
+    "provider": "runpod",
+    "base_model": "mistral-7b-instruct",
+    "api_endpoint": "",
+    "api_key": "",
+    "temperature": 0.7,
+    "max_tokens": 2048
+  },
+  "training": {
+    "auto_train": true,
+    "train_interval_hours": 24,
+    "preferred_editor": "davinci",
+    "learning_rate": 0.3,
+    "max_versions": 10
+  },
+  "research": {
+    "youtube_api_key": "",
+    "search_queries": [
+      "DaVinci Resolve viral edit tutorial",
+      "TikTok short transitions",
+      "YouTube Shorts editing trends",
+      "fast-paced video editing",
+      "beat sync editing tutorial"
+    ],
+    "update_interval_hours": 12
+  },
+  "meta_tracking": {
+    "tiktok_api_enabled": false,
+    "youtube_shorts_enabled": true,
+    "trend_window_days": 7,
+    "min_views_threshold": 10000
+  },
+  "editing": {
+    "default_pace": "fast",
+    "subtitle_enabled": true,
+    "color_grade_enabled": true,
+    "transition_style": "modern",
+    "beat_sync_enabled": true
+  },
+  "evaluation": {
+    "virality_weights": {
+      "pace": 0.25,
+      "beat_sync": 0.25,
+      "subtitle_timing": 0.20,
+      "retention_prediction": 0.30
+    },
+    "min_score_threshold": 60
+  }
+}
