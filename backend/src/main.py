@@ -30,6 +30,7 @@ from api_ai_content import router as ai_content_router
 from api_ai_code import router as ai_code_router
 from api_ai_ux import router as ai_ux_router
 from api_ai_video import router as ai_video_router
+from api_edit_ai import router as edit_ai_router
 
 app = FastAPI(title="Cosmiv - AI Gaming Montage Platform")
 
@@ -228,3 +229,4 @@ app.include_router(ai_content_router)
 app.include_router(ai_code_router)
 app.include_router(ai_ux_router)
 app.include_router(ai_video_router)
+app.include_router(edit_ai_router)
