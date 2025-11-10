@@ -20,11 +20,16 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install dependencies
+      - name: Clean install dependencies
         run: |
+          # Fix for npm optional dependency bug: remove Windows-generated lock file
+          rm -f package-lock.json
           npm cache clean --force
-          rm -rf node_modules package-lock.json
+          rm -rf node_modules
+          # Fresh install on Linux will get correct platform-specific optional deps
           npm install
+          # Workaround: explicitly ensure rollup's Linux native dependency is installed
+          npm install @rollup/rollup-linux-x64-gnu --no-save || true
 
       - name: Build
         run: npm run build
@@ -176,11 +181,16 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Install dependencies
+      - name: Clean install dependencies
         run: |
+          # Fix for npm optional dependency bug: remove Windows-generated lock file
+          rm -f package-lock.json
           npm cache clean --force
-          rm -rf node_modules package-lock.json
+          rm -rf node_modules
+          # Fresh install on Linux will get correct platform-specific optional deps
           npm install
+          # Workaround: explicitly ensure rollup's Linux native dependency is installed
+          npm install @rollup/rollup-linux-x64-gnu --no-save || true
 
       - name: Run tests
         run: npm test -- --passWithNoTests || true
