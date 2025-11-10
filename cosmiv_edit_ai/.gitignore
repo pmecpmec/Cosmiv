@@ -1,0 +1,40 @@
+# Cosmiv Edit AI - Git Ignore
+
+# Rendered videos
+renders/*.mp4
+renders/*.mov
+renders/*.avi
+renders/temp_*
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+temp_audio.*
+temp_eval_audio.*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Environment
+.env
+.venv
+venv/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

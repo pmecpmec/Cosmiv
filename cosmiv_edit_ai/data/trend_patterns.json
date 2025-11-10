@@ -1,0 +1,22 @@
+{
+  "version": "1.0.0",
+  "last_updated": null,
+  "trends": {
+    "youtube_shorts": {
+      "current_meta": [],
+      "trending_patterns": [],
+      "evolution_history": []
+    },
+    "tiktok": {
+      "current_meta": [],
+      "trending_patterns": [],
+      "evolution_history": []
+    },
+    "instagram_reels": {
+      "current_meta": [],
+      "trending_patterns": [],
+      "evolution_history": []
+    }
+  },
+  "rolling_window_days": 30
+}
