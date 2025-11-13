@@ -224,8 +224,119 @@ async function syncUploads() {
   // Retry failed uploads when back online
   console.log("[Service Worker] Syncing uploads...");
   try {
-    // TODO: Implement upload sync logic
-    // This would read from IndexedDB and retry failed uploads
+    // Check if IndexedDB is available
+    if (typeof self.indexedDB === 'undefined') {
+      console.log("[Service Worker] IndexedDB not available, skipping upload sync");
+      return;
+    }
+
+    // Open IndexedDB database for pending uploads
+    const dbName = 'cosmiv_uploads';
+    const dbVersion = 1;
+    
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open(dbName, dbVersion);
+      
+      request.onerror = () => {
+        console.error("[Service Worker] Failed to open IndexedDB:", request.error);
+        reject(request.error);
+      };
+      
+      request.onsuccess = async () => {
+        const db = request.result;
+        
+        // Check if uploads store exists
+        if (!db.objectStoreNames.contains('pending_uploads')) {
+          console.log("[Service Worker] No pending uploads store found");
+          db.close();
+          resolve();
+          return;
+        }
+        
+        const transaction = db.transaction(['pending_uploads'], 'readwrite');
+        const store = transaction.objectStore('pending_uploads');
+        const getAllRequest = store.getAll();
+        
+        getAllRequest.onsuccess = async () => {
+          const pendingUploads = getAllRequest.result;
+          console.log(`[Service Worker] Found ${pendingUploads.length} pending uploads`);
+          
+          if (pendingUploads.length === 0) {
+            db.close();
+            resolve();
+            return;
+          }
+          
+          // Retry each pending upload
+          const retryPromises = pendingUploads.map(async (upload) => {
+            try {
+              // Attempt to retry the upload
+              const response = await fetch(upload.url, {
+                method: upload.method || 'POST',
+                body: upload.body,
+                headers: upload.headers || {}
+              });
+              
+              if (response.ok) {
+                // Upload succeeded, remove from IndexedDB
+                const deleteTransaction = db.transaction(['pending_uploads'], 'readwrite');
+                const deleteStore = deleteTransaction.objectStore('pending_uploads');
+                await new Promise((resolve, reject) => {
+                  const deleteRequest = deleteStore.delete(upload.id);
+                  deleteRequest.onsuccess = () => resolve();
+                  deleteRequest.onerror = () => reject(deleteRequest.error);
+                });
+                console.log(`[Service Worker] Successfully synced upload ${upload.id}`);
+                return { success: true, id: upload.id };
+              } else {
+                // Upload failed, keep in IndexedDB for next retry
+                console.warn(`[Service Worker] Upload ${upload.id} failed: ${response.status}`);
+                return { success: false, id: upload.id };
+              }
+            } catch (error) {
+              // Network error, keep in IndexedDB
+              console.warn(`[Service Worker] Upload ${upload.id} error:`, error.message);
+              return { success: false, id: upload.id, error: error.message };
+            }
+          });
+          
+          const results = await Promise.all(retryPromises);
+          const successful = results.filter(r => r.success).length;
+          const failed = results.filter(r => !r.success).length;
+          
+          console.log(`[Service Worker] Sync complete: ${successful} succeeded, ${failed} failed`);
+          
+          // Notify clients about sync completion
+          const clients = await self.clients.matchAll();
+          clients.forEach(client => {
+            client.postMessage({
+              type: 'UPLOAD_SYNC_COMPLETE',
+              successful,
+              failed,
+              total: pendingUploads.length
+            });
+          });
+          
+          db.close();
+          resolve();
+        };
+        
+        getAllRequest.onerror = () => {
+          console.error("[Service Worker] Failed to get pending uploads:", getAllRequest.error);
+          db.close();
+          reject(getAllRequest.error);
+        };
+      };
+      
+      request.onupgradeneeded = (event) => {
+        const db = event.target.result;
+        // Create object store if it doesn't exist
+        if (!db.objectStoreNames.contains('pending_uploads')) {
+          const objectStore = db.createObjectStore('pending_uploads', { keyPath: 'id', autoIncrement: true });
+          objectStore.createIndex('timestamp', 'timestamp', { unique: false });
+        }
+      };
+    });
   } catch (error) {
     console.error("[Service Worker] Upload sync error:", error);
   }

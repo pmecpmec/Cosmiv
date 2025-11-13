@@ -111,6 +111,7 @@ jobs:
           REDIS_URL: redis://localhost:6379/0
           USE_POSTGRES: false  # Use in-memory SQLite for tests
           JWT_SECRET_KEY: test-secret-key-for-tests-only
+          STORAGE_ROOT: /tmp/cosmiv_storage  # Use writable temp directory
           PYTHONPATH: src
         working-directory: backend
         run: |

@@ -53,6 +53,20 @@ function AppContent() {
   if (loading) {
     return (
       <div className="min-h-screen bg-pure-black flex items-center justify-center relative">
+        {/* Animated Background Comets - Professional Cinematic Animation */}
+        <div className="area"></div>
+        <ul className="comets">
+          <li></li>
+          <li></li>
+          <li></li>
+          <li></li>
+          <li></li>
+          <li></li>
+          <li></li>
+          <li></li>
+          <li></li>
+          <li></li>
+        </ul>
         <StarfieldBackground starCount={1000} intensity="medium" />
         <motion.div 
           initial={{ opacity: 0 }}
@@ -68,6 +82,20 @@ function AppContent() {
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-pure-black flex items-center justify-center px-4 py-16 relative">
+        {/* Animated Background Comets - Professional Cinematic Animation */}
+        <div className="area"></div>
+        <ul className="comets">
+          <li></li>
+          <li></li>
+          <li></li>
+          <li></li>
+          <li></li>
+          <li></li>
+          <li></li>
+          <li></li>
+          <li></li>
+          <li></li>
+        </ul>
         {/* Stars on auth pages too */}
         <StarfieldBackground starCount={1500} intensity="high" />
         <div className="w-full max-w-md relative z-10">
@@ -101,6 +129,20 @@ function AppContent() {
 
   return (
     <div className="min-h-screen relative bg-pure-black text-pure-white">
+      {/* Animated Background Circles */}
+      <div className="area"></div>
+      <ul className="circles">
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+      </ul>
       <ScrollProgress />
       <CosmicBackground />
       {/* Enhanced starfield for better visibility */}
