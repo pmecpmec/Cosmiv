@@ -72,10 +72,17 @@ async def get_user(
             select(Entitlement).where(Entitlement.user_id == user_id)
         ).all()
 
-        # Get user's jobs count (note: jobs don't have user_id yet, so we skip this for now)
-        # TODO: Add user_id to Job model when user association is implemented
-        jobs_total = 0
-        jobs_success = 0
+        # Get user's jobs count
+        jobs_total = session.exec(
+            select(func.count(Job.id)).where(Job.user_id == user_id)
+        ).one() or 0
+        
+        jobs_success = session.exec(
+            select(func.count(Job.id)).where(
+                Job.user_id == user_id,
+                Job.status == JobStatus.SUCCESS
+            )
+        ).one() or 0
 
         return {
             "user_id": user.user_id,

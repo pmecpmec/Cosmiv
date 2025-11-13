@@ -18,18 +18,31 @@ export default function CosmicBackground() {
     setCanvasSize()
     window.addEventListener('resize', setCanvasSize)
 
-    // Initialize stars - more stars for richer background
+    // Initialize stars - MUCH more stars for rich, visible starfield
     const initStars = () => {
       starsRef.current = []
-      const starCount = 500
+      const starCount = 2000 // Increased from 500 to 2000 for dense starfield
       for (let i = 0; i < starCount; i++) {
+        const starType = Math.random()
         starsRef.current.push({
           x: Math.random() * canvas.width,
           y: Math.random() * canvas.height,
-          radius: Math.random() * 1.5 + 0.5,
-          opacity: Math.random() * 0.8 + 0.2,
+          radius: starType > 0.9 
+            ? Math.random() * 2 + 1.5  // Bright stars (10%)
+            : starType > 0.7 
+            ? Math.random() * 1.5 + 1   // Medium stars (20%)
+            : Math.random() * 1 + 0.5,  // Small stars (70%)
+          opacity: starType > 0.9 
+            ? Math.random() * 0.3 + 0.9  // Very bright (0.9-1.2)
+            : starType > 0.7 
+            ? Math.random() * 0.4 + 0.6  // Medium bright (0.6-1.0)
+            : Math.random() * 0.5 + 0.4, // Dim but visible (0.4-0.9)
           twinkleSpeed: Math.random() * 0.02 + 0.01,
           twinkleOffset: Math.random() * Math.PI * 2,
+          color: starType > 0.95 
+            ? 'colored' // 5% colored stars
+            : 'white',
+          colorType: starType > 0.95 ? Math.floor(Math.random() * 4) : 0, // Store color type for consistency
         })
       }
     }
@@ -251,8 +264,8 @@ export default function CosmicBackground() {
 
     // Animation loop
     const animate = () => {
-      // Deep teal/blue-green cosmic background
-      ctx.fillStyle = '#0a1a2a'  // Dark teal-blue
+      // Deep space black background - pure black for maximum star visibility
+      ctx.fillStyle = '#000000'  // Pure black for maximum star contrast
       ctx.fillRect(0, 0, canvas.width, canvas.height)
 
       // Draw subtle nebulae in deep teal/blue-green tones
@@ -285,35 +298,66 @@ export default function CosmicBackground() {
         0.1
       )
 
-      // Draw stars - more visible against darker background
-      ctx.fillStyle = 'white'
+      // Draw stars - MUCH more visible and prominent
       starsRef.current.forEach((star) => {
-        const twinkle = Math.sin(Date.now() * star.twinkleSpeed + star.twinkleOffset) * 0.3 + 0.7
-        ctx.globalAlpha = star.opacity * twinkle
+        const twinkle = Math.sin(Date.now() * star.twinkleSpeed + star.twinkleOffset) * 0.2 + 0.8
+        const currentOpacity = star.opacity * twinkle
         
-        // Main star
-        ctx.beginPath()
-        ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2)
-        ctx.fill()
-
-        // Occasional colored stars (purple/cyan/pink)
-        if (Math.random() > 0.97) {
+        // Colored stars (5% of total)
+        if (star.color === 'colored') {
           const colorChoices = [
-            '255, 0, 255',   // Hot pink
-            '139, 92, 246',  // Cosmic violet
-            '0, 255, 255',   // Neon cyan
+            { rgb: '255, 0, 255', shadow: 'rgba(255, 0, 255, 0.8)' },   // Hot pink
+            { rgb: '139, 92, 246', shadow: 'rgba(139, 92, 246, 0.8)' }, // Cosmic violet
+            { rgb: '0, 255, 255', shadow: 'rgba(0, 255, 255, 0.8)' },    // Neon cyan
+            { rgb: '255, 215, 0', shadow: 'rgba(255, 215, 0, 0.8)' },   // Galactic gold
           ]
-          const color = colorChoices[Math.floor(Math.random() * colorChoices.length)]
-          ctx.fillStyle = `rgba(${color}, ${star.opacity * twinkle * 0.9})`
-          ctx.shadowBlur = 8
-          ctx.shadowColor = `rgba(${color}, 0.8)`
+          const color = colorChoices[star.colorType || 0] // Use stored color type
+          
+          // Glow effect for colored stars
+          ctx.shadowBlur = star.radius * 3
+          ctx.shadowColor = color.shadow
+          ctx.fillStyle = `rgba(${color.rgb}, ${currentOpacity})`
           ctx.beginPath()
-          ctx.arc(star.x, star.y, star.radius * 2, 0, Math.PI * 2)
+          ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2)
           ctx.fill()
-          ctx.shadowBlur = 0
-          ctx.fillStyle = 'white'
+          
+          // Outer glow ring
+          ctx.shadowBlur = star.radius * 5
+          ctx.beginPath()
+          ctx.arc(star.x, star.y, star.radius * 1.5, 0, Math.PI * 2)
+          ctx.fill()
+        } else {
+          // White stars - make them much brighter and more visible
+          ctx.shadowBlur = star.radius > 1.5 ? star.radius * 2 : 0 // Glow for larger stars
+          ctx.shadowColor = star.radius > 1.5 ? 'rgba(255, 255, 255, 0.5)' : 'transparent'
+          ctx.fillStyle = `rgba(255, 255, 255, ${currentOpacity})`
+          ctx.beginPath()
+          ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2)
+          ctx.fill()
         }
+        
+        // Reset shadow
+        ctx.shadowBlur = 0
       })
+      
+      // Add occasional shooting stars
+      if (Math.random() > 0.998) {
+        const startX = Math.random() * canvas.width
+        const startY = Math.random() * canvas.height * 0.3
+        const length = 100 + Math.random() * 50
+        const angle = Math.PI / 4 + (Math.random() - 0.5) * 0.3
+        
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)'
+        ctx.lineWidth = 2
+        ctx.shadowBlur = 10
+        ctx.shadowColor = 'rgba(0, 255, 255, 0.8)'
+        ctx.beginPath()
+        ctx.moveTo(startX, startY)
+        ctx.lineTo(startX + Math.cos(angle) * length, startY + Math.sin(angle) * length)
+        ctx.stroke()
+        ctx.shadowBlur = 0
+      }
+      
       ctx.globalAlpha = 1
 
       // Draw rotating sphere

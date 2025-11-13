@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { ToastProvider } from './contexts/ToastContext'
 import ErrorBoundary from './components/ErrorBoundary'
 import CosmicBackground from './components/CosmicBackground'
+import StarfieldBackground from './components/StarfieldBackground'
 import Login from './components/Login'
 import Register from './components/Register'
 import Header from './components/Header'
@@ -51,11 +52,12 @@ function AppContent() {
   // Show auth pages if not authenticated
   if (loading) {
     return (
-      <div className="min-h-screen bg-pure-black flex items-center justify-center">
+      <div className="min-h-screen bg-pure-black flex items-center justify-center relative">
+        <StarfieldBackground starCount={1000} intensity="medium" />
         <motion.div 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="text-pure-white text-xl font-black tracking-wide font-display"
+          className="text-pure-white text-xl font-black tracking-wide font-display relative z-10"
         >
           L O A D I N G . . .
         </motion.div>
@@ -65,8 +67,10 @@ function AppContent() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-pure-black flex items-center justify-center px-4 py-16">
-        <div className="w-full max-w-md">
+      <div className="min-h-screen bg-pure-black flex items-center justify-center px-4 py-16 relative">
+        {/* Stars on auth pages too */}
+        <StarfieldBackground starCount={1500} intensity="high" />
+        <div className="w-full max-w-md relative z-10">
           <div className="text-center mb-12">
             <motion.h1 
               initial={{ opacity: 0, scale: 0.9 }}
@@ -99,6 +103,8 @@ function AppContent() {
     <div className="min-h-screen relative bg-pure-black text-pure-white">
       <ScrollProgress />
       <CosmicBackground />
+      {/* Enhanced starfield for better visibility */}
+      <StarfieldBackground starCount={2000} intensity="high" />
       {/* Fixed Header */}
       <Header activeTab={activeTab} setActiveTab={setActiveTab} />
 
