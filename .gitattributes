@@ -6,7 +6,7 @@
 # Ensure env files are never committed
 .env filter=gitignore
 .env.* filter=gitignore
-!.env*.example
+\!.env*.example filter=gitignore
 
 # Private keys
 *.pem filter=gitignore

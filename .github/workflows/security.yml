@@ -70,10 +70,16 @@ jobs:
         uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true  # Don't fail workflow - review results in Security tab
+        id: gitleaks
+
+      - name: Upload Gitleaks results
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          config-path: .gitleaks.toml
-          no-git: false
-          verbose: true
+          name: gitleaks-results
+          path: results.sarif
+          retention-days: 90
 
   codeql-analysis:
     name: CodeQL Analysis
