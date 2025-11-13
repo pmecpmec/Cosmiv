@@ -28,9 +28,15 @@ export function AuthProvider({ children }) {
 
   const login = async (usernameOrEmail, password) => {
     try {
+      if (!usernameOrEmail || !password) {
+        return { success: false, error: 'Username/email and password are required' }
+      }
+
       const formData = new FormData()
-      formData.append('username_or_email', usernameOrEmail)
+      formData.append('username_or_email', usernameOrEmail.trim())
       formData.append('password', password)
+
+      console.log('Attempting login for:', usernameOrEmail)
 
       // Use api client for better error handling
       const data = await api.post('/api/auth/login', formData, {
@@ -38,9 +44,17 @@ export function AuthProvider({ children }) {
         headers: {}, // Don't set Content-Type for FormData
       })
       
+      console.log('Login response received:', { hasToken: !!data.access_token, hasUser: !!data.user })
+      
+      if (!data.access_token) {
+        return { success: false, error: 'No access token received from server' }
+      }
+      
       // Store token and user
       localStorage.setItem('auth_token', data.access_token)
-      localStorage.setItem('auth_refresh_token', data.refresh_token)
+      if (data.refresh_token) {
+        localStorage.setItem('auth_refresh_token', data.refresh_token)
+      }
       if (data.user) {
         localStorage.setItem('auth_user', JSON.stringify(data.user))
         setUser(data.user)
@@ -50,8 +64,28 @@ export function AuthProvider({ children }) {
       
       return { success: true }
     } catch (error) {
-      console.error('Login error:', error)
-      return { success: false, error: error.message || 'Login failed' }
+      console.error('Login error details:', {
+        message: error.message,
+        status: error.status,
+        data: error.data,
+        stack: error.stack
+      })
+      
+      // Provide more specific error messages
+      let errorMessage = 'Login failed'
+      if (error.status === 401) {
+        errorMessage = 'Invalid username/email or password'
+      } else if (error.status === 404) {
+        errorMessage = 'Login endpoint not found. Is the backend running?'
+      } else if (error.status === 0 || error.message?.includes('fetch')) {
+        errorMessage = 'Cannot connect to server. Please check if the backend is running.'
+      } else if (error.data?.detail) {
+        errorMessage = error.data.detail
+      } else if (error.message) {
+        errorMessage = error.message
+      }
+      
+      return { success: false, error: errorMessage }
     }
   }
 

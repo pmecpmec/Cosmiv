@@ -53,7 +53,7 @@ export default function Register({ onSwitchToLogin }) {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="text-4xl font-black gradient-text-cosmic mb-4 text-center tracking-poppr"
+        className="text-4xl font-black gradient-text-cosmic mb-4 text-center tracking-poppr font-display"
       >
         C R E A T E   A C C O U N T
       </motion.h2>
@@ -70,48 +70,54 @@ export default function Register({ onSwitchToLogin }) {
         <motion.div 
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="mb-6 p-4 border-2 border-pure-white bg-pure-white text-pure-black"
+          className="alert alert-error mb-6 border-2 border-error bg-error text-base-content"
         >
-          <p className="font-black tracking-wide">⚠️ {error}</p>
+          <span className="font-black tracking-wide">⚠️ {error}</span>
         </motion.div>
       )}
 
-      <AnimatedForm delay={0.3} onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-black text-pure-white mb-3 tracking-wide uppercase">
-            Username
+      <AnimatedForm delay={0.3} onSubmit={handleSubmit} className="form-control space-y-4">
+        <div className="form-control">
+          <label className="label">
+            <span className="label-text text-sm font-black text-pure-white tracking-wide uppercase">
+              Username
+            </span>
           </label>
           <input
             type="text"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required
-            className="w-full px-6 py-4 min-h-[44px] text-base bg-pure-black border-2 border-cosmic-neon-cyan/30 text-pure-white placeholder-pure-white/30 focus:outline-none focus:border-cosmic-neon-cyan font-bold tracking-wide disabled:opacity-50 focus:neon-glow-cyan"
+            className="input input-bordered w-full px-6 py-4 min-h-[44px] text-base bg-pure-black border-2 border-cosmic-neon-cyan/30 text-pure-white placeholder-pure-white/30 focus:outline-none focus:border-cosmic-neon-cyan font-bold tracking-wide disabled:opacity-50 focus:neon-glow-cyan"
             placeholder="Choose a username"
             disabled={loading}
             autoComplete="username"
           />
         </div>
 
-        <div>
-          <label className="block text-sm font-black text-pure-white mb-3 tracking-wide uppercase">
-            Email
+        <div className="form-control">
+          <label className="label">
+            <span className="label-text text-sm font-black text-pure-white tracking-wide uppercase">
+              Email
+            </span>
           </label>
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full px-6 py-4 min-h-[44px] text-base bg-pure-black border-2 border-cosmic-neon-cyan/30 text-pure-white placeholder-pure-white/30 focus:outline-none focus:border-cosmic-neon-cyan font-bold tracking-wide disabled:opacity-50 focus:neon-glow-cyan"
+            className="input input-bordered w-full px-6 py-4 min-h-[44px] text-base bg-pure-black border-2 border-cosmic-neon-cyan/30 text-pure-white placeholder-pure-white/30 focus:outline-none focus:border-cosmic-neon-cyan font-bold tracking-wide disabled:opacity-50 focus:neon-glow-cyan"
             placeholder="Enter your email"
             disabled={loading}
             autoComplete="email"
           />
         </div>
 
-        <div>
-          <label className="block text-sm font-black text-pure-white mb-3 tracking-wide uppercase">
-            Password
+        <div className="form-control">
+          <label className="label">
+            <span className="label-text text-sm font-black text-pure-white tracking-wide uppercase">
+              Password
+            </span>
           </label>
           <input
             type="password"
@@ -119,37 +125,50 @@ export default function Register({ onSwitchToLogin }) {
             onChange={(e) => setPassword(e.target.value)}
             required
             minLength={8}
-            className="w-full px-6 py-4 min-h-[44px] text-base bg-pure-black border-2 border-cosmic-neon-cyan/30 text-pure-white placeholder-pure-white/30 focus:outline-none focus:border-cosmic-neon-cyan font-bold tracking-wide disabled:opacity-50 focus:neon-glow-cyan"
+            className="input input-bordered w-full px-6 py-4 min-h-[44px] text-base bg-pure-black border-2 border-cosmic-neon-cyan/30 text-pure-white placeholder-pure-white/30 focus:outline-none focus:border-cosmic-neon-cyan font-bold tracking-wide disabled:opacity-50 focus:neon-glow-cyan"
             placeholder="At least 8 characters"
             disabled={loading}
             autoComplete="new-password"
           />
-          <p className="text-xs text-pure-white/50 mt-2 font-bold">Must be at least 8 characters</p>
+          <label className="label">
+            <span className="label-text-alt text-xs text-pure-white/50 font-bold">Must be at least 8 characters</span>
+          </label>
         </div>
 
-        <div>
-          <label className="block text-sm font-black text-pure-white mb-3 tracking-wide uppercase">
-            Confirm Password
+        <div className="form-control">
+          <label className="label">
+            <span className="label-text text-sm font-black text-pure-white tracking-wide uppercase">
+              Confirm Password
+            </span>
           </label>
           <input
             type="password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
-            className="w-full px-6 py-4 min-h-[44px] text-base bg-pure-black border-2 border-cosmic-neon-cyan/30 text-pure-white placeholder-pure-white/30 focus:outline-none focus:border-cosmic-neon-cyan font-bold tracking-wide disabled:opacity-50 focus:neon-glow-cyan"
+            className="input input-bordered w-full px-6 py-4 min-h-[44px] text-base bg-pure-black border-2 border-cosmic-neon-cyan/30 text-pure-white placeholder-pure-white/30 focus:outline-none focus:border-cosmic-neon-cyan font-bold tracking-wide disabled:opacity-50 focus:neon-glow-cyan"
             placeholder="Confirm your password"
             disabled={loading}
             autoComplete="new-password"
           />
         </div>
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full min-h-[44px] bg-gradient-to-r from-cosmic-violet to-cosmic-deep-blue hover:from-cosmic-purple hover:to-cosmic-violet text-white font-black py-4 border-2 border-cosmic-neon-cyan/50 hover:neon-glow-cyan transition-all tracking-wide disabled:opacity-50 disabled:cursor-not-allowed neon-glow chromatic-aberration"
-        >
-          {loading ? 'C R E A T I N G   A C C O U N T . . .' : 'C R E A T E   A C C O U N T'}
-        </button>
+        <div className="form-control mt-6">
+          <button
+            type="submit"
+            disabled={loading}
+            className="btn btn-primary w-full min-h-[44px] bg-gradient-to-r from-cosmic-violet to-cosmic-deep-blue hover:from-cosmic-purple hover:to-cosmic-violet text-white font-black py-4 border-2 border-cosmic-neon-cyan/50 hover:neon-glow-cyan transition-all tracking-wide disabled:opacity-50 disabled:cursor-not-allowed neon-glow chromatic-aberration btn-magnetic btn-glow-pulse font-display"
+          >
+            {loading ? (
+              <>
+                <span className="loading loading-spinner loading-sm"></span>
+                C R E A T I N G   A C C O U N T . . .
+              </>
+            ) : (
+              'C R E A T E   A C C O U N T'
+            )}
+          </button>
+        </div>
       </AnimatedForm>
 
       <div className="mt-6 text-center">

@@ -58,6 +58,34 @@ export default {
           "Segoe UI",
           "sans-serif",
         ],
+        // Space-style fonts for cosmic aesthetic
+        orbitron: [
+          "Orbitron",
+          "Inter",
+          "system-ui",
+          "sans-serif",
+        ],
+        exo: [
+          "Exo 2",
+          "Inter",
+          "system-ui",
+          "sans-serif",
+        ],
+        michroma: [
+          "Michroma",
+          "Orbitron",
+          "Inter",
+          "system-ui",
+          "sans-serif",
+        ],
+        // Hero and display text
+        display: [
+          "Orbitron",
+          "Michroma",
+          "Inter",
+          "system-ui",
+          "sans-serif",
+        ],
       },
       fontWeight: {
         black: 900,
@@ -125,8 +153,47 @@ export default {
         'float-cosmic': 'float-cosmic 4s ease-in-out infinite',
         'nebula-shift': 'nebula-shift 10s ease infinite',
         'pulse-neon': 'pulse-neon 2s ease-in-out infinite',
+        'spin-slow': 'spin-slow 20s linear infinite',
+        'glow-pulse': 'glow-pulse 2s ease-in-out infinite',
+      },
+      keyframes: {
+        'glow-pulse': {
+          '0%, 100%': {
+            boxShadow: '0 0 10px rgba(0, 255, 255, 0.5), 0 0 20px rgba(139, 92, 246, 0.3)',
+          },
+          '50%': {
+            boxShadow: '0 0 20px rgba(0, 255, 255, 0.8), 0 0 40px rgba(139, 92, 246, 0.6), 0 0 60px rgba(0, 255, 255, 0.4)',
+          },
+        },
       },
     },
   },
-  plugins: [],
+  plugins: [require("daisyui")],
+  daisyui: {
+    themes: [
+      {
+        cosmic: {
+          "primary": "#8B5CF6",        // cosmic-violet
+          "secondary": "#00FFFF",      // neon-cyan
+          "accent": "#A855F7",         // cosmic-purple
+          "neutral": "#1E3A8A",        // deep-blue
+          "base-100": "#000000",       // pure-black
+          "base-200": "#1a1a1a",       // bw-gray-1
+          "base-300": "#2a2a2a",       // bw-gray-2
+          "base-content": "#FFFFFF",   // pure-white
+          "info": "#00FFFF",           // neon-cyan
+          "success": "#00FFFF",        // neon-cyan for success
+          "warning": "#EC4899",        // pink accent
+          "error": "#FF0080",          // glitch-pink
+        },
+      },
+    ],
+    darkTheme: "cosmic",
+    base: true,
+    styled: true,
+    utils: true,
+    prefix: "",
+    logs: true,
+    themeRoot: ":root",
+  },
 };

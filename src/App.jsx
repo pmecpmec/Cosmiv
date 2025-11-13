@@ -52,7 +52,13 @@ function AppContent() {
   if (loading) {
     return (
       <div className="min-h-screen bg-pure-black flex items-center justify-center">
-        <div className="text-pure-white text-xl font-black tracking-wide">L O A D I N G . . .</div>
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="text-pure-white text-xl font-black tracking-wide font-display"
+        >
+          L O A D I N G . . .
+        </motion.div>
       </div>
     )
   }
@@ -62,12 +68,22 @@ function AppContent() {
       <div className="min-h-screen bg-pure-black flex items-center justify-center px-4 py-16">
         <div className="w-full max-w-md">
           <div className="text-center mb-12">
-            <h1 className="text-5xl font-black gradient-text-cosmic mb-6 tracking-poppr chromatic-aberration">
+            <motion.h1 
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+              className="text-5xl font-black gradient-text-cosmic mb-6 tracking-poppr chromatic-aberration font-display"
+            >
               🌌   C O S M I V
-            </h1>
-            <p className="text-xl text-pure-white/70 font-bold tracking-wide">
+            </motion.h1>
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
+              className="text-xl text-pure-white/70 font-bold tracking-wide font-exo"
+            >
               A I - P O W E R E D   G A M I N G   M O N T A G E   P L A T F O R M
-            </p>
+            </motion.p>
           </div>
           {authMode === "login" ? (
             <Login onSwitchToRegister={() => setAuthMode("register")} />
@@ -168,8 +184,8 @@ function AppContent() {
             >
               <div className="max-w-4xl mx-auto">
                 <div className="mb-6">
-                  <h2 className="text-3xl font-bold text-white mb-2">🤖 AI Assistant</h2>
-                  <p className="text-gray-300">Ask me anything about Cosmiv, get help, or chat!</p>
+                  <h2 className="text-3xl font-bold text-white mb-2 font-display">🤖 AI Assistant</h2>
+                  <p className="text-gray-300 font-exo">Ask me anything about Cosmiv, get help, or chat!</p>
                 </div>
                 <div className="h-[600px]">
                   <Suspense fallback={<InlineLoader message="Loading AI assistant..." />}>

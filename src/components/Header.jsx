@@ -195,7 +195,7 @@ export default function Header({ activeTab, setActiveTab }) {
                   </motion.span>
                 </motion.button>
 
-                {/* Dropdown Menu */}
+                {/* Dropdown Menu - Using daisyUI dropdown with custom styling */}
                 <AnimatePresence>
                   {openDropdown === dropdown.id && (
                     <motion.div
