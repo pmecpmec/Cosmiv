@@ -4,7 +4,7 @@
  */
 
 import { motion } from 'framer-motion'
-import './styles/astronaut-loader.css'
+import '../styles/astronaut-loader.css'
 
 export default function AstronautLoadingScreen() {
   return (
@@ -14,15 +14,15 @@ export default function AstronautLoadingScreen() {
         <div className="stars-container">
           <div 
             className="stars stars-near" 
-            style={{ '--star-x': '20%', '--star-y': '30%' } as React.CSSProperties}
+            style={{ '--star-x': '20%', '--star-y': '30%' }}
           ></div>
           <div 
             className="stars stars-mid" 
-            style={{ '--star-x': '60%', '--star-y': '50%' } as React.CSSProperties}
+            style={{ '--star-x': '60%', '--star-y': '50%' }}
           ></div>
           <div 
             className="stars stars-far" 
-            style={{ '--star-x': '80%', '--star-y': '20%' } as React.CSSProperties}
+            style={{ '--star-x': '80%', '--star-y': '20%' }}
           ></div>
         </div>
 
