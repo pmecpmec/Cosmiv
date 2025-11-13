@@ -11,7 +11,7 @@ export default defineConfig({
       ? `/${
           process.env.REPO_NAME ||
           process.env.GITHUB_REPOSITORY?.split("/")[1] ||
-          "Cosmiv"
+          "Aiditor"
         }/`
       : "/",
   server: {
