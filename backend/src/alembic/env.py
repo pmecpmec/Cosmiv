@@ -29,10 +29,18 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 # Set the SQLAlchemy URL from our settings
+# Note: For migrations, we need to handle both SQLite and PostgreSQL
+# The URL can be overridden via command line: alembic -x db_url=...
 if settings.USE_POSTGRES:
-    config.set_main_option("sqlalchemy.url", settings.POSTGRES_DSN)
+    db_url = settings.POSTGRES_DSN
 else:
-    config.set_main_option("sqlalchemy.url", f"sqlite:///{settings.DB_PATH}")
+    db_url = f"sqlite:///{settings.DB_PATH}"
+
+# Allow override via command line argument
+if context.get_x_argument(as_dictionary=True).get('db_url'):
+    db_url = context.get_x_argument(as_dictionary=True)['db_url']
+
+config.set_main_option("sqlalchemy.url", db_url)
 
 # add your model's MetaData object here
 # for 'autogenerate' support
