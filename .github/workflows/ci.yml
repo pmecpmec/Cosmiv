@@ -29,23 +29,18 @@ jobs:
           rm -f package-lock.json
           npm cache clean --force
           rm -rf node_modules
-          # Step 1: Install rollup first to establish dependency tree
-          npm install rollup@latest --save-dev --no-save --legacy-peer-deps
-          # Step 2: Install all other dependencies (optional deps included by default)
+          # Install all dependencies (rollup comes via vite)
           npm install --legacy-peer-deps
-          # Step 3: Force install rollup's Linux native dependency (workaround for npm bug)
+          # Workaround: Explicitly install rollup's Linux native dependency (npm bug prevents auto-install)
           echo "Installing rollup Linux native dependency..."
-          npm install @rollup/rollup-linux-x64-gnu@latest --force --no-save
-          # Step 4: Verify and debug if needed
+          npm install @rollup/rollup-linux-x64-gnu@latest --force --no-save || true
+          # Verify installation
           if [ -d "node_modules/@rollup/rollup-linux-x64-gnu" ]; then
             echo "✓ Rollup native dependency installed successfully"
             ls -la node_modules/@rollup/rollup-linux-x64-gnu/ | head -5
           else
-            echo "✗ Rollup native dependency missing"
-            echo "Checking @rollup directory:"
-            ls -la node_modules/@rollup/ 2>/dev/null || echo "No @rollup directory found"
-            echo "Attempting alternative installation method..."
-            npm install @rollup/rollup-linux-x64-gnu --force
+            echo "✗ Rollup native dependency missing - attempting alternative installation"
+            npm install @rollup/rollup-linux-x64-gnu --force --no-save
             test -d "node_modules/@rollup/rollup-linux-x64-gnu" || exit 1
           fi
 
@@ -208,23 +203,18 @@ jobs:
           rm -f package-lock.json
           npm cache clean --force
           rm -rf node_modules
-          # Step 1: Install rollup first to establish dependency tree
-          npm install rollup@latest --save-dev --no-save --legacy-peer-deps
-          # Step 2: Install all other dependencies (optional deps included by default)
+          # Install all dependencies (rollup comes via vite)
           npm install --legacy-peer-deps
-          # Step 3: Force install rollup's Linux native dependency (workaround for npm bug)
+          # Workaround: Explicitly install rollup's Linux native dependency (npm bug prevents auto-install)
           echo "Installing rollup Linux native dependency..."
-          npm install @rollup/rollup-linux-x64-gnu@latest --force --no-save
-          # Step 4: Verify and debug if needed
+          npm install @rollup/rollup-linux-x64-gnu@latest --force --no-save || true
+          # Verify installation
           if [ -d "node_modules/@rollup/rollup-linux-x64-gnu" ]; then
             echo "✓ Rollup native dependency installed successfully"
             ls -la node_modules/@rollup/rollup-linux-x64-gnu/ | head -5
           else
-            echo "✗ Rollup native dependency missing"
-            echo "Checking @rollup directory:"
-            ls -la node_modules/@rollup/ 2>/dev/null || echo "No @rollup directory found"
-            echo "Attempting alternative installation method..."
-            npm install @rollup/rollup-linux-x64-gnu --force
+            echo "✗ Rollup native dependency missing - attempting alternative installation"
+            npm install @rollup/rollup-linux-x64-gnu --force --no-save
             test -d "node_modules/@rollup/rollup-linux-x64-gnu" || exit 1
           fi
 
