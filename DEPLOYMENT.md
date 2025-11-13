@@ -55,11 +55,17 @@ Complete guide for deploying Cosmiv to production.
    docker-compose -f docker-compose.prod.yml --env-file .env.prod up -d --build
    ```
 
-5. **Initialize database:**
+5. **Initialize database and run migrations:**
 
    ```bash
+   # Run Alembic migrations (recommended)
+   docker-compose -f docker-compose.prod.yml exec backend alembic upgrade head
+   
+   # Or use SQLModel auto-creation (development only)
    docker-compose -f docker-compose.prod.yml exec backend python -c "from db import init_db; init_db()"
    ```
+   
+   **Note:** For production, always use Alembic migrations. See `backend/src/alembic/MIGRATION_GUIDE.md` for details.
 
 6. **Verify health:**
    ```bash

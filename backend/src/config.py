@@ -10,10 +10,6 @@ class Settings(BaseSettings):
     # Environment
     ENVIRONMENT: str = "development"  # development, staging, production
 
-    # Security - JWT Authentication
-    # CRITICAL: Must be set in production via environment variable
-    JWT_SECRET_KEY: str = "INSECURE_DEV_KEY_CHANGE_IN_PRODUCTION"
-
     # Token encryption for OAuth tokens
     ENCRYPTION_KEY: str = ""
 
@@ -66,8 +62,9 @@ class Settings(BaseSettings):
 
     # JWT Authentication
     # ⚠️ SECURITY: This default is ONLY for development. MUST set JWT_SECRET_KEY environment variable in production!
+    # Generate a secure key with: openssl rand -hex 32
     JWT_SECRET_KEY: str = os.getenv(
-        "JWT_SECRET_KEY", "dev-secret-key-change-in-production-123456789"
+        "JWT_SECRET_KEY", "INSECURE_DEV_KEY_CHANGE_IN_PRODUCTION"
     )
     JWT_ALGORITHM: str = "HS256"
     JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24  # 24 hours
@@ -133,25 +130,45 @@ settings = Settings()  # reads from env
 # Security validation for production
 if settings.ENVIRONMENT == "production":
     warnings = []
+    errors = []
 
-    if settings.JWT_SECRET_KEY == "INSECURE_DEV_KEY_CHANGE_IN_PRODUCTION":
-        warnings.append("JWT_SECRET_KEY is using default value")
+    # Critical errors - will prevent startup
+    if settings.JWT_SECRET_KEY == "INSECURE_DEV_KEY_CHANGE_IN_PRODUCTION" or len(settings.JWT_SECRET_KEY) < 32:
+        errors.append(
+            "JWT_SECRET_KEY must be set to a secure random string (min 32 chars). "
+            "Generate with: openssl rand -hex 32"
+        )
 
     if settings.S3_SECRET_KEY == "minioadmin":
-        warnings.append("S3_SECRET_KEY is using default value")
+        errors.append("S3_SECRET_KEY is using default value - must be changed for production")
 
-    if "postgres:postgres" in settings.POSTGRES_DSN:
-        warnings.append("POSTGRES_DSN contains default credentials")
+    if "CHANGEME" in settings.POSTGRES_DSN or "postgres:postgres" in settings.POSTGRES_DSN:
+        errors.append("POSTGRES_DSN contains default credentials - must be changed for production")
 
-    if "localhost" in settings.ALLOWED_ORIGINS:
-        warnings.append("ALLOWED_ORIGINS contains localhost in production")
+    if "localhost" in settings.ALLOWED_ORIGINS or "127.0.0.1" in settings.ALLOWED_ORIGINS:
+        errors.append("ALLOWED_ORIGINS contains localhost - not allowed in production")
 
-    if warnings:
-        error_msg = "PRODUCTION SECURITY ERRORS:\n" + "\n".join(
-            f"  - {w}" for w in warnings
+    # Warnings - will log but not prevent startup
+    if not settings.ENCRYPTION_KEY:
+        warnings.append("ENCRYPTION_KEY not set - OAuth token encryption may be insecure")
+
+    if settings.JWT_SECRET_KEY and len(settings.JWT_SECRET_KEY) < 32:
+        warnings.append("JWT_SECRET_KEY is shorter than recommended 32 characters")
+
+    # Raise errors (critical)
+    if errors:
+        error_msg = "🚨 PRODUCTION SECURITY ERRORS - Application will not start:\n" + "\n".join(
+            f"  ❌ {e}" for e in errors
         )
         logger.error(error_msg)
         raise ValueError(error_msg)
+
+    # Log warnings (non-critical but important)
+    if warnings:
+        warning_msg = "⚠️ PRODUCTION SECURITY WARNINGS:\n" + "\n".join(
+            f"  ⚠️ {w}" for w in warnings
+        )
+        logger.warning(warning_msg)
 
 # Development warnings
 if settings.ENVIRONMENT == "development":

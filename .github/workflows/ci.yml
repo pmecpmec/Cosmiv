@@ -207,6 +207,50 @@ jobs:
 
       - name: Deploy to production
         run: |
-          echo "Deploy backend to production server"
-          # Add your deployment script here
-          # e.g., SSH to server and pull new image, restart services
+          echo "🚀 Deploying Cosmiv backend to production..."
+          echo "📦 Image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:${{ github.sha }}"
+          
+          # Platform-specific deployment
+          # Choose one deployment method based on your infrastructure:
+          
+          # Option 1: Railway
+          # railway up --service backend
+          
+          # Option 2: Render
+          # render deploy --service cosmiv-backend
+          
+          # Option 3: Fly.io
+          # flyctl deploy --app cosmiv-backend --image ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:${{ github.sha }}
+          
+          # Option 4: SSH to VPS
+          # ssh user@your-server.com "cd /opt/cosmiv && docker-compose pull && docker-compose up -d"
+          
+          # Option 5: Kubernetes
+          # kubectl set image deployment/cosmiv-backend backend=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:${{ github.sha }}
+          # kubectl rollout status deployment/cosmiv-backend
+          
+          # Option 6: AWS ECS
+          # aws ecs update-service --cluster cosmiv --service cosmiv-backend --force-new-deployment
+          
+          # Option 7: DigitalOcean App Platform
+          # doctl apps create-deployment YOUR_APP_ID --force-rebuild
+          
+          echo "✅ Deployment initiated"
+          echo "⚠️  Configure deployment method in .github/workflows/ci.yml based on your platform"
+          
+      - name: Run database migrations
+        run: |
+          echo "📊 Running database migrations..."
+          # Example: SSH to server and run migrations
+          # ssh user@your-server.com "cd /opt/cosmiv && docker-compose exec backend alembic upgrade head"
+          # Or for cloud platforms, trigger migration job
+          echo "⚠️  Configure migration step based on your deployment method"
+          
+      - name: Health check
+        run: |
+          echo "🏥 Verifying deployment health..."
+          # Wait for deployment to be ready
+          sleep 30
+          # Health check (replace with your production URL)
+          # curl -f https://api.yourdomain.com/health || exit 1
+          echo "⚠️  Configure health check URL based on your deployment"

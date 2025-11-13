@@ -1,0 +1,19 @@
+Generic single-database configuration with an async dbapi.
+
+This is a minimal Alembic setup for SQLModel/SQLAlchemy migrations.
+
+To create a migration:
+    alembic revision --autogenerate -m "description"
+
+To apply migrations:
+    alembic upgrade head
+
+To rollback:
+    alembic downgrade -1
+
+To see current revision:
+    alembic current
+
+To see migration history:
+    alembic history
+

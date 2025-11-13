@@ -26,6 +26,7 @@ stripe
 requests
 email-validator
 psycopg2-binary
+alembic>=1.13.0
 # AI/LLM Services (optional - install if using AI features)
 # Uncomment to enable:
 openai>=1.0.0
