@@ -1,6 +1,6 @@
 # TODO_PEDRO.md
 
-_Last updated: 2025-01-27 by agent_project_sync_
+_Last updated: 2025-01-28 by Auto (AI Assistant)_
 
 ## 👋 Hey Pedro (pmec)!
 
@@ -12,15 +12,17 @@ This is your **technical development checklist**. These are tasks that require c
 
 ## ✅ Current Snapshot
 
-| Area                   | Status         | Notes                                      |
-| ---------------------- | -------------- | ------------------------------------------ |
-| Test Suite             | ❌ Missing     | No test files found - critical for CI/CD   |
-| Production Deployment  | ⚙️ Placeholder | CI/CD has deployment stub                  |
-| Environment Variables  | ⚙️ Partial     | Need production `.env` template            |
-| ML Models              | ⚙️ Stub        | Highlight detection model interface exists |
-| CI/CD Pipeline         | ⚙️ Configured  | Needs test files to be useful              |
-| Error Monitoring       | ❌ Missing     | No Sentry or error tracking                |
-| Performance Monitoring | ❌ Missing     | No APM setup                               |
+| Area                   | Status          | Notes                                                    |
+| ---------------------- | --------------- | -------------------------------------------------------- |
+| Test Suite             | 🟡 Partial      | Basic auth + API tests exist, need more coverage         |
+| Production Deployment  | ⚙️ Placeholder  | CI/CD has deployment stub                                |
+| Environment Variables  | ⚙️ Partial      | Need production `.env` template                          |
+| ML Models              | ⚙️ Stub         | Highlight detection model interface exists               |
+| CI/CD Pipeline         | 🟡 Configured   | Tests running, deployment needs setup                    |
+| Error Monitoring       | ❌ Missing      | No Sentry or error tracking                              |
+| Performance Monitoring | ❌ Missing      | No APM setup                                             |
+| **Security Hardening** | 🟢 **Good**     | ✅ Rate limiting, ✅ File validation, ✅ CORS configured |
+| **Health Checks**      | 🟢 **Complete** | ✅ Enhanced endpoint with metrics and Celery status      |
 
 ---
 
@@ -28,30 +30,26 @@ This is your **technical development checklist**. These are tasks that require c
 
 ### 🧪 Testing Infrastructure (Priority: High)
 
-**Goal:** Add comprehensive test coverage for critical paths
+**Goal:** Expand test coverage beyond current auth + API tests
 
-**Steps:**
+**Current Status:**
 
-1. **Create Test Structure:**
+- ✅ Basic test structure exists (`backend/src/tests/`)
+- ✅ Authentication tests implemented (`test_auth.py`)
+- ✅ API endpoint tests implemented (`test_api_endpoints.py`)
+- ✅ `pytest.ini` configuration exists
+- ✅ CI/CD runs tests correctly
 
-   ```bash
-   backend/src/tests/
-   ├── __init__.py
-   ├── test_api_auth.py
-   ├── test_api_accounts.py
-   ├── test_api_billing.py
-   ├── test_pipeline.py
-   ├── test_highlight_detection.py
-   └── conftest.py  # pytest fixtures
-   ```
+**Remaining Work:**
 
-2. **Write Core Tests:**
+1. **Add Missing Test Files:**
 
-   - **Authentication tests** (`test_api_auth.py`):
+   - **Pipeline tests** (`test_pipeline.py`):
 
-     - Test JWT token generation/validation
-     - Test login/logout flows
-     - Test token refresh
+     - Test video preprocessing
+     - Test highlight detection scoring
+     - Test scene selection logic
+     - Mock FFmpeg calls for unit tests
 
    - **Accounts API tests** (`test_api_accounts.py`):
 
@@ -65,40 +63,31 @@ This is your **technical development checklist**. These are tasks that require c
      - Test subscription creation/cancellation
      - Test plan listing
 
-   - **Pipeline tests** (`test_pipeline.py`):
-
-     - Test video preprocessing
-     - Test highlight detection scoring
-     - Test scene selection logic
-     - Mock FFmpeg calls for unit tests
-
    - **Integration tests**:
      - Full job processing flow (with mocks)
      - OAuth callback handling
      - Webhook processing
 
-3. **Test Configuration:**
+2. **Enhance Test Coverage:**
 
-   - Add `pytest.ini` or `pyproject.toml` with pytest config
-   - Set up test database (SQLite for speed)
-   - Mock external services (Stripe, OAuth providers, S3)
+   - Increase coverage percentage
+   - Add edge case tests
+   - Add error scenario tests
    - Configure coverage reporting
 
-4. **CI/CD Integration:**
-   - Verify `.github/workflows/ci.yml` runs tests correctly
+3. **CI/CD Enhancements:**
    - Ensure coverage reports are uploaded
    - Add test badges to README
 
-**Files to Create/Modify:**
+**Files to Create:**
 
-- `backend/src/tests/` directory
-- `backend/src/tests/conftest.py` - Shared fixtures
-- `backend/src/tests/test_*.py` - Individual test files
-- `.coveragerc` or `pyproject.toml` - Coverage config
+- `backend/src/tests/test_pipeline.py`
+- `backend/src/tests/test_api_accounts.py`
+- `backend/src/tests/test_api_billing.py`
+- Integration test files
 
 **Help:**
 
-- Use ChatGPT: "How to write pytest tests for FastAPI with SQLModel?"
 - Use ChatGPT: "How to mock FFmpeg and external APIs in Python tests?"
 
 ---
@@ -194,20 +183,27 @@ This is your **technical development checklist**. These are tasks that require c
 
 4. **API Rate Limiting:**
 
-   - Add rate limiting middleware to FastAPI
-   - Protect against abuse
-   - Consider: `slowapi` or `fastapi-limiter`
+   - ✅ **COMPLETED:** Rate limiting added using `slowapi`
+   - ✅ Login endpoint: 10 requests/minute
+   - ✅ Register endpoint: 5 requests/minute
+   - ✅ Integrated with FastAPI app state
+   - File: `backend/src/auth.py`, `backend/src/main.py`
 
 5. **Input Validation:**
 
-   - Review all API endpoints for input validation
-   - Add file upload size limits
-   - Validate file types
+   - ✅ **COMPLETED:** File upload validation added to `/api/v2/jobs`
+   - ✅ File size limits: 500MB per file, 2GB total
+   - ✅ File type validation (extension + MIME type)
+   - ✅ Filename sanitization
+   - ✅ `/api/upload` already had validation
+   - Files: `backend/src/api_v2.py`, `backend/src/security.py`
 
 6. **CORS Configuration:**
-   - Set proper CORS origins (production domain only)
-   - Remove `*` wildcard in production
-   - File: Check `main.py` for CORS middleware
+   - ✅ **COMPLETED:** CORS configuration verified
+   - ✅ Production validation prevents localhost origins
+   - ✅ Explicit methods and headers only (no wildcards)
+   - ✅ Environment-based configuration
+   - File: `backend/src/main.py` lines 44-65
 
 **Files to Modify:**
 
@@ -333,9 +329,13 @@ This is your **technical development checklist**. These are tasks that require c
 
 4. **Health Checks:**
 
-   - Add `/health` endpoint
-   - Check database, Redis, storage connectivity
-   - File: `backend/src/main.py`
+   - ✅ **COMPLETED:** Enhanced `/health` endpoint
+   - ✅ Database connectivity check with response time
+   - ✅ Redis connectivity check with response time
+   - ✅ Storage connectivity check
+   - ✅ Celery worker status check
+   - ✅ Timestamp included in response
+   - File: `backend/src/main.py` lines 90-159
 
 5. **Performance Monitoring:**
    - APM tool (New Relic, Datadog, etc.) - optional
@@ -504,50 +504,6 @@ This is your **technical development checklist**. These are tasks that require c
 
 ---
 
-### 🎬 Upload Form Refactoring (Priority: Medium)
-
-**Goal:** Clean up and optimize the UploadForm component
-
-**Current Status:**
-
-- `src/components/UploadForm.jsx` has both sync and async upload methods
-- Some duplicate state management between `clipFile` and `files`
-- Could benefit from consolidation and better error handling
-
-**Steps:**
-
-1. **Consolidate State Management:**
-
-   - Unify `clipFile` and `files` into a single state structure
-   - Simplify file handling logic to reduce duplication
-   - Clean up unused variables and functions
-
-2. **Improve Error Handling:**
-
-   - Add better error messages for different failure scenarios
-   - Handle edge cases (network failures, corrupted files, etc.)
-   - Add retry logic for failed uploads
-
-3. **Code Organization:**
-
-   - Extract upload logic into custom hooks if needed
-   - Separate concerns (file validation, upload, status tracking)
-   - Improve component readability and maintainability
-
-4. **Testing Considerations:**
-   - Make component more testable by extracting logic
-   - Add data-testid attributes where helpful
-   - Consider adding unit tests once test infrastructure is set up
-
-**Files to Modify:**
-
-- `src/components/UploadForm.jsx` - Refactor and optimize
-
-**Help:**
-
-- Use ChatGPT: "How to refactor React component with multiple upload methods?"
-- Use ChatGPT: "Best practices for file upload error handling in React"
-
 ---
 
 ## 🧭 Priority Order
@@ -588,7 +544,7 @@ USE_POSTGRES=true
 S3_ENDPOINT_URL=https://...
 S3_ACCESS_KEY=...
 S3_SECRET_KEY=...
-S3_BUCKET=aiditor-prod
+S3_BUCKET=cosmiv-prod
 USE_OBJECT_STORAGE=true
 
 # OAuth (Daan will get these)
@@ -620,14 +576,16 @@ BASE_URL=https://yourdomain.com
 
 ---
 
-## 🪜 Progress Log
+## 🪜 Recent Progress
 
-| Date       | Task                                | Status | Notes                     |
-| ---------- | ----------------------------------- | ------ | ------------------------- |
-| 2025-01-27 | Initial TODO list created           | ✅     | Agent generated tasks     |
-| 2025-01-27 | Fixed package-lock.json conflicts   | ✅     | Regenerated clean file    |
-| 2025-01-27 | Fixed config.py trailing whitespace | ✅     | Cleaned up formatting     |
-| 2025-01-27 | Upload Form refactoring task added  | 📋     | New task for code cleanup |
+- ✅ Testing infrastructure created (auth + API tests)
+- ✅ UploadForm component refactored (consolidated duplicate state)
+- ✅ Password authentication fully implemented
+- ✅ Database connectivity confirmed (PostgreSQL, Redis, storage)
+- ✅ **Rate limiting added to auth endpoints** (login: 10/min, register: 5/min) - Security Hardening #4
+- ✅ **Health check endpoint enhanced** with metrics and Celery worker status - Monitoring #4
+- ✅ **File upload validation added** to `/api/v2/jobs` endpoint (size limits, file type validation) - Security Hardening #5
+- ✅ **CORS configuration verified** with production validation - Security Hardening #6
 
 ---
 

@@ -10,36 +10,36 @@ export default function Header({ activeTab, setActiveTab }) {
   const dropdownRefs = useRef({})
   const mobileMenuRef = useRef(null)
 
-  // Organize tabs into logical groups
+  // Organize tabs into logical groups - no emojis, clean and professional
   const mainTabs = [
-    { id: "home", label: "Home", icon: "🏠" },
-    { id: "upload", label: "Upload", icon: "⬆️" },
-    { id: "dashboard", label: "Dashboard", icon: "📊" },
+    { id: "home", label: "Home" },
+    { id: "upload", label: "Upload" },
+    { id: "dashboard", label: "Dashboard" },
   ]
 
   const contentTabs = [
-    { id: "feed", label: "Feed", icon: "📱" },
-    { id: "weekly", label: "Weekly Montages", icon: "🎬" },
-    { id: "communities", label: "Communities", icon: "💬" },
+    { id: "feed", label: "Feed" },
+    { id: "weekly", label: "Weekly Montages" },
+    { id: "communities", label: "Communities" },
   ]
 
   const toolsTabs = [
-    { id: "analytics", label: "Analytics", icon: "📈" },
-    { id: "ai", label: "AI Chat", icon: "🤖" },
-    ...(isAdmin ? [{ id: "ai-admin", label: "AI Admin", icon: "⚙️" }] : []),
+    { id: "analytics", label: "Analytics" },
+    { id: "ai", label: "AI Chat" },
+    ...(isAdmin ? [{ id: "ai-admin", label: "AI Admin" }] : []),
   ]
 
   const settingsTabs = [
-    { id: "accounts", label: "Accounts", icon: "🔗" },
-    { id: "billing", label: "Billing", icon: "💳" },
-    { id: "social", label: "Social", icon: "📱" },
-    ...(isAdmin ? [{ id: "admin", label: "Admin", icon: "⚙️" }] : []),
+    { id: "accounts", label: "Accounts" },
+    { id: "billing", label: "Billing" },
+    { id: "social", label: "Social" },
+    ...(isAdmin ? [{ id: "admin", label: "Admin" }] : []),
   ]
 
   const dropdowns = [
-    { id: "content", label: "Content", icon: "📺", tabs: contentTabs },
-    { id: "tools", label: "Tools", icon: "🛠️", tabs: toolsTabs },
-    { id: "settings", label: "Settings", icon: "⚙️", tabs: settingsTabs },
+    { id: "content", label: "Content", tabs: contentTabs },
+    { id: "tools", label: "Tools", tabs: toolsTabs },
+    { id: "settings", label: "Settings", tabs: settingsTabs },
   ]
 
   // Close dropdown when clicking outside
@@ -108,8 +108,7 @@ export default function Header({ activeTab, setActiveTab }) {
             className="flex items-center gap-2 cursor-pointer flex-shrink-0"
             onClick={() => handleTabClick("home")}
           >
-            <span className="text-2xl">🌌</span>
-            <span className="text-xl font-black gradient-text-cosmic tracking-poppr chromatic-aberration hidden sm:inline">
+            <span className="text-xl font-black gradient-text-cosmic tracking-poppr hidden sm:inline">
               C O S M I V
             </span>
             <span className="text-xl font-black gradient-text-cosmic tracking-poppr chromatic-aberration sm:hidden">
@@ -165,7 +164,7 @@ export default function Header({ activeTab, setActiveTab }) {
                     : "border-transparent text-white/70 hover:text-cosmic-neon-cyan hover:border-cosmic-neon-cyan/50 hover:bg-cosmic-violet/20 chromatic-aberration"
                 }`}
               >
-                {tab.icon} {tab.label}
+{tab.label}
               </motion.button>
             ))}
 
@@ -186,7 +185,7 @@ export default function Header({ activeTab, setActiveTab }) {
                       : "border-transparent text-white/70 hover:text-cosmic-neon-cyan hover:border-cosmic-neon-cyan/50 hover:bg-cosmic-violet/20 chromatic-aberration"
                   }`}
                 >
-                  {dropdown.icon} {dropdown.label}
+                  {dropdown.label}
                   <motion.span
                     animate={{ rotate: openDropdown === dropdown.id ? 180 : 0 }}
                     className="text-xs"
@@ -219,7 +218,6 @@ export default function Header({ activeTab, setActiveTab }) {
                               : "text-white/70 hover:text-cosmic-neon-cyan hover:bg-cosmic-violet/30 chromatic-aberration"
                           }`}
                         >
-                          <span className="text-lg">{tab.icon}</span>
                           <span>{tab.label}</span>
                           {activeTab === tab.id && (
                             <motion.span
@@ -291,7 +289,6 @@ export default function Header({ activeTab, setActiveTab }) {
                         : "text-white/70 hover:text-cosmic-neon-cyan hover:bg-cosmic-violet/20"
                     }`}
                   >
-                    <span className="text-xl">{tab.icon}</span>
                     <span>{tab.label}</span>
                     {activeTab === tab.id && (
                       <motion.span

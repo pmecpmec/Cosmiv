@@ -45,7 +45,7 @@ export default function StarfieldBackground({
       
       for (let i = 0; i < count; i++) {
         const starType = Math.random()
-        const isColored = showColoredStars && starType > 0.95
+        const isColored = showColoredStars && starType > 0.88 // 12% colored stars to match CosmicBackground
         
         starsRef.current.push({
           x: Math.random() * canvas.width,
@@ -63,7 +63,7 @@ export default function StarfieldBackground({
           twinkleSpeed: Math.random() * 0.02 + 0.01,
           twinkleOffset: Math.random() * Math.PI * 2,
           color: isColored ? 'colored' : 'white',
-          colorType: isColored ? Math.floor(Math.random() * 4) : 0,
+          colorType: isColored ? Math.floor(Math.random() * 6) : 0,
         })
       }
     }
@@ -97,10 +97,12 @@ export default function StarfieldBackground({
         
         if (star.color === 'colored') {
           const colorChoices = [
-            { rgb: '255, 0, 255', shadow: 'rgba(255, 0, 255, 0.9)' },   // Hot pink
+            { rgb: '0, 255, 255', shadow: 'rgba(0, 255, 255, 0.9)' },    // Neon cyan (most common)
+            { rgb: '100, 200, 255', shadow: 'rgba(100, 200, 255, 0.9)' }, // Bright blue
             { rgb: '139, 92, 246', shadow: 'rgba(139, 92, 246, 0.9)' }, // Cosmic violet
-            { rgb: '0, 255, 255', shadow: 'rgba(0, 255, 255, 0.9)' },    // Neon cyan
-            { rgb: '255, 215, 0', shadow: 'rgba(255, 215, 0, 0.9)' },    // Galactic gold
+            { rgb: '150, 100, 255', shadow: 'rgba(150, 100, 255, 0.9)' }, // Purple-cyan
+            { rgb: '0, 200, 255', shadow: 'rgba(0, 200, 255, 0.9)' },   // Electric cyan
+            { rgb: '50, 150, 255', shadow: 'rgba(50, 150, 255, 0.9)' },  // Sky blue
           ]
           const color = colorChoices[star.colorType]
           

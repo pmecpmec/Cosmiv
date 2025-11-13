@@ -18,9 +18,7 @@ router = APIRouter(prefix="/v2/ai/video", tags=["AI Video"])
 
 class VideoEnhancementRequest(BaseModel):
     job_id: str
-    enhancement_type: (
-        str  # captions, transitions, color_grade, effects, motion_graphics
-    )
+    enhancement_type: str  # captions, transitions, color_grade, effects, motion_graphics
     input_video_path: str
     params: Optional[dict] = None
 

@@ -37,8 +37,8 @@ Complete guide for deploying Cosmiv to production.
 1. **Clone repository:**
 
    ```bash
-   git clone https://github.com/yourusername/aiditor.git
-   cd aiditor/backend
+   git clone https://github.com/yourusername/cosmiv.git
+   cd cosmiv/backend
    ```
 
 2. **Copy environment template:**
@@ -73,9 +73,9 @@ Complete guide for deploying Cosmiv to production.
 1. **Build and push image:**
 
    ```bash
-   docker build -f backend/src/Dockerfile.prod -t aiditor-backend .
-   docker tag aiditor-backend:latest YOUR_ECR_URI/aiditor-backend:latest
-   docker push YOUR_ECR_URI/aiditor-backend:latest
+   docker build -f backend/src/Dockerfile.prod -t cosmiv-backend .
+   docker tag cosmiv-backend:latest YOUR_ECR_URI/cosmiv-backend:latest
+   docker push YOUR_ECR_URI/cosmiv-backend:latest
    ```
 
 2. **Create ECS task definition** with environment variables
@@ -85,9 +85,9 @@ Complete guide for deploying Cosmiv to production.
 #### Google Cloud Run
 
 ```bash
-gcloud builds submit --tag gcr.io/YOUR_PROJECT/aiditor-backend
-gcloud run deploy aiditor-backend \
-  --image gcr.io/YOUR_PROJECT/aiditor-backend \
+gcloud builds submit --tag gcr.io/YOUR_PROJECT/cosmiv-backend
+gcloud run deploy cosmiv-backend \
+  --image gcr.io/YOUR_PROJECT/cosmiv-backend \
   --platform managed \
   --region us-central1 \
   --allow-unauthenticated
@@ -96,11 +96,11 @@ gcloud run deploy aiditor-backend \
 #### Azure Container Instances
 
 ```bash
-az acr build --registry YOUR_REGISTRY --image aiditor-backend:latest backend/src
+az acr build --registry YOUR_REGISTRY --image cosmiv-backend:latest backend/src
 az container create \
   --resource-group YOUR_RESOURCE_GROUP \
-  --name aiditor-backend \
-  --image YOUR_REGISTRY.azurecr.io/aiditor-backend:latest \
+  --name cosmiv-backend \
+  --image YOUR_REGISTRY.azurecr.io/cosmiv-backend:latest \
   --cpu 2 --memory 4
 ```
 
@@ -177,9 +177,9 @@ az container create \
 1. **Create database:**
 
    ```sql
-   CREATE DATABASE aiditor;
-   CREATE USER aiditor_user WITH PASSWORD '<strong-password>';
-   GRANT ALL PRIVILEGES ON DATABASE aiditor TO aiditor_user;
+   CREATE DATABASE cosmiv;
+   CREATE USER cosmiv_user WITH PASSWORD '<strong-password>';
+   GRANT ALL PRIVILEGES ON DATABASE cosmiv TO cosmiv_user;
    ```
 
 2. **Set connection string:**
@@ -204,7 +204,7 @@ az container create \
 1. **Create bucket:**
 
    ```bash
-   aws s3 mb s3://aiditor-prod
+   aws s3 mb s3://cosmiv-prod
    ```
 
 2. **Set CORS policy:**
@@ -227,7 +227,7 @@ az container create \
    S3_REGION=us-east-1
    S3_ACCESS_KEY=YOUR_ACCESS_KEY
    S3_SECRET_KEY=YOUR_SECRET_KEY
-   S3_BUCKET=aiditor-prod
+   S3_BUCKET=cosmiv-prod
    ```
 
 ### Cloudflare R2
@@ -241,7 +241,7 @@ az container create \
    S3_ENDPOINT_URL=https://<account-id>.r2.cloudflarestorage.com
    S3_ACCESS_KEY=YOUR_ACCESS_KEY
    S3_SECRET_KEY=YOUR_SECRET_KEY
-   S3_BUCKET=aiditor-prod
+   S3_BUCKET=cosmiv-prod
    ```
 
 ---

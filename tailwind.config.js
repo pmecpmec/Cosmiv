@@ -143,6 +143,44 @@ export default {
             textShadow: '0 0 10px #00FFFF, 0 0 20px #00FFFF, 0 0 30px #00FFFF, 0 0 40px #00FFFF, 0 0 50px #00FFFF',
           },
         },
+        'glow-pulse': {
+          '0%, 100%': {
+            boxShadow: '0 0 10px rgba(0, 255, 255, 0.5), 0 0 20px rgba(139, 92, 246, 0.3)',
+          },
+          '50%': {
+            boxShadow: '0 0 20px rgba(0, 255, 255, 0.8), 0 0 40px rgba(139, 92, 246, 0.6), 0 0 60px rgba(0, 255, 255, 0.4)',
+          },
+        },
+        'astronaut-float': {
+          '0%, 100%': { transform: 'translate(-50%, -50%) translateY(-10px) rotate(-2deg)' },
+          '50%': { transform: 'translate(-50%, -50%) translateY(10px) rotate(2deg)' },
+        },
+        'glass-shine': {
+          '0%, 100%': { opacity: '0.3', transform: 'translateX(-100%) rotate(-45deg)' },
+          '50%': { opacity: '0.8', transform: 'translateX(100%) rotate(-45deg)' },
+        },
+        'reflection-move': {
+          '0%, 100%': { transform: 'translate(0, 0)' },
+          '50%': { transform: 'translate(5px, 5px)' },
+        },
+        'antenna-blink': {
+          '0%, 100%': { opacity: '0.3' },
+          '50%': { opacity: '1' },
+        },
+        'stars-rotate': {
+          'from': { transform: 'rotate(0deg)' },
+          'to': { transform: 'rotate(360deg)' },
+        },
+        'meteor-move': {
+          '0%': { transform: 'translate(0, 0) rotate(45deg)', opacity: '0' },
+          '20%': { opacity: '1' },
+          '80%': { opacity: '1' },
+          '100%': { transform: 'translate(400px, 400px) rotate(45deg)', opacity: '0' },
+        },
+        'progress-shimmer': {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(400%)' },
+        },
       },
       animation: {
         float: 'float 3s ease-in-out infinite',
@@ -155,16 +193,17 @@ export default {
         'pulse-neon': 'pulse-neon 2s ease-in-out infinite',
         'spin-slow': 'spin-slow 20s linear infinite',
         'glow-pulse': 'glow-pulse 2s ease-in-out infinite',
-      },
-      keyframes: {
-        'glow-pulse': {
-          '0%, 100%': {
-            boxShadow: '0 0 10px rgba(0, 255, 255, 0.5), 0 0 20px rgba(139, 92, 246, 0.3)',
-          },
-          '50%': {
-            boxShadow: '0 0 20px rgba(0, 255, 255, 0.8), 0 0 40px rgba(139, 92, 246, 0.6), 0 0 60px rgba(0, 255, 255, 0.4)',
-          },
-        },
+        'astronaut-float': 'astronaut-float 4s ease-in-out infinite',
+        'glass-shine': 'glass-shine 3s ease-in-out infinite',
+        'reflection-move': 'reflection-move 4s ease-in-out infinite',
+        'antenna-blink': 'antenna-blink 1s ease-in-out infinite',
+        'stars-rotate-20': 'stars-rotate 20s linear infinite',
+        'stars-rotate-30': 'stars-rotate 30s linear infinite reverse',
+        'stars-rotate-40': 'stars-rotate 40s linear infinite',
+        'meteor-move-1': 'meteor-move 3s linear infinite',
+        'meteor-move-2': 'meteor-move 4s linear infinite 2s',
+        'meteor-move-3': 'meteor-move 5s linear infinite 1s',
+        'progress-shimmer': 'progress-shimmer 2s ease-in-out infinite',
       },
     },
   },

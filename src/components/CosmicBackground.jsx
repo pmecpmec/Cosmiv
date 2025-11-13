@@ -21,43 +21,88 @@ export default function CosmicBackground() {
     // Initialize stars - MUCH more stars for rich, visible starfield
     const initStars = () => {
       starsRef.current = []
-      const starCount = 2000 // Increased from 500 to 2000 for dense starfield
+      const starCount = 400 // Sparse, subtle stars - not overwhelming
       for (let i = 0; i < starCount; i++) {
         const starType = Math.random()
         starsRef.current.push({
           x: Math.random() * canvas.width,
           y: Math.random() * canvas.height,
-          radius: starType > 0.9 
-            ? Math.random() * 2 + 1.5  // Bright stars (10%)
-            : starType > 0.7 
-            ? Math.random() * 1.5 + 1   // Medium stars (20%)
-            : Math.random() * 1 + 0.5,  // Small stars (70%)
-          opacity: starType > 0.9 
-            ? Math.random() * 0.3 + 0.9  // Very bright (0.9-1.2)
-            : starType > 0.7 
-            ? Math.random() * 0.4 + 0.6  // Medium bright (0.6-1.0)
-            : Math.random() * 0.5 + 0.4, // Dim but visible (0.4-0.9)
+          radius: starType > 0.95 
+            ? Math.random() * 0.8 + 0.5  // Rare larger stars (5%) - still tiny
+            : Math.random() * 0.5 + 0.3, // Most stars are very small (95%)
+          opacity: starType > 0.95 
+            ? Math.random() * 0.2 + 0.5  // Rare brighter stars (0.5-0.7)
+            : Math.random() * 0.3 + 0.2, // Most stars are dim (0.2-0.5)
           twinkleSpeed: Math.random() * 0.02 + 0.01,
           twinkleOffset: Math.random() * Math.PI * 2,
-          color: starType > 0.95 
-            ? 'colored' // 5% colored stars
+          color: starType > 0.98 
+            ? 'colored' // 2% colored stars - very rare, subtle
             : 'white',
-          colorType: starType > 0.95 ? Math.floor(Math.random() * 4) : 0, // Store color type for consistency
+          colorType: starType > 0.98 ? Math.floor(Math.random() * 3) : 0, // Only cyan, blue, purple
         })
       }
     }
     initStars()
 
-    // Draw nebula - deeper teal/blue-green cosmic background
-    const drawNebula = (x, y, width, height, color1, color2, opacity) => {
-      const gradient = ctx.createRadialGradient(x, y, 0, x, y, width)
-      gradient.addColorStop(0, `rgba(${color1}, ${opacity})`)
-      gradient.addColorStop(0.5, `rgba(${color2}, ${opacity * 0.5})`)
-      gradient.addColorStop(1, `rgba(${color2}, 0)`)
-      ctx.fillStyle = gradient
+    // Enhanced nebula drawing with multiple layers and swirling effects
+    const drawNebula = (x, y, width, height, color1, color2, color3, opacity, rotation = 0) => {
+      ctx.save()
+      ctx.translate(x, y)
+      ctx.rotate(rotation)
+      
+      // Multiple gradient layers for depth
+      const gradient1 = ctx.createRadialGradient(0, 0, 0, 0, 0, width * 0.6)
+      gradient1.addColorStop(0, `rgba(${color1}, ${opacity})`)
+      gradient1.addColorStop(0.4, `rgba(${color2}, ${opacity * 0.7})`)
+      gradient1.addColorStop(0.7, `rgba(${color3}, ${opacity * 0.4})`)
+      gradient1.addColorStop(1, 'transparent')
+      
+      ctx.fillStyle = gradient1
       ctx.beginPath()
-      ctx.ellipse(x, y, width, height, 0, 0, Math.PI * 2)
+      ctx.ellipse(0, 0, width * 0.6, height * 0.6, 0, 0, Math.PI * 2)
       ctx.fill()
+      
+      // Outer glow layer
+      const gradient2 = ctx.createRadialGradient(0, 0, width * 0.4, 0, 0, width)
+      gradient2.addColorStop(0, `rgba(${color2}, ${opacity * 0.3})`)
+      gradient2.addColorStop(0.5, `rgba(${color3}, ${opacity * 0.2})`)
+      gradient2.addColorStop(1, 'transparent')
+      
+      ctx.fillStyle = gradient2
+      ctx.beginPath()
+      ctx.ellipse(0, 0, width, height, 0, 0, Math.PI * 2)
+      ctx.fill()
+      
+      ctx.restore()
+    }
+    
+    // Draw swirling nebula clouds with noise
+    const drawSwirlingNebula = (x, y, width, height, colors, opacity, time) => {
+      ctx.save()
+      ctx.translate(x, y)
+      
+      // Create swirling pattern using multiple overlapping ellipses
+      const swirls = 3
+      for (let i = 0; i < swirls; i++) {
+        const angle = (time * 0.00005 + i * Math.PI * 2 / swirls) % (Math.PI * 2)
+        const offsetX = Math.cos(angle) * width * 0.2
+        const offsetY = Math.sin(angle) * height * 0.2
+        
+        const gradient = ctx.createRadialGradient(
+          offsetX, offsetY, 0,
+          offsetX, offsetY, width * (0.4 + i * 0.2)
+        )
+        gradient.addColorStop(0, `rgba(${colors[i % colors.length]}, ${opacity * (1 - i * 0.2)})`)
+        gradient.addColorStop(0.5, `rgba(${colors[(i + 1) % colors.length]}, ${opacity * 0.5 * (1 - i * 0.2)})`)
+        gradient.addColorStop(1, 'transparent')
+        
+        ctx.fillStyle = gradient
+        ctx.beginPath()
+        ctx.ellipse(offsetX, offsetY, width * (0.5 - i * 0.1), height * (0.5 - i * 0.1), angle, 0, Math.PI * 2)
+        ctx.fill()
+      }
+      
+      ctx.restore()
     }
 
     // Draw the rotating translucent cosmic sphere (Broken Planet)
@@ -268,34 +313,32 @@ export default function CosmicBackground() {
       ctx.fillStyle = '#000000'  // Pure black for maximum star contrast
       ctx.fillRect(0, 0, canvas.width, canvas.height)
 
-      // Draw subtle nebulae in deep teal/blue-green tones
-      const time = Date.now() * 0.0001
+      // Draw subtle, minimal nebula glows - very faint light streaks
+      const time = Date.now()
+      
+      // Very subtle light streaks in upper corners - barely visible
       drawNebula(
-        canvas.width * 0.15 + Math.sin(time) * 40,
-        canvas.height * 0.3 + Math.cos(time * 0.7) * 30,
-        canvas.width * 0.5,
-        canvas.height * 0.5,
-        '0, 100, 120',   // Deep teal
-        '20, 50, 80',    // Dark blue-green
-        0.15
-      )
-      drawNebula(
-        canvas.width * 0.85 + Math.cos(time * 0.8) * 50,
-        canvas.height * 0.7 + Math.sin(time * 0.5) * 40,
+        canvas.width * 0.1,
+        canvas.height * 0.15,
         canvas.width * 0.4,
-        canvas.height * 0.4,
-        '30, 80, 100',   // Medium teal
-        '0, 50, 70',     // Deep blue-green
-        0.12
-      )
-      drawNebula(
-        canvas.width * 0.5,
-        canvas.height * 0.2,
-        canvas.width * 0.3,
         canvas.height * 0.3,
-        '0, 150, 180',   // Bright teal
-        '50, 100, 130',  // Blue-teal
-        0.1
+        '100, 150, 255',  // Very faint blue
+        '139, 92, 246',   // Very faint purple
+        '100, 150, 255',  // Very faint blue
+        0.08,  // Much lower opacity - barely visible
+        time * 0.00001
+      )
+      
+      drawNebula(
+        canvas.width * 0.9,
+        canvas.height * 0.2,
+        canvas.width * 0.35,
+        canvas.height * 0.25,
+        '139, 92, 246',   // Very faint purple
+        '100, 150, 255',  // Very faint blue
+        '139, 92, 246',   // Very faint purple
+        0.06,  // Even lower opacity
+        time * -0.00001
       )
 
       // Draw stars - MUCH more visible and prominent
@@ -303,34 +346,26 @@ export default function CosmicBackground() {
         const twinkle = Math.sin(Date.now() * star.twinkleSpeed + star.twinkleOffset) * 0.2 + 0.8
         const currentOpacity = star.opacity * twinkle
         
-        // Colored stars (5% of total)
+        // Colored stars (2% of total) - very rare, subtle
         if (star.color === 'colored') {
           const colorChoices = [
-            { rgb: '255, 0, 255', shadow: 'rgba(255, 0, 255, 0.8)' },   // Hot pink
-            { rgb: '139, 92, 246', shadow: 'rgba(139, 92, 246, 0.8)' }, // Cosmic violet
-            { rgb: '0, 255, 255', shadow: 'rgba(0, 255, 255, 0.8)' },    // Neon cyan
-            { rgb: '255, 215, 0', shadow: 'rgba(255, 215, 0, 0.8)' },   // Galactic gold
+            { rgb: '100, 200, 255', shadow: 'rgba(100, 200, 255, 0.4)' }, // Subtle blue
+            { rgb: '139, 92, 246', shadow: 'rgba(139, 92, 246, 0.4)' },    // Subtle purple
+            { rgb: '100, 150, 255', shadow: 'rgba(100, 150, 255, 0.4)' },   // Subtle cyan-blue
           ]
-          const color = colorChoices[star.colorType || 0] // Use stored color type
+          const color = colorChoices[star.colorType || 0]
           
-          // Glow effect for colored stars
-          ctx.shadowBlur = star.radius * 3
+          // Very subtle glow for colored stars
+          ctx.shadowBlur = star.radius * 1.5
           ctx.shadowColor = color.shadow
-          ctx.fillStyle = `rgba(${color.rgb}, ${currentOpacity})`
+          ctx.fillStyle = `rgba(${color.rgb}, ${currentOpacity * 0.6})` // Dimmer
           ctx.beginPath()
           ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2)
           ctx.fill()
-          
-          // Outer glow ring
-          ctx.shadowBlur = star.radius * 5
-          ctx.beginPath()
-          ctx.arc(star.x, star.y, star.radius * 1.5, 0, Math.PI * 2)
-          ctx.fill()
         } else {
-          // White stars - make them much brighter and more visible
-          ctx.shadowBlur = star.radius > 1.5 ? star.radius * 2 : 0 // Glow for larger stars
-          ctx.shadowColor = star.radius > 1.5 ? 'rgba(255, 255, 255, 0.5)' : 'transparent'
-          ctx.fillStyle = `rgba(255, 255, 255, ${currentOpacity})`
+          // White stars - subtle, tiny pinpricks
+          ctx.shadowBlur = 0 // No glow - just tiny dots
+          ctx.fillStyle = `rgba(255, 255, 255, ${currentOpacity * 0.7})` // Dimmer
           ctx.beginPath()
           ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2)
           ctx.fill()
@@ -340,30 +375,18 @@ export default function CosmicBackground() {
         ctx.shadowBlur = 0
       })
       
-      // Add occasional shooting stars
-      if (Math.random() > 0.998) {
-        const startX = Math.random() * canvas.width
-        const startY = Math.random() * canvas.height * 0.3
-        const length = 100 + Math.random() * 50
-        const angle = Math.PI / 4 + (Math.random() - 0.5) * 0.3
-        
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)'
-        ctx.lineWidth = 2
-        ctx.shadowBlur = 10
-        ctx.shadowColor = 'rgba(0, 255, 255, 0.8)'
-        ctx.beginPath()
-        ctx.moveTo(startX, startY)
-        ctx.lineTo(startX + Math.cos(angle) * length, startY + Math.sin(angle) * length)
-        ctx.stroke()
-        ctx.shadowBlur = 0
-      }
+      // No shooting stars - keep it minimal and clean
       
       ctx.globalAlpha = 1
 
-      // Draw rotating sphere
-      sphereRef.current.rotation += 0.003  // Slow rotation
-      sphereRef.current.yRotation += 0.001  // Subtle vertical rotation
+      // Draw rotating sphere - make it much more subtle/optional
+      sphereRef.current.rotation += 0.001  // Very slow rotation
+      sphereRef.current.yRotation += 0.0005  // Very subtle vertical rotation
+      // Make sphere very faint - almost invisible
+      ctx.save()
+      ctx.globalAlpha = 0.15  // Very faint sphere
       drawSphere()
+      ctx.restore()
 
       animationFrameRef.current = requestAnimationFrame(animate)
     }

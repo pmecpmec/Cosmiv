@@ -11,6 +11,7 @@ import StatsCounter from './StatsCounter'
 import InteractiveDemo from './InteractiveDemo'
 import ParallaxSection from './ParallaxSection'
 import EnhancedHero from './EnhancedHero'
+import TensorStaxLandingPage from './TensorStaxLandingPage'
 
 // Lazy load the game (it's a hidden feature)
 const CosmicGame = lazy(() => import('./game/CosmicGame'))
@@ -39,10 +40,13 @@ export default function LandingPage({ onGetStarted }) {
   ]
 
 
+  // Use TensorStax-inspired design
+  return <TensorStaxLandingPage onGetStarted={onGetStarted} />
+  
+  /* Original design - commented out
   return (
     <div className="min-h-screen bg-pure-black text-pure-white relative">
       <Planet3DBackground />
-      {/* Enhanced Hero Section */}
       <EnhancedHero onGetStarted={onGetStarted} />
 
       {/* Pipeline Showcase - Enhanced with Parallax */}
@@ -453,5 +457,6 @@ export default function LandingPage({ onGetStarted }) {
       )}
     </div>
   )
+  */
 }
 

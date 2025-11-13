@@ -4,6 +4,7 @@ import { ToastProvider } from './contexts/ToastContext'
 import ErrorBoundary from './components/ErrorBoundary'
 import CosmicBackground from './components/CosmicBackground'
 import StarfieldBackground from './components/StarfieldBackground'
+import BackgroundComets from './components/BackgroundComets'
 import Login from './components/Login'
 import Register from './components/Register'
 import Header from './components/Header'
@@ -29,10 +30,11 @@ const AIChatbot = lazy(() => import('./components/AIChatbot'))
 const Feed = lazy(() => import('./components/Feed'))
 const Communities = lazy(() => import('./components/Communities'))
 const AIAdminPanel = lazy(() => import('./components/AIAdminPanel'))
+const PublicHomePage = lazy(() => import('./components/PublicHomePage'))
 
 function AppContent() {
   const [activeTab, setActiveTab] = useState("home")
-  const [authMode, setAuthMode] = useState("login") // "login" or "register"
+  const [authMode, setAuthMode] = useState("home") // "home", "login", or "register"
   const [showLoading, setShowLoading] = useState(true)
   const { user, loading, logout, isAuthenticated } = useAuth()
 
@@ -53,20 +55,7 @@ function AppContent() {
   if (loading) {
     return (
       <div className="min-h-screen bg-pure-black flex items-center justify-center relative">
-        {/* Animated Background Comets - Professional Cinematic Animation */}
-        <div className="area"></div>
-        <ul className="comets">
-          <li></li>
-          <li></li>
-          <li></li>
-          <li></li>
-          <li></li>
-          <li></li>
-          <li></li>
-          <li></li>
-          <li></li>
-          <li></li>
-        </ul>
+        <BackgroundComets />
         <StarfieldBackground starCount={1000} intensity="medium" />
         <motion.div 
           initial={{ opacity: 0 }}
@@ -80,73 +69,84 @@ function AppContent() {
   }
 
   if (!isAuthenticated) {
+    // Show public home page with Plays of the Week
     return (
-      <div className="min-h-screen bg-pure-black flex items-center justify-center px-4 py-16 relative">
-        {/* Animated Background Comets - Professional Cinematic Animation */}
-        <div className="area"></div>
-        <ul className="comets">
-          <li></li>
-          <li></li>
-          <li></li>
-          <li></li>
-          <li></li>
-          <li></li>
-          <li></li>
-          <li></li>
-          <li></li>
-          <li></li>
-        </ul>
-        {/* Stars on auth pages too */}
-        <StarfieldBackground starCount={1500} intensity="high" />
-        <div className="w-full max-w-md relative z-10">
-          <div className="text-center mb-12">
+      <div className="min-h-screen relative bg-pure-black text-pure-white">
+        <BackgroundComets />
+        <CosmicBackground />
+        <StarfieldBackground starCount={2000} intensity="high" />
+        
+        {/* Simple Header for Public Page */}
+        <div className="fixed top-0 left-0 right-0 z-50 bg-pure-black/80 backdrop-blur-lg border-b border-pure-white/10">
+          <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+            <div className="text-2xl font-black gradient-text-cosmic tracking-poppr font-display">
+              🌌   C O S M I V
+            </div>
+            <div className="flex gap-4">
+              <button
+                onClick={() => setAuthMode("login")}
+                className="px-6 py-3 bg-pure-white/10 backdrop-blur-lg border-2 border-pure-white/30 hover:border-cosmic-neon-cyan text-pure-white font-black tracking-wide transition-all hover:bg-pure-white/20 text-sm"
+              >
+                S I G N   I N
+              </button>
+              <button
+                onClick={() => setAuthMode("register")}
+                className="px-6 py-3 bg-gradient-to-r from-cosmic-violet to-cosmic-deep-blue hover:from-cosmic-purple hover:to-cosmic-violet text-white border-2 border-cosmic-neon-cyan/50 font-black tracking-wide transition-all hover:neon-glow-cyan text-sm"
+              >
+                S I G N   U P
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Show Public Home Page or Auth based on authMode */}
+        {authMode === "home" || (!authMode || authMode === "") ? (
+          <Suspense fallback={<InlineLoader message="Loading..." />}>
+            <PublicHomePage 
+              onGetStarted={() => setAuthMode("register")}
+              onLogin={() => setAuthMode("login")}
+            />
+          </Suspense>
+        ) : (
+          <div className="min-h-screen flex items-center justify-center px-4 py-16 relative pt-20">
+            <div className="w-full max-w-md relative z-10">
+              <div className="text-center mb-12">
             <motion.h1 
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.6, ease: "easeOut" }}
-              className="text-5xl font-black gradient-text-cosmic mb-6 tracking-poppr chromatic-aberration font-display"
+              className="text-5xl font-black gradient-text-cosmic mb-6 tracking-poppr font-display"
             >
-              🌌   C O S M I V
+              C O S M I V
             </motion.h1>
-            <motion.p 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
-              className="text-xl text-pure-white/70 font-bold tracking-wide font-exo"
-            >
-              A I - P O W E R E D   G A M I N G   M O N T A G E   P L A T F O R M
-            </motion.p>
+                <motion.p 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
+                  className="text-xl text-pure-white/70 font-bold tracking-wide font-exo"
+                >
+                  A I - P O W E R E D   G A M I N G   M O N T A G E   P L A T F O R M
+                </motion.p>
+              </div>
+              {authMode === "login" ? (
+                <Login onSwitchToRegister={() => setAuthMode("register")} />
+              ) : (
+                <Register onSwitchToLogin={() => setAuthMode("login")} />
+              )}
+            </div>
           </div>
-          {authMode === "login" ? (
-            <Login onSwitchToRegister={() => setAuthMode("register")} />
-          ) : (
-            <Register onSwitchToLogin={() => setAuthMode("login")} />
-          )}
-        </div>
+        )}
       </div>
     )
   }
 
   return (
     <div className="min-h-screen relative bg-pure-black text-pure-white">
-      {/* Animated Background Circles */}
-      <div className="area"></div>
-      <ul className="circles">
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-      </ul>
+      <BackgroundComets />
       <ScrollProgress />
       <CosmicBackground />
-      {/* Enhanced starfield for better visibility */}
-      <StarfieldBackground starCount={2000} intensity="high" />
+      {/* Subtle starfield overlay - sparse and minimal */}
+      <StarfieldBackground starCount={300} intensity="low" />
       {/* Fixed Header */}
       <Header activeTab={activeTab} setActiveTab={setActiveTab} />
 
@@ -336,16 +336,6 @@ function AppContent() {
           )}
         </AnimatePresence>
       </div>
-    </div>
-  )
-}
-
-function FeatureCard({ icon, title, description }) {
-  return (
-    <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20 hover:border-white/40 transition-all">
-      <div className="text-4xl mb-4">{icon}</div>
-      <h3 className="text-xl font-semibold text-white mb-2">{title}</h3>
-      <p className="text-gray-300 text-sm">{description}</p>
     </div>
   )
 }

@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { useAuth } from '../contexts/AuthContext'
 import { useToast } from '../contexts/ToastContext'
 import { AnimatedForm, AnimatedContainer } from './ui/AnimatedContainer'
+import SpaceLoader from './ui/SpaceLoader'
 
 export default function Register({ onSwitchToLogin }) {
   const [username, setUsername] = useState('')
@@ -159,17 +160,22 @@ export default function Register({ onSwitchToLogin }) {
             disabled={loading}
             className="btn btn-primary w-full min-h-[44px] bg-gradient-to-r from-cosmic-violet to-cosmic-deep-blue hover:from-cosmic-purple hover:to-cosmic-violet text-white font-black py-4 border-2 border-cosmic-neon-cyan/50 hover:neon-glow-cyan transition-all tracking-wide disabled:opacity-50 disabled:cursor-not-allowed neon-glow chromatic-aberration btn-magnetic btn-glow-pulse font-display"
           >
-            {loading ? (
-              <>
-                <span className="loading loading-spinner loading-sm"></span>
-                C R E A T I N G   A C C O U N T . . .
-              </>
-            ) : (
-              'C R E A T E   A C C O U N T'
-            )}
+            C R E A T E   A C C O U N T
           </button>
         </div>
       </AnimatedForm>
+
+      {/* Space Loader Overlay */}
+      {loading && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
+        >
+          <SpaceLoader size={300} text="C R E A T I N G   A C C O U N T . . ." />
+        </motion.div>
+      )}
 
       <div className="mt-6 text-center">
         <p className="text-pure-white/60 text-sm font-bold">

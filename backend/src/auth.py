@@ -3,7 +3,7 @@ Authentication endpoints for Cosmiv
 Handles user registration, login, and token management
 """
 
-from fastapi import APIRouter, HTTPException, Depends, status, Header
+from fastapi import APIRouter, HTTPException, Depends, status, Header, Request
 from pydantic import BaseModel, EmailStr
 from passlib.context import CryptContext
 from datetime import timedelta
@@ -14,9 +14,19 @@ from sqlmodel import select
 from security import create_access_token, log_security_event, verify_token
 import secrets
 from fastapi.security import HTTPBearer
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
 security = HTTPBearer()
+
+# Rate limiter - will be set from app state after app initialization
+limiter = None
+
+def set_limiter(app_limiter):
+    """Set limiter from app state"""
+    global limiter
+    limiter = app_limiter
 
 # Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -146,16 +156,22 @@ async def get_current_admin_user(
     return current_user
 
 
+def _register_wrapper(f):
+    """Wrapper to apply rate limiting to register endpoint"""
+    if limiter:
+        return limiter.limit("5/minute")(f)
+    return f
+
 @router.post("/register", response_model=Token)
-async def register(user_data: UserRegister):
+@_register_wrapper
+async def register(request: Request, user_data: UserRegister):
     """
-    Register a new user
+    Register a new user - Rate limited to 5 requests per minute
 
     NOTE: This is a simplified implementation for the security audit.
     In production, add:
     - Email verification
     - Password strength requirements
-    - Rate limiting on registration
     - CAPTCHA for bot prevention
     """
     with get_session() as session:
@@ -195,13 +211,19 @@ async def register(user_data: UserRegister):
         return Token(access_token=access_token, token_type="bearer", user_id=user_id)
 
 
+def _login_wrapper(f):
+    """Wrapper to apply rate limiting to login endpoint"""
+    if limiter:
+        return limiter.limit("10/minute")(f)
+    return f
+
 @router.post("/login", response_model=Token)
-async def login(credentials: UserLogin):
+@_login_wrapper
+async def login(request: Request, credentials: UserLogin):
     """
-    Login with email and password
+    Login with email and password - Rate limited to 10 requests per minute
 
     NOTE: In production, add:
-    - Rate limiting to prevent brute force
     - Account lockout after failed attempts
     - Two-factor authentication option
     - Login attempt logging

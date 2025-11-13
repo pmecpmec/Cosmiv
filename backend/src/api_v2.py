@@ -1,4 +1,4 @@
-from fastapi import APIRouter, UploadFile, File, Form, Query, Depends
+from fastapi import APIRouter, UploadFile, File, Form, Query, Depends, HTTPException, status
 from fastapi.responses import JSONResponse
 from typing import List, Optional
 from storage import job_upload_dir, job_export_dir
@@ -8,6 +8,7 @@ from sqlmodel import select
 from tasks import render_job
 from services.storage_adapters import get_storage
 from auth import get_current_user
+from security import validate_video_file, MAX_FILE_SIZE, MAX_TOTAL_UPLOAD_SIZE, sanitize_filename
 import os
 from config import settings
 
@@ -28,11 +29,70 @@ async def create_job_v2(
 
     jid = new_job_id()
     uploads_dir = job_upload_dir(jid)
+    os.makedirs(uploads_dir, exist_ok=True)
 
+    # Validate all files before processing
+    total_size = 0
     for uf in files:
-        dst = f"{uploads_dir}/{uf.filename}"
+        if not uf.filename:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="All files must include a filename"
+            )
+        
+        # Validate file type
+        try:
+            validate_video_file(uf.filename, uf.content_type)
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid file: {str(e)}"
+            )
+        
+        # Sanitize filename
+        try:
+            safe_filename = sanitize_filename(uf.filename)
+        except ValueError as e:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid filename: {str(e)}"
+            )
+        
+        # Check file size (read in chunks to avoid loading entire file into memory)
+        file_size = 0
+        await uf.seek(0)
+        chunk_size = 1024 * 1024  # 1MB chunks
+        while True:
+            chunk = await uf.read(chunk_size)
+            if not chunk:
+                break
+            file_size += len(chunk)
+            if file_size > MAX_FILE_SIZE:
+                max_mb = MAX_FILE_SIZE // (1024 * 1024)
+                raise HTTPException(
+                    status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                    detail=f"File '{uf.filename}' exceeds maximum allowed size of {max_mb}MB"
+                )
+        
+        total_size += file_size
+        if total_size > MAX_TOTAL_UPLOAD_SIZE:
+            max_gb = MAX_TOTAL_UPLOAD_SIZE // (1024 * 1024 * 1024)
+            raise HTTPException(
+                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                detail=f"Total upload size exceeds maximum allowed size of {max_gb}GB"
+            )
+        
+        # Reset file pointer and save
+        await uf.seek(0)
+        dst = os.path.join(uploads_dir, safe_filename)
         with open(dst, "wb") as f:
-            f.write(await uf.read())
+            while True:
+                chunk = await uf.read(chunk_size)
+                if not chunk:
+                    break
+                f.write(chunk)
 
     if target_duration > settings.FREEMIUM_MAX_DURATION:
         return JSONResponse(
