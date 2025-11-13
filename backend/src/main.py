@@ -61,7 +61,7 @@ if settings.SENTRY_ENABLED and settings.SENTRY_DSN:
                 CeleryIntegration(),
             ],
             # Set release version if available
-            release=os.getenv("RELEASE_VERSION", None),
+            release=os.environ.get("RELEASE_VERSION", None),
             # Don't send PII
             send_default_pii=False,
         )
