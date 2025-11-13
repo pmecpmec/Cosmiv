@@ -30,7 +30,15 @@ from api_ai_content import router as ai_content_router
 from api_ai_code import router as ai_code_router
 from api_ai_ux import router as ai_ux_router
 from api_ai_video import router as ai_video_router
-from api_frontend_learning import router as frontend_learning_router
+
+# Frontend learning router - optional dependency
+try:
+    from api_frontend_learning import router as frontend_learning_router
+    FRONTEND_LEARNING_AVAILABLE = True
+except ImportError as e:
+    logger.warning(f"Frontend learning module not available: {e}")
+    frontend_learning_router = None
+    FRONTEND_LEARNING_AVAILABLE = False
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
@@ -409,7 +417,8 @@ app.include_router(ai_content_router)
 app.include_router(ai_code_router)
 app.include_router(ai_ux_router)
 app.include_router(ai_video_router)
-app.include_router(frontend_learning_router)
+if FRONTEND_LEARNING_AVAILABLE and frontend_learning_router:
+    app.include_router(frontend_learning_router)
 
 # Initialize rate limiter for auth router
 from auth import set_limiter
