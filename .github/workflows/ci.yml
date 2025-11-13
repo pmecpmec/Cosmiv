@@ -35,7 +35,7 @@ jobs:
           npm install --include=optional --legacy-peer-deps
           # Step 3: Force install rollup's Linux native dependency (workaround for npm bug)
           echo "Installing rollup Linux native dependency..."
-          npm install @rollup/rollup-linux-x64-gnu@latest --save-optional --force --no-save
+          npm install @rollup/rollup-linux-x64-gnu@latest --force --no-save
           # Step 4: Verify and debug if needed
           if [ -d "node_modules/@rollup/rollup-linux-x64-gnu" ]; then
             echo "✓ Rollup native dependency installed successfully"
@@ -214,7 +214,7 @@ jobs:
           npm install --include=optional --legacy-peer-deps
           # Step 3: Force install rollup's Linux native dependency (workaround for npm bug)
           echo "Installing rollup Linux native dependency..."
-          npm install @rollup/rollup-linux-x64-gnu@latest --save-optional --force --no-save
+          npm install @rollup/rollup-linux-x64-gnu@latest --force --no-save
           # Step 4: Verify and debug if needed
           if [ -d "node_modules/@rollup/rollup-linux-x64-gnu" ]; then
             echo "✓ Rollup native dependency installed successfully"
