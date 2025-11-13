@@ -20,16 +20,34 @@ jobs:
         with:
           node-version: 20
 
+      - name: Upgrade npm to latest
+        run: npm install -g npm@latest
+
       - name: Clean install dependencies
         run: |
-          # Fix for npm optional dependency bug: remove Windows-generated lock file
+          # Fix for npm optional dependency bug (https://github.com/npm/cli/issues/4828)
           rm -f package-lock.json
           npm cache clean --force
           rm -rf node_modules
-          # Fresh install on Linux will get correct platform-specific optional deps
-          npm install
-          # Workaround: explicitly ensure rollup's Linux native dependency is installed
-          npm install @rollup/rollup-linux-x64-gnu --no-save || true
+          # Step 1: Install rollup first to establish dependency tree
+          npm install rollup@latest --save-dev --no-save --legacy-peer-deps
+          # Step 2: Install all other dependencies
+          npm install --include=optional --legacy-peer-deps
+          # Step 3: Force install rollup's Linux native dependency (workaround for npm bug)
+          echo "Installing rollup Linux native dependency..."
+          npm install @rollup/rollup-linux-x64-gnu@latest --save-optional --force --no-save
+          # Step 4: Verify and debug if needed
+          if [ -d "node_modules/@rollup/rollup-linux-x64-gnu" ]; then
+            echo "✓ Rollup native dependency installed successfully"
+            ls -la node_modules/@rollup/rollup-linux-x64-gnu/ | head -5
+          else
+            echo "✗ Rollup native dependency missing"
+            echo "Checking @rollup directory:"
+            ls -la node_modules/@rollup/ 2>/dev/null || echo "No @rollup directory found"
+            echo "Attempting alternative installation method..."
+            npm install @rollup/rollup-linux-x64-gnu --force
+            test -d "node_modules/@rollup/rollup-linux-x64-gnu" || exit 1
+          fi
 
       - name: Build
         run: npm run build
@@ -181,16 +199,34 @@ jobs:
         with:
           node-version: "20"
 
+      - name: Upgrade npm to latest
+        run: npm install -g npm@latest
+
       - name: Clean install dependencies
         run: |
-          # Fix for npm optional dependency bug: remove Windows-generated lock file
+          # Fix for npm optional dependency bug (https://github.com/npm/cli/issues/4828)
           rm -f package-lock.json
           npm cache clean --force
           rm -rf node_modules
-          # Fresh install on Linux will get correct platform-specific optional deps
-          npm install
-          # Workaround: explicitly ensure rollup's Linux native dependency is installed
-          npm install @rollup/rollup-linux-x64-gnu --no-save || true
+          # Step 1: Install rollup first to establish dependency tree
+          npm install rollup@latest --save-dev --no-save --legacy-peer-deps
+          # Step 2: Install all other dependencies
+          npm install --include=optional --legacy-peer-deps
+          # Step 3: Force install rollup's Linux native dependency (workaround for npm bug)
+          echo "Installing rollup Linux native dependency..."
+          npm install @rollup/rollup-linux-x64-gnu@latest --save-optional --force --no-save
+          # Step 4: Verify and debug if needed
+          if [ -d "node_modules/@rollup/rollup-linux-x64-gnu" ]; then
+            echo "✓ Rollup native dependency installed successfully"
+            ls -la node_modules/@rollup/rollup-linux-x64-gnu/ | head -5
+          else
+            echo "✗ Rollup native dependency missing"
+            echo "Checking @rollup directory:"
+            ls -la node_modules/@rollup/ 2>/dev/null || echo "No @rollup directory found"
+            echo "Attempting alternative installation method..."
+            npm install @rollup/rollup-linux-x64-gnu --force
+            test -d "node_modules/@rollup/rollup-linux-x64-gnu" || exit 1
+          fi
 
       - name: Run tests
         run: npm test -- --passWithNoTests || true

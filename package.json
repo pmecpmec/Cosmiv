@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "jest"
+    "test": "jest",
+    "postinstall": "sh -c \"[ \\\"$(uname)\\\" = \\\"Linux\\\" ] && [ ! -d node_modules/@rollup/rollup-linux-x64-gnu ] && npm install @rollup/rollup-linux-x64-gnu --save-optional --force || true\""
   },
   "dependencies": {
     "@react-three/drei": "^9.114.1",
