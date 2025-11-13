@@ -35,3 +35,8 @@ anthropic>=0.18.0
 # transformers>=4.35.0
 # torch>=2.0.0
 # torchaudio>=2.0.0
+# Frontend Learning (optional - install if using frontend learning features)
+beautifulsoup4>=4.12.0
+playwright>=1.40.0
+sentence-transformers>=2.2.0
+chromadb>=0.4.0

@@ -30,8 +30,17 @@ from api_ai_content import router as ai_content_router
 from api_ai_code import router as ai_code_router
 from api_ai_ux import router as ai_ux_router
 from api_ai_video import router as ai_video_router
+from api_frontend_learning import router as frontend_learning_router
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 
 app = FastAPI(title="Cosmiv - AI Gaming Montage Platform")
+
+# Rate limiter setup
+limiter = Limiter(key_func=get_remote_address)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # CORS configuration (environment-based with security validation)
 cors_origins_str = os.getenv("CORS_ORIGINS", settings.ALLOWED_ORIGINS)
@@ -89,38 +98,64 @@ async def on_startup():
 
 @app.get("/health")
 async def health_check():
-    """Health check endpoint to verify DB, Redis, and storage connectivity"""
+    """Health check endpoint to verify DB, Redis, storage, and Celery connectivity"""
     import redis
     from config import settings
     from services.storage_adapters import get_storage
+    import time
 
-    health = {"status": "healthy", "checks": {}}
+    health = {"status": "healthy", "checks": {}, "timestamp": time.time()}
 
     # Check database
     try:
         with get_session() as session:
+            start_time = time.time()
             session.exec(select(func.count(Job.id)))
-        health["checks"]["database"] = "ok"
+            db_time = (time.time() - start_time) * 1000  # Convert to ms
+            health["checks"]["database"] = {"status": "ok", "response_time_ms": round(db_time, 2)}
     except Exception as e:
-        health["checks"]["database"] = f"error: {str(e)}"
+        health["checks"]["database"] = {"status": "error", "error": str(e)}
         health["status"] = "degraded"
 
     # Check Redis
     try:
         r = redis.from_url(settings.REDIS_URL)
+        start_time = time.time()
         r.ping()
-        health["checks"]["redis"] = "ok"
+        redis_time = (time.time() - start_time) * 1000
+        health["checks"]["redis"] = {"status": "ok", "response_time_ms": round(redis_time, 2)}
     except Exception as e:
-        health["checks"]["redis"] = f"error: {str(e)}"
+        health["checks"]["redis"] = {"status": "error", "error": str(e)}
         health["status"] = "degraded"
 
     # Check storage
     try:
         storage = get_storage()
         # Try to list (may fail if not configured, that's ok)
-        health["checks"]["storage"] = "ok"
+        health["checks"]["storage"] = {"status": "ok"}
     except Exception as e:
-        health["checks"]["storage"] = f"warning: {str(e)}"
+        health["checks"]["storage"] = {"status": "warning", "error": str(e)}
+
+    # Check Celery worker (via Redis inspection)
+    try:
+        r = redis.from_url(settings.REDIS_URL)
+        # Check Celery worker registry - workers register themselves with keys like "celery@hostname"
+        worker_keys = r.keys("celery@*")
+        if worker_keys:
+            health["checks"]["celery"] = {
+                "status": "ok",
+                "workers_detected": len(worker_keys),
+                "workers": [key.decode() if isinstance(key, bytes) else str(key) for key in worker_keys[:5]]  # Show first 5
+            }
+        else:
+            # Also check for active tasks as fallback
+            active_tasks = r.keys("celery-task-meta-*")
+            if active_tasks:
+                health["checks"]["celery"] = {"status": "ok", "workers_detected": True, "note": "Detected via active tasks"}
+            else:
+                health["checks"]["celery"] = {"status": "warning", "message": "No active workers detected"}
+    except Exception as e:
+        health["checks"]["celery"] = {"status": "warning", "error": str(e)}
 
     return health
 
@@ -262,3 +297,8 @@ app.include_router(ai_content_router)
 app.include_router(ai_code_router)
 app.include_router(ai_ux_router)
 app.include_router(ai_video_router)
+app.include_router(frontend_learning_router)
+
+# Initialize rate limiter for auth router
+from api_auth import set_limiter
+set_limiter(limiter)

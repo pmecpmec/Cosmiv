@@ -90,6 +90,10 @@ celery_app.conf.beat_schedule = {
         "task": "refresh_expiring_platform_tokens",
         "schedule": 3600.0,  # Every hour - check for tokens expiring soon
     },
+    "learn-frontend-patterns-daily": {
+        "task": "learn_frontend_patterns",
+        "schedule": 86400.0,  # Every 24 hours (daily at 2 AM UTC)
+    },
 }
 
 
@@ -1251,3 +1255,126 @@ def refresh_expiring_platform_tokens():
             f"Token refresh complete: {refreshed_count} refreshed, {failed_count} failed",
             extra={"refreshed": refreshed_count, "failed": failed_count},
         )
+
+
+@celery_app.task(name="learn_frontend_patterns")
+def learn_frontend_patterns():
+    """
+    Automated daily task to learn front-end design patterns.
+    Scrapes target websites, extracts patterns, vectorizes them, and updates design principles.
+    Runs daily via Celery Beat.
+    """
+    from services.frontend_learner.scraper import FrontendScraper
+    from services.frontend_learner.parser import PatternParser
+    from services.frontend_learner.vectorizer import PatternVectorizer
+    from services.frontend_learner.learner import PatternLearner
+    from models_ai import FrontendPattern, ScrapingJob
+    import uuid
+    import json
+
+    logger.info("Starting automated front-end pattern learning...")
+
+    try:
+        scraper = FrontendScraper()
+        parser = PatternParser()
+        vectorizer = PatternVectorizer()
+        learner = PatternLearner()
+
+        # Step 1: Scrape target websites
+        logger.info("Phase 1: Scraping target websites...")
+        snapshots = scraper.scrape_targets()
+        logger.info(f"Scraped {len(snapshots)} pages")
+
+        if not snapshots:
+            logger.warning("No snapshots scraped, skipping learning")
+            return {"status": "skipped", "reason": "no_snapshots"}
+
+        # Step 2: Parse and extract patterns
+        logger.info("Phase 2: Parsing and extracting patterns...")
+        patterns_parsed = 0
+        patterns_vectorized = 0
+
+        with get_session() as session:
+            for snapshot in snapshots:
+                try:
+                    # Parse snapshot
+                    pattern_data = parser.parse_snapshot(snapshot)
+                    if not pattern_data:
+                        continue
+
+                    # Create pattern ID
+                    pattern_id = f"pattern_{uuid.uuid4().hex[:12]}"
+
+                    # Check if pattern already exists (by URL)
+                    existing = session.exec(
+                        select(FrontendPattern).where(
+                            FrontendPattern.source_url == pattern_data["url"]
+                        )
+                    ).first()
+
+                    if existing:
+                        # Update existing pattern
+                        existing.pattern_data = json.dumps(pattern_data)
+                        existing.layout_type = pattern_data.get("layout")
+                        existing.colors = json.dumps(pattern_data.get("colors", []))
+                        existing.fonts = json.dumps(pattern_data.get("fonts", []))
+                        existing.components = json.dumps(pattern_data.get("components", []))
+                        existing.animations = json.dumps(pattern_data.get("animations", []))
+                        existing.gradients = json.dumps(pattern_data.get("gradients", []))
+                        existing.cosmiv_alignment_score = pattern_data.get(
+                            "cosmiv_alignment_score", 0.0
+                        )
+                        existing.updated_at = datetime.utcnow()
+                        pattern_id = existing.pattern_id
+                    else:
+                        # Create new pattern
+                        pattern = FrontendPattern(
+                            pattern_id=pattern_id,
+                            source_url=pattern_data["url"],
+                            pattern_type="layout",
+                            pattern_data=json.dumps(pattern_data),
+                            layout_type=pattern_data.get("layout"),
+                            colors=json.dumps(pattern_data.get("colors", [])),
+                            fonts=json.dumps(pattern_data.get("fonts", [])),
+                            components=json.dumps(pattern_data.get("components", [])),
+                            animations=json.dumps(pattern_data.get("animations", [])),
+                            gradients=json.dumps(pattern_data.get("gradients", [])),
+                            cosmiv_alignment_score=pattern_data.get(
+                                "cosmiv_alignment_score", 0.0
+                            ),
+                        )
+                        session.add(pattern)
+
+                    # Vectorize pattern
+                    embedding = vectorizer.vectorize_pattern(pattern_data, pattern_id)
+                    if embedding:
+                        patterns_vectorized += 1
+
+                    patterns_parsed += 1
+
+                except Exception as e:
+                    logger.error(f"Failed to process snapshot {snapshot.get('url', 'unknown')}: {e}")
+                    continue
+
+            session.commit()
+
+        # Step 3: Update design principles
+        logger.info("Phase 3: Updating design principles...")
+        principles = learner.generate_design_principles()
+
+        logger.info(
+            f"Front-end learning complete: {patterns_parsed} patterns parsed, "
+            f"{patterns_vectorized} vectorized, {len(principles.get('trends', {}))} trend categories"
+        )
+
+        return {
+            "status": "completed",
+            "snapshots_scraped": len(snapshots),
+            "patterns_parsed": patterns_parsed,
+            "patterns_vectorized": patterns_vectorized,
+            "trends_detected": len(principles.get("trends", {})),
+        }
+
+    except Exception as e:
+        logger.error(f"Failed to learn front-end patterns: {e}", exc_info=True)
+        return {"status": "failed", "error": str(e)}

@@ -1,0 +1,110 @@
+{
+  "targets": [
+    {
+      "url": "https://dribbble.com",
+      "type": "design_portfolio",
+      "priority": "high",
+      "selectors": {
+        "main_content": ".shot",
+        "colors": true,
+        "typography": true,
+        "components": true
+      },
+      "notes": "Premium design inspiration, modern UI patterns"
+    },
+    {
+      "url": "https://www.awwwards.com",
+      "type": "award_showcase",
+      "priority": "high",
+      "selectors": {
+        "main_content": ".card",
+        "colors": true,
+        "animations": true
+      },
+      "notes": "Award-winning websites, cutting-edge design"
+    },
+    {
+      "url": "https://www.behance.net",
+      "type": "design_portfolio",
+      "priority": "high",
+      "selectors": {
+        "main_content": ".project",
+        "colors": true,
+        "typography": true
+      },
+      "notes": "Creative portfolios, diverse design styles"
+    },
+    {
+      "url": "https://www.linear.app",
+      "type": "saas_product",
+      "priority": "medium",
+      "selectors": {
+        "main_content": "main",
+        "colors": true,
+        "components": ["hero", "pricing", "features"]
+      },
+      "notes": "Modern SaaS design, clean interfaces"
+    },
+    {
+      "url": "https://www.stripe.com",
+      "type": "saas_product",
+      "priority": "medium",
+      "selectors": {
+        "main_content": "main",
+        "colors": true,
+        "animations": true
+      },
+      "notes": "Professional SaaS, excellent UX"
+    },
+    {
+      "url": "https://www.vercel.com",
+      "type": "saas_product",
+      "priority": "medium",
+      "selectors": {
+        "main_content": "main",
+        "colors": true,
+        "gradients": true
+      },
+      "notes": "Modern gradients, dark theme expertise"
+    },
+    {
+      "url": "https://www.framer.com",
+      "type": "saas_product",
+      "priority": "medium",
+      "selectors": {
+        "main_content": "main",
+        "animations": true,
+        "motion": true
+      },
+      "notes": "Animation-focused, motion design"
+    },
+    {
+      "url": "https://www.land-book.com",
+      "type": "design_gallery",
+      "priority": "low",
+      "selectors": {
+        "main_content": ".website",
+        "colors": true,
+        "components": true
+      },
+      "notes": "Landing page gallery, diverse styles"
+    }
+  ],
+  "scraping_config": {
+    "max_pages_per_site": 10,
+    "respect_robots_txt": true,
+    "delay_between_requests": 2.0,
+    "user_agent": "Cosmiv-FrontendLearner/1.0 (+https://cosmiv.com/bot)",
+    "timeout_seconds": 30,
+    "max_retries": 3,
+    "save_screenshots": true,
+    "extract_css": true,
+    "extract_js": false
+  },
+  "cosmiv_brand_filters": {
+    "preferred_colors": ["#0f0f1a", "#1a1a2e", "#16213e", "#ff0080", "#00ffff", "#667eea", "#764ba2"],
+    "preferred_styles": ["glassmorphism", "neon", "gradient", "dark", "space", "cosmic"],
+    "reject_styles": ["minimal", "pastel", "light", "corporate"]
+  }
+}
+

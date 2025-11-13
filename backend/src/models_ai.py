@@ -100,3 +100,61 @@ class VideoEnhancement(SQLModel, table=True):
     quality_score: Optional[float] = None  # AI-evaluated quality improvement
     created_at: datetime = Field(default_factory=datetime.utcnow)
     completed_at: Optional[datetime] = None
+
+
+class FrontendPattern(SQLModel, table=True):
+    """Store extracted front-end design patterns"""
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    pattern_id: str = Field(index=True, unique=True)
+    source_url: str = Field(index=True)
+    pattern_type: str = Field(
+        index=True
+    )  # "layout", "component", "color", "typography", "animation"
+    pattern_data: str  # JSON: extracted pattern data
+    layout_type: Optional[str] = None  # "flex", "grid", "absolute", "responsive"
+    colors: Optional[str] = None  # JSON array of colors
+    fonts: Optional[str] = None  # JSON array of fonts
+    components: Optional[str] = None  # JSON array of component types
+    animations: Optional[str] = None  # JSON array of animation types
+    gradients: Optional[str] = None  # JSON array of gradient definitions
+    cosmiv_alignment_score: Optional[float] = None  # 0-1 score for brand alignment
+    popularity_score: Optional[float] = None  # 0-1 score for trend popularity
+    embedding: Optional[str] = None  # Base64 encoded embedding vector
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class DesignTrend(SQLModel, table=True):
+    """Track design trend analytics over time"""
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    trend_id: str = Field(index=True, unique=True)
+    trend_name: str = Field(index=True)  # e.g., "Glassmorphism", "Neon Gradients"
+    trend_type: str = Field(
+        index=True
+    )  # "style", "color", "layout", "animation", "typography"
+    trend_data: str  # JSON: trend-specific data
+    popularity_score: float = Field(default=0.0, index=True)  # 0-1 score
+    detected_count: int = Field(default=0)  # Number of times detected
+    first_detected_at: datetime = Field(default_factory=datetime.utcnow)
+    last_detected_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class ScrapingJob(SQLModel, table=True):
+    """Track front-end learning scraping operations"""
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    job_id: str = Field(index=True, unique=True)
+    target_url: str = Field(index=True)
+    status: str = Field(
+        default="pending", index=True
+    )  # "pending", "scraping", "parsing", "completed", "failed"
+    pages_scraped: int = Field(default=0)
+    patterns_extracted: int = Field(default=0)
+    error_message: Optional[str] = None
+    snapshot_path: Optional[str] = None  # Path to saved HTML/CSS
+    started_at: Optional[datetime] = None
+    completed_at: Optional[datetime] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)

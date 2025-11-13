@@ -52,6 +52,9 @@ def init_db():
         UXAnalysis,
         AITask,
         VideoEnhancement,
+        FrontendPattern,
+        DesignTrend,
+        ScrapingJob,
     )
 
     SQLModel.metadata.create_all(engine)
