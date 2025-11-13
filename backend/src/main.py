@@ -34,6 +34,44 @@ from api_frontend_learning import router as frontend_learning_router
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
+import uuid
+import logging
+
+# Set up structured logging
+from logging_config import setup_logging
+setup_logging()
+
+logger = logging.getLogger(__name__)
+
+# Initialize Sentry for error tracking (if enabled)
+if settings.SENTRY_ENABLED and settings.SENTRY_DSN:
+    try:
+        import sentry_sdk
+        from sentry_sdk.integrations.fastapi import FastApiIntegration
+        from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
+        from sentry_sdk.integrations.celery import CeleryIntegration
+        
+        sentry_sdk.init(
+            dsn=settings.SENTRY_DSN,
+            environment=settings.SENTRY_ENVIRONMENT,
+            traces_sample_rate=settings.SENTRY_TRACES_SAMPLE_RATE,
+            integrations=[
+                FastApiIntegration(),
+                SqlalchemyIntegration(),
+                CeleryIntegration(),
+            ],
+            # Set release version if available
+            release=os.getenv("RELEASE_VERSION", None),
+            # Don't send PII
+            send_default_pii=False,
+        )
+        logger.info("Sentry error tracking initialized")
+    except ImportError:
+        logger.warning("sentry-sdk not installed, error tracking disabled")
+    except Exception as e:
+        logger.error(f"Failed to initialize Sentry: {e}")
+else:
+    logger.info("Sentry error tracking disabled (SENTRY_ENABLED=false or SENTRY_DSN not set)")
 
 app = FastAPI(title="Cosmiv - AI Gaming Montage Platform")
 
@@ -65,6 +103,24 @@ app.add_middleware(
     ],  # Explicit headers only
     max_age=3600,  # Cache preflight requests for 1 hour
 )
+
+
+# Request ID middleware for log tracking
+@app.middleware("http")
+async def add_request_id(request, call_next):
+    """Add unique request ID to each request for log tracking"""
+    request_id = str(uuid.uuid4())
+    request.state.request_id = request_id
+    
+    # Store request ID in context for logging
+    # This will be picked up by the JSONFormatter
+    import contextvars
+    request_id_var = contextvars.ContextVar('request_id', default=None)
+    request_id_var.set(request_id)
+    
+    response = await call_next(request)
+    response.headers["X-Request-ID"] = request_id
+    return response
 
 
 # Security headers middleware
