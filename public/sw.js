@@ -1,6 +1,6 @@
 // Service Worker for Cosmiv PWA
-const CACHE_NAME = "cosmiv-v1";
-const RUNTIME_CACHE = "cosmiv-runtime";
+const CACHE_NAME = "cosmiv-v2";
+const RUNTIME_CACHE = "cosmiv-runtime-v2";
 
 // Assets to cache on install
 const STATIC_ASSETS = ["/", "/index.html", "/manifest.json"];
