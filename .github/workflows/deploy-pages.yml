@@ -38,8 +38,8 @@ jobs:
           rm -rf node_modules
           # Step 1: Install rollup first to establish dependency tree
           npm install rollup@latest --save-dev --no-save --legacy-peer-deps
-          # Step 2: Install all other dependencies
-          npm install --include=optional --legacy-peer-deps
+          # Step 2: Install all other dependencies (optional deps included by default)
+          npm install --legacy-peer-deps
           # Step 3: Force install rollup's Linux native dependency (workaround for npm bug)
           echo "Installing rollup Linux native dependency..."
           npm install @rollup/rollup-linux-x64-gnu@latest --force --no-save
