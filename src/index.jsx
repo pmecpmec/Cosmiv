@@ -5,15 +5,34 @@ import './index.css'
 import { registerServiceWorker } from './utils/registerServiceWorker'
 import { initPerformanceOptimizations } from './utils/performance'
 
-// Initialize performance optimizations
-initPerformanceOptimizations()
+// Initialize performance optimizations (with error handling)
+try {
+  initPerformanceOptimizations()
+} catch (error) {
+  console.error('Failed to initialize performance optimizations:', error)
+}
 
-ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-)
+// Render app with error boundary
+const rootElement = document.getElementById('root')
+if (!rootElement) {
+  throw new Error('Root element not found')
+}
 
-// Register service worker for PWA
-registerServiceWorker()
+try {
+  ReactDOM.createRoot(rootElement).render(
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>,
+  )
+} catch (error) {
+  console.error('Failed to render app:', error)
+  rootElement.innerHTML = '<div style="padding: 20px; color: white; background: black;">Error loading application. Please refresh the page.</div>'
+}
+
+// Register service worker for PWA (with error handling)
+try {
+  registerServiceWorker()
+} catch (error) {
+  console.error('Failed to register service worker:', error)
+}
 

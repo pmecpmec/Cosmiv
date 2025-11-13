@@ -175,41 +175,50 @@ export function preloadResource(href, as = 'style', crossorigin = false) {
  * Initialize performance optimizations on page load
  */
 export function initPerformanceOptimizations() {
-  // Handle reduced motion
-  handleReducedMotion()
-
-  // Lazy load images
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-      lazyLoadImages()
-    })
-  } else {
-    lazyLoadImages()
+  // Only run in browser environment
+  if (typeof window === 'undefined' || typeof document === 'undefined') {
+    return
   }
 
-  // Optimize scroll
-  optimizeScroll()
+  try {
+    // Handle reduced motion
+    handleReducedMotion()
 
-  // Enable GPU acceleration for animated elements
-  document.querySelectorAll('.animate-float, .animate-cosmic-glow, .card-3d').forEach((el) => {
-    enableGPUAcceleration(el)
-  })
-
-  // Monitor performance
-  if ('PerformanceObserver' in window) {
-    try {
-      const perfObserver = new PerformanceObserver((list) => {
-        for (const entry of list.getEntries()) {
-          // Log long tasks
-          if (entry.entryType === 'longtask') {
-            console.warn('Long task detected:', entry.duration)
-          }
-        }
+    // Lazy load images
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => {
+        lazyLoadImages()
       })
-      perfObserver.observe({ entryTypes: ['longtask'] })
-    } catch (e) {
-      // PerformanceObserver not fully supported
+    } else {
+      lazyLoadImages()
     }
+
+    // Optimize scroll
+    optimizeScroll()
+
+    // Enable GPU acceleration for animated elements
+    document.querySelectorAll('.animate-float, .animate-cosmic-glow, .card-3d').forEach((el) => {
+      enableGPUAcceleration(el)
+    })
+
+    // Monitor performance
+    if ('PerformanceObserver' in window) {
+      try {
+        const perfObserver = new PerformanceObserver((list) => {
+          for (const entry of list.getEntries()) {
+            // Log long tasks
+            if (entry.entryType === 'longtask') {
+              console.warn('Long task detected:', entry.duration)
+            }
+          }
+        })
+        perfObserver.observe({ entryTypes: ['longtask'] })
+      } catch (e) {
+        // PerformanceObserver not fully supported
+      }
+    }
+  } catch (error) {
+    console.error('Performance optimization error:', error)
   }
 }
 
