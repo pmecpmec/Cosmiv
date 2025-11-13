@@ -213,6 +213,36 @@ class FrontendScraper:
                 for style_tag in style_tags:
                     css_content.append(style_tag.inner_text())
 
+                # Take full page screenshot
+                screenshot_path = None
+                if self.scraping_config.get("save_screenshots", True):
+                    try:
+                        parsed = urlparse(url)
+                        domain = parsed.netloc.replace(".", "_")
+                        timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+                        screenshot_filename = f"{domain}_{timestamp}_screenshot.png"
+                        screenshot_path_full = self.snapshot_dir / screenshot_filename
+                        page.screenshot(path=str(screenshot_path_full), full_page=True)
+                        screenshot_path = str(screenshot_path_full)
+                        logger.info(f"Saved screenshot: {screenshot_path}")
+                    except Exception as e:
+                        logger.warning(f"Failed to save screenshot: {e}")
+
+                # Extract and save images
+                images_data = []
+                try:
+                    img_elements = page.query_selector_all("img")
+                    for img in img_elements[:20]:  # Limit to 20 images
+                        src = img.get_attribute("src")
+                        if src:
+                            full_img_url = urljoin(url, src)
+                            images_data.append({
+                                "src": full_img_url,
+                                "alt": img.get_attribute("alt") or "",
+                            })
+                except Exception as e:
+                    logger.debug(f"Failed to extract images: {e}")
+
                 browser.close()
 
                 return {
@@ -221,6 +251,8 @@ class FrontendScraper:
                     "css": "\n".join(css_content),
                     "method": "dynamic",
                     "timestamp": datetime.utcnow().isoformat(),
+                    "screenshot_path": screenshot_path,
+                    "images": images_data,
                 }
         except Exception as e:
             logger.error(f"Failed to scrape dynamic page {url}: {e}")

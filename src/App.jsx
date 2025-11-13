@@ -31,6 +31,7 @@ const Feed = lazy(() => import('./components/Feed'))
 const Communities = lazy(() => import('./components/Communities'))
 const AIAdminPanel = lazy(() => import('./components/AIAdminPanel'))
 const PublicHomePage = lazy(() => import('./components/PublicHomePage'))
+const EpimindsLanding = lazy(() => import('./components/EpimindsLanding'))
 
 function AppContent() {
   const [activeTab, setActiveTab] = useState("home")
@@ -99,10 +100,10 @@ function AppContent() {
           </div>
         </div>
 
-        {/* Show Public Home Page or Auth based on authMode */}
+        {/* Show Epiminds Landing Page or Auth based on authMode */}
         {authMode === "home" || (!authMode || authMode === "") ? (
           <Suspense fallback={<InlineLoader message="Loading..." />}>
-            <PublicHomePage 
+            <EpimindsLanding 
               onGetStarted={() => setAuthMode("register")}
               onLogin={() => setAuthMode("login")}
             />
