@@ -15,7 +15,13 @@ from urllib.parse import urljoin, urlparse
 from urllib.robotparser import RobotFileParser
 
 import requests
-from bs4 import BeautifulSoup
+
+try:
+    from bs4 import BeautifulSoup
+    BEAUTIFULSOUP_AVAILABLE = True
+except ImportError:
+    BEAUTIFULSOUP_AVAILABLE = False
+    BeautifulSoup = None
 
 logger = logging.getLogger(__name__)
 
@@ -127,6 +133,10 @@ class FrontendScraper:
 
     def _scrape_static(self, url: str) -> Optional[Dict[str, Any]]:
         """Scrape static HTML page using BeautifulSoup"""
+        if not BEAUTIFULSOUP_AVAILABLE:
+            logger.error("BeautifulSoup4 is not installed. Install with: pip install beautifulsoup4")
+            return None
+        
         try:
             headers = {"User-Agent": self.user_agent}
             response = requests.get(url, headers=headers, timeout=self.timeout)

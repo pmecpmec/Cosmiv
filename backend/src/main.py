@@ -412,5 +412,5 @@ app.include_router(ai_video_router)
 app.include_router(frontend_learning_router)
 
 # Initialize rate limiter for auth router
-from api_auth import set_limiter
+from auth import set_limiter
 set_limiter(limiter)
