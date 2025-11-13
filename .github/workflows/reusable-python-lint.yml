@@ -1,0 +1,89 @@
+name: Reusable Python Lint
+
+# Reusable workflow for Python code quality checks
+# Runs black, flake8, mypy, and security checks
+
+on:
+  workflow_call:
+    inputs:
+      python-version:
+        description: 'Python version to use'
+        required: false
+        type: string
+        default: '3.12'
+      working-directory:
+        description: 'Working directory for linting'
+        required: false
+        type: string
+        default: 'backend/src'
+      fail-on-error:
+        description: 'Fail workflow on linting errors'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  lint:
+    name: Python Lint & Format Check
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ inputs.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ inputs.python-version }}
+          cache: 'pip'
+          cache-dependency-path: backend/src/requirements.txt
+
+      - name: Install linting tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install black flake8 mypy bandit safety
+
+      - name: Run Black (code formatter check)
+        continue-on-error: ${{ !inputs.fail-on-error }}
+        run: |
+          black --check --diff . || (echo "::warning::Code formatting issues found. Run 'black .' to fix." && exit 1)
+
+      - name: Run Flake8 (linting)
+        continue-on-error: ${{ !inputs.fail-on-error }}
+        run: |
+          flake8 . \
+            --max-line-length=120 \
+            --extend-ignore=E203,W503 \
+            --exclude=.git,__pycache__,*.pyc,venv,node_modules \
+            --count \
+            --statistics || (echo "::warning::Linting issues found." && exit 1)
+
+      - name: Run MyPy (type checking)
+        continue-on-error: ${{ !inputs.fail-on-error }}
+        run: |
+          mypy . \
+            --ignore-missing-imports \
+            --no-strict-optional \
+            --show-error-codes || (echo "::warning::Type checking issues found." && exit 1)
+
+      - name: Run Bandit (security linting)
+        continue-on-error: ${{ !inputs.fail-on-error }}
+        run: |
+          bandit -r . \
+            -f json \
+            -o bandit-report.json \
+            -ll \
+            -i || true
+          bandit -r . -ll || (echo "::warning::Security issues found." && exit 1)
+
+      - name: Upload security report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bandit-security-report
+          path: ${{ inputs.working-directory }}/bandit-report.json
+          retention-days: 30
+

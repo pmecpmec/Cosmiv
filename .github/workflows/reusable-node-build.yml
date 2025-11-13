@@ -1,0 +1,87 @@
+name: Reusable Node.js Build
+
+# Reusable workflow for Node.js frontend builds
+# Handles dependency installation, testing, and building
+
+on:
+  workflow_call:
+    inputs:
+      node-version:
+        description: 'Node.js version to use'
+        required: false
+        type: string
+        default: '20'
+      working-directory:
+        description: 'Working directory'
+        required: false
+        type: string
+        default: '.'
+      install-command:
+        description: 'Custom install command'
+        required: false
+        type: string
+        default: 'npm ci'
+      build-command:
+        description: 'Build command'
+        required: false
+        type: string
+        default: 'npm run build'
+      test-command:
+        description: 'Test command'
+        required: false
+        type: string
+        default: 'npm test -- --passWithNoTests --watch=false'
+      run-tests:
+        description: 'Run tests'
+        required: false
+        type: boolean
+        default: true
+
+jobs:
+  build:
+    name: Node.js Build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js ${{ inputs.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: 'npm'
+          cache-dependency-path: ${{ inputs.working-directory }}/package-lock.json
+
+      - name: Upgrade npm to latest
+        run: npm install -g npm@latest
+
+      - name: Install dependencies
+        run: ${{ inputs.install-command }}
+
+      - name: Fix rollup native dependency (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          if [ ! -d "node_modules/@rollup/rollup-linux-x64-gnu" ]; then
+            echo "Installing rollup Linux native dependency..."
+            npm install @rollup/rollup-linux-x64-gnu@latest --save-optional --force || true
+          fi
+
+      - name: Run tests
+        if: ${{ inputs.run-tests }}
+        run: ${{ inputs.test-command }}
+
+      - name: Build application
+        run: ${{ inputs.build-command }}
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build
+          path: |
+            ${{ inputs.working-directory }}/dist
+          retention-days: 7
+

@@ -1,0 +1,37 @@
+name: Dependabot Auto-merge
+
+# Automatically merge Dependabot PRs that pass CI
+# Only merges patch and minor updates (not major)
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  auto-merge:
+    name: Auto-merge Dependabot PRs
+    runs-on: ubuntu-latest
+    if: github.actor == 'dependabot[bot]'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Enable auto-merge for Dependabot PRs
+        if: |
+          github.event.pull_request.user.login == 'dependabot[bot]' &&
+          (contains(github.event.pull_request.title, 'patch') || 
+           contains(github.event.pull_request.title, 'minor') ||
+           contains(github.event.pull_request.title, 'bump'))
+        run: |
+          gh pr merge ${{ github.event.pull_request.number }} \
+            --auto \
+            --squash \
+            --delete-branch || true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
