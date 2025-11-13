@@ -17,7 +17,7 @@ export default function PublicHomePage({ onGetStarted, onLogin }) {
 
   const loadMontages = async () => {
     try {
-      const res = await fetch('/api/v2/weekly-montages?limit=6&featured_only=true')
+      const res = await fetch('/api/v2/weekly-montages?limit=6&featured_only=true').catch(() => null)
       if (!res.ok) throw new Error('Failed to load montages')
       const data = await res.json()
       setMontages(data.montages || [])

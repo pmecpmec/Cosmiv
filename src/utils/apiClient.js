@@ -186,10 +186,33 @@ async function handleResponse(response, endpoint) {
     const data = await response.json()
     
     if (!response.ok) {
-      const error = new Error(data.detail || data.message || data.error || 'Request failed')
+      // Handle new error format from backend
+      let errorMessage = 'Request failed'
+      let errorCode = null
+      
+      if (data.error) {
+        // New error format: { error: { code, message, data } }
+        errorMessage = data.error.message || data.error.code || 'Request failed'
+        errorCode = data.error.code
+      } else if (data.detail) {
+        // FastAPI validation error format
+        errorMessage = data.detail
+      } else if (data.message) {
+        // Generic message format
+        errorMessage = data.message
+      }
+      
+      const error = new Error(errorMessage)
       error.status = response.status
+      error.code = errorCode
       error.data = data
+      error.userMessage = errorMessage // User-friendly message
       throw error
+    }
+    
+    // Handle success response format: { success: true, data: ... }
+    if (data.success !== undefined) {
+      return data.data !== undefined ? data.data : data
     }
     
     return data

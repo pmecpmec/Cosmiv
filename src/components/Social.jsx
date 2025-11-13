@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react"
 import { motion } from 'framer-motion'
 import { useAuth } from '../contexts/AuthContext'
+import { useToast } from '../contexts/ToastContext'
+import api from '../utils/apiClient'
 
 export default function Social() {
   const { getAuthHeaders } = useAuth()
@@ -19,28 +21,30 @@ export default function Social() {
     loadPosts()
   }, [])
 
+  const { showError } = useToast()
+
   const loadConnections = async () => {
     try {
-      const headers = getAuthHeaders()
-      const res = await fetch('/api/v2/social/connections', { headers })
-      if (!res.ok) throw new Error('Failed to load connections')
-      const data = await res.json()
+      const data = await api.get('/api/v2/social/connections', { requireAuth: true })
       setConnections(data.connections || [])
+      setError(null)
     } catch (err) {
-      setError(err.message)
+      const errorMsg = err.userMessage || err.message || 'Failed to load connections'
+      setError(errorMsg)
+      showError(errorMsg)
     }
   }
 
   const loadPosts = async () => {
     try {
-      const headers = getAuthHeaders()
-      const res = await fetch('/api/v2/social/posts?limit=50', { headers })
-      if (!res.ok) throw new Error('Failed to load posts')
-      const data = await res.json()
+      const data = await api.get('/api/v2/social/posts?limit=50', { requireAuth: true })
       setPosts(data.posts || [])
-      setLoading(false)
+      setError(null)
     } catch (err) {
-      setError(err.message)
+      const errorMsg = err.userMessage || err.message || 'Failed to load posts'
+      setError(errorMsg)
+      showError(errorMsg)
+    } finally {
       setLoading(false)
     }
   }

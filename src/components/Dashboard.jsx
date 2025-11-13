@@ -33,17 +33,17 @@ export default function Dashboard() {
   }, []);
 
   const downloadUrl = async (jobId, format) => {
-    const r = await fetch(`/api/v2/jobs/${jobId}/download?format=${format}`);
-    const d = await r.json();
-    
-    // Track view for analytics
     try {
-      await fetch(`/api/v2/analytics/track-view/${jobId}`, { method: "POST" });
-    } catch (e) {
-      // Silent fail
+      const data = await api.get(`/api/v2/jobs/${jobId}/download?format=${format}`, { requireAuth: true });
+      
+      // Track view for analytics (silent fail)
+      api.post(`/api/v2/analytics/track-view/${jobId}`, null, { requireAuth: true }).catch(() => {});
+      
+      return data?.url || data?.path || data;
+    } catch (error) {
+      setError(error.userMessage || error.message || 'Failed to get download URL');
+      throw error;
     }
-    
-    return d.url || d.path;
   };
 
   // Mock data for trend chart
