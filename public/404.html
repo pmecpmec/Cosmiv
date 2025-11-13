@@ -7,7 +7,9 @@
       // Store the original URL before redirecting
       sessionStorage.redirect = location.href;
       // Redirect to index.html (base path will be injected at build time)
-      const basePath = location.pathname.split("/").slice(0, 2).join("/") || "";
+      // Extract base path from current location (e.g., /Aiditor from /Aiditor/some/path)
+      const pathParts = location.pathname.split("/").filter(p => p);
+      const basePath = pathParts.length > 0 ? "/" + pathParts[0] : "";
       location.replace(basePath + "/index.html");
     </script>
   </head>
@@ -15,7 +17,7 @@
     <noscript>
       <p>
         Please enable JavaScript or navigate to
-        <a href="/Cosmiv/index.html">home page</a>.
+        <a href="/Aiditor/index.html">home page</a>.
       </p>
     </noscript>
   </body>
