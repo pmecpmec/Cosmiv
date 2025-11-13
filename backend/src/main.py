@@ -141,6 +141,62 @@ async def add_security_headers(request, call_next):
     return response
 
 
+# Global exception handler for consistent error responses
+from fastapi.exceptions import RequestValidationError
+from starlette.exceptions import HTTPException as StarletteHTTPException
+from utils.errors import CosmivError, format_error_response, handle_exception
+
+@app.exception_handler(CosmivError)
+async def cosmiv_error_handler(request, exc: CosmivError):
+    """Handle CosmivError exceptions with consistent format"""
+    return JSONResponse(
+        status_code=exc.status_code,
+        content=format_error_response(exc)
+    )
+
+@app.exception_handler(StarletteHTTPException)
+async def http_exception_handler(request, exc: StarletteHTTPException):
+    """Handle HTTP exceptions with consistent format"""
+    from utils.errors import CosmivError
+    cosmiv_error = CosmivError(
+        status_code=exc.status_code,
+        detail=exc.detail,
+        error_code=f"HTTP_{exc.status_code}",
+    )
+    return JSONResponse(
+        status_code=exc.status_code,
+        content=format_error_response(cosmiv_error)
+    )
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request, exc: RequestValidationError):
+    """Handle validation errors with consistent format"""
+    from utils.errors import ValidationError
+    errors = exc.errors()
+    first_error = errors[0] if errors else None
+    
+    field = first_error.get("loc", [None])[-1] if first_error else None
+    message = first_error.get("msg", "Validation error") if first_error else "Validation error"
+    
+    validation_error = ValidationError(
+        detail=message,
+        field=str(field) if field else None,
+    )
+    return JSONResponse(
+        status_code=400,
+        content=format_error_response(validation_error)
+    )
+
+@app.exception_handler(Exception)
+async def general_exception_handler(request, exc: Exception):
+    """Handle all other exceptions"""
+    cosmiv_error = handle_exception(exc)
+    return JSONResponse(
+        status_code=cosmiv_error.status_code,
+        content=format_error_response(cosmiv_error)
+    )
+
+
 @app.on_event("startup")
 async def on_startup():
     # Only initialize DB if not in test mode
