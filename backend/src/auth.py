@@ -228,6 +228,11 @@ async def login(request: Request, credentials: UserLogin):
     - Two-factor authentication option
     - Login attempt logging
     """
+    from datetime import datetime, timedelta
+    
+    MAX_FAILED_ATTEMPTS = 5  # Lock after 5 failed attempts
+    LOCKOUT_DURATION_MINUTES = 15  # Lock for 15 minutes
+    
     with get_session() as session:
         user = session.exec(select(User).where(User.email == credentials.email)).first()
 
@@ -240,19 +245,75 @@ async def login(request: Request, credentials: UserLogin):
                 detail="Incorrect email or password",
             )
 
+        # Check if account is locked
+        if user.account_locked_until:
+            if user.account_locked_until > datetime.utcnow():
+                remaining_minutes = int((user.account_locked_until - datetime.utcnow()).total_seconds() / 60)
+                log_security_event(
+                    "LOGIN_BLOCKED_ACCOUNT_LOCKED",
+                    user.user_id,
+                    {"email": credentials.email, "locked_until": str(user.account_locked_until)}
+                )
+                raise HTTPException(
+                    status_code=status.HTTP_423_LOCKED,
+                    detail=f"Account locked due to too many failed login attempts. Try again in {remaining_minutes} minutes.",
+                )
+            else:
+                # Lockout expired, reset
+                user.account_locked_until = None
+                user.failed_login_attempts = 0
+                session.add(user)
+                session.commit()
+
         # Verify password
         if not user.password_hash or not verify_password(
             credentials.password, user.password_hash
         ):
-            log_security_event(
-                "LOGIN_FAILED_INVALID_PASSWORD",
-                user.user_id,
-                {"email": credentials.email},
-            )
+            # Increment failed attempts
+            user.failed_login_attempts = (user.failed_login_attempts or 0) + 1
+            
+            # Lock account if max attempts reached
+            if user.failed_login_attempts >= MAX_FAILED_ATTEMPTS:
+                user.account_locked_until = datetime.utcnow() + timedelta(minutes=LOCKOUT_DURATION_MINUTES)
+                log_security_event(
+                    "ACCOUNT_LOCKED",
+                    user.user_id,
+                    {
+                        "email": credentials.email,
+                        "failed_attempts": user.failed_login_attempts,
+                        "locked_until": str(user.account_locked_until)
+                    }
+                )
+            else:
+                remaining_attempts = MAX_FAILED_ATTEMPTS - user.failed_login_attempts
+                log_security_event(
+                    "LOGIN_FAILED_INVALID_PASSWORD",
+                    user.user_id,
+                    {
+                        "email": credentials.email,
+                        "failed_attempts": user.failed_login_attempts,
+                        "remaining_attempts": remaining_attempts
+                    }
+                )
+            
+            session.add(user)
+            session.commit()
+            
+            error_detail = "Incorrect email or password"
+            if user.failed_login_attempts >= MAX_FAILED_ATTEMPTS:
+                error_detail = f"Account locked due to too many failed attempts. Try again in {LOCKOUT_DURATION_MINUTES} minutes."
+            
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Incorrect email or password",
+                status_code=status.HTTP_423_LOCKED if user.failed_login_attempts >= MAX_FAILED_ATTEMPTS else status.HTTP_401_UNAUTHORIZED,
+                detail=error_detail,
             )
+
+        # Successful login - reset failed attempts
+        if user.failed_login_attempts > 0 or user.account_locked_until:
+            user.failed_login_attempts = 0
+            user.account_locked_until = None
+            session.add(user)
+            session.commit()
 
         log_security_event("USER_LOGGED_IN", user.user_id, {"email": credentials.email})
 

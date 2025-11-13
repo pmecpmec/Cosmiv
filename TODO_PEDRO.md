@@ -1,6 +1,6 @@
 # TODO_PEDRO.md
 
-_Last updated: 2025-01-28 by Auto (AI Assistant)_
+_Last updated: 2025-01-28_
 
 ## 👋 Hey Pedro (pmec)!
 
@@ -18,608 +18,471 @@ This is your **technical development checklist**. These are tasks that require c
 | Production Deployment  | ⚙️ Placeholder  | CI/CD has deployment stub                                |
 | Environment Variables  | ⚙️ Partial      | Need production `.env` template                          |
 | ML Models              | ⚙️ Stub         | Highlight detection model interface exists               |
-| CI/CD Pipeline         | 🟡 Configured   | Tests running, deployment needs setup                    |
-| Error Monitoring       | ❌ Missing      | No Sentry or error tracking                              |
-| Performance Monitoring | ❌ Missing      | No APM setup                                             |
-| **Security Hardening** | 🟢 **Good**     | ✅ Rate limiting, ✅ File validation, ✅ CORS configured |
-| **Health Checks**      | 🟢 **Complete** | ✅ Enhanced endpoint with metrics and Celery status      |
+| Security Hardening     | 🟡 Partial      | JWT secrets need production config                       |
+| Feed Algorithm         | ⏳ Pending      | Database models exist, algorithm needs implementation    |
+| Community Features     | ⏳ Pending      | Models exist, API endpoints and frontend needed          |
+| Real-time Messaging    | ⏳ Pending      | WebSocket implementation needed                          |
 
 ---
 
-## 🚀 Tasks To Do
+## 🚀 High Priority Tasks
 
-### 🧪 Testing Infrastructure (Priority: High)
+### 1. Production Deployment Setup (Priority: CRITICAL)
 
-**Goal:** Expand test coverage beyond current auth + API tests
-
-**Current Status:**
-
-- ✅ Basic test structure exists (`backend/src/tests/`)
-- ✅ Authentication tests implemented (`test_auth.py`)
-- ✅ API endpoint tests implemented (`test_api_endpoints.py`)
-- ✅ `pytest.ini` configuration exists
-- ✅ CI/CD runs tests correctly
-
-**Remaining Work:**
-
-1. **Add Missing Test Files:**
-
-   - **Pipeline tests** (`test_pipeline.py`):
-
-     - Test video preprocessing
-     - Test highlight detection scoring
-     - Test scene selection logic
-     - Mock FFmpeg calls for unit tests
-
-   - **Accounts API tests** (`test_api_accounts.py`):
-
-     - Test OAuth linking (mock mode)
-     - Test provider listing
-     - Test clip discovery
-
-   - **Billing API tests** (`test_api_billing.py`):
-
-     - Test Stripe webhook signature verification
-     - Test subscription creation/cancellation
-     - Test plan listing
-
-   - **Integration tests**:
-     - Full job processing flow (with mocks)
-     - OAuth callback handling
-     - Webhook processing
-
-2. **Enhance Test Coverage:**
-
-   - Increase coverage percentage
-   - Add edge case tests
-   - Add error scenario tests
-   - Configure coverage reporting
-
-3. **CI/CD Enhancements:**
-   - Ensure coverage reports are uploaded
-   - Add test badges to README
-
-**Files to Create:**
-
-- `backend/src/tests/test_pipeline.py`
-- `backend/src/tests/test_api_accounts.py`
-- `backend/src/tests/test_api_billing.py`
-- Integration test files
-
-**Help:**
-
-- Use ChatGPT: "How to mock FFmpeg and external APIs in Python tests?"
-
----
-
-### 🚀 Production Deployment (Priority: High)
-
-**Goal:** Complete production deployment automation
-
-**Current Status:**
-
-- `.github/workflows/ci.yml` line 180-184 has placeholder deployment
-- Docker images are being built but not deployed
+**Goal:** Get Cosmiv deployed and running in production.
 
 **Steps:**
 
-1. **Choose Deployment Platform:**
+1. **Complete Production Environment Template**
+   - Review `env.production.example`
+   - Ensure all required variables are documented
+   - Add comments explaining each variable
+   - Reference: `DEPLOYMENT.md`
 
-   - Options: Railway, Render, Fly.io, AWS, DigitalOcean
-   - Consider: Cost, scaling, database persistence, storage
+2. **Set Up CI/CD Pipeline**
+   - Complete the deployment stub in CI/CD config
+   - Configure deployment to production environment
+   - Add health checks and rollback mechanisms
+   - Reference: `DEPLOYMENT.md` → CI/CD section
 
-2. **Create Deployment Scripts:**
+3. **Production Database Setup**
+   - Set up PostgreSQL database (managed service recommended)
+   - Run Alembic migrations in production
+   - Verify database backups are configured
+   - Reference: `backend/src/alembic/MIGRATION_GUIDE.md`
 
-   - Update `.github/workflows/ci.yml` deploy-backend job:
-     ```yaml
-     - name: Deploy to production
-       run: |
-         # Add actual deployment commands
-         # e.g., SSH to server, pull image, restart services
-         # or use platform CLI (railway up, render deploy, etc.)
-     ```
+4. **Production Storage Configuration**
+   - Set up S3-compatible storage (AWS S3 or Cloudflare R2)
+   - Configure bucket policies and CORS
+   - Test file uploads and exports
+   - Reference: `DEPLOYMENT.md` → Storage Setup
 
-3. **Environment Variables:**
+5. **SSL & Domain Configuration**
+   - Configure domain DNS
+   - Set up SSL certificates (Let's Encrypt)
+   - Test HTTPS endpoints
 
-   - Create `env.production.example` with all required variables
-   - Set up secrets management (GitHub Secrets, platform env vars)
-   - Document which secrets go where
+**Resources:**
+- `DEPLOYMENT.md` - Complete deployment guide
+- `SECURITY.md` - Security checklist
+- `backend/src/alembic/MIGRATION_GUIDE.md` - Migration instructions
 
-4. **Database Setup:**
+**Time Estimate:** 4-6 hours
 
-   - Production PostgreSQL setup with migrations
-   - Backup strategy
-   - Connection pooling
-
-5. **Storage Setup:**
-
-   - Production S3 bucket (AWS, DigitalOcean Spaces, etc.)
-   - CORS configuration
-   - CDN setup (optional but recommended)
-
-6. **SSL/HTTPS:**
-   - Required for OAuth callbacks
-   - Set up domain with SSL certificate
-   - Update callback URLs in all OAuth providers
-
-**Files to Create/Modify:**
-
-- `.github/workflows/ci.yml` - Update deploy-backend job
-- `DEPLOYMENT.md` - Deployment guide (already exists, update it)
-- `env.production.example` - Already exists, verify completeness
-
-**Help:**
-
-- Use ChatGPT: "How to deploy FastAPI app to Railway/Render?"
-- Use ChatGPT: "Docker production deployment best practices"
+**Follow-up:** After deployment, test all critical flows (upload, processing, export) and monitor logs.
 
 ---
 
-### 🔒 Security Hardening (Priority: High)
+### 2. Security Hardening (Priority: CRITICAL)
 
-**Goal:** Secure production environment
+**Goal:** Ensure production security best practices are in place.
 
 **Steps:**
 
-1. **JWT Secret Key:**
+1. **Generate Strong JWT Secret**
+   ```bash
+   python -c "import secrets; print(secrets.token_urlsafe(32))"
+   ```
+   - Add to production environment variables
+   - Never commit to repo
+   - Reference: `SECURITY.md`
 
-   - ⚠️ **CRITICAL:** Change `JWT_SECRET_KEY` from dev default
-   - Generate strong secret: `openssl rand -hex 32`
-   - Set in production environment
-   - Never commit to git
-   - File: `backend/src/config.py` line 36
+2. **Configure CORS Properly**
+   - Update CORS settings to only allow frontend domain
+   - Remove any `*` wildcards in production
+   - Test from frontend application
 
-2. **OAuth Credentials:**
+3. **Implement Rate Limiting**
+   - Add rate limiting to authentication endpoints
+   - Add rate limiting to upload endpoints
+   - Configure per-user and per-IP limits
 
-   - Ensure all OAuth secrets are in environment variables
-   - Never hardcode in source code
-   - Use secret management service if available
+4. **Review Environment Variables**
+   - Audit all `.env` files
+   - Ensure no secrets are hardcoded
+   - Verify all sensitive data uses environment variables
+   - Reference: `SECURITY.md` → Security Audit Commands
 
-3. **Database Credentials:**
+5. **Database Security**
+   - Use strong PostgreSQL passwords
+   - Enable SSL/TLS connections
+   - Restrict database access to backend only
 
-   - Strong passwords for PostgreSQL
-   - Use connection strings from environment
-   - Enable SSL for database connections
+**Resources:**
+- `SECURITY.md` - Security guide and audit commands
+- `backend/src/security.py` - Security utilities
 
-4. **API Rate Limiting:**
+**Time Estimate:** 2-3 hours
 
-   - ✅ **COMPLETED:** Rate limiting added using `slowapi`
-   - ✅ Login endpoint: 10 requests/minute
-   - ✅ Register endpoint: 5 requests/minute
-   - ✅ Integrated with FastAPI app state
-   - File: `backend/src/auth.py`, `backend/src/main.py`
-
-5. **Input Validation:**
-
-   - ✅ **COMPLETED:** File upload validation added to `/api/v2/jobs`
-   - ✅ File size limits: 500MB per file, 2GB total
-   - ✅ File type validation (extension + MIME type)
-   - ✅ Filename sanitization
-   - ✅ `/api/upload` already had validation
-   - Files: `backend/src/api_v2.py`, `backend/src/security.py`
-
-6. **CORS Configuration:**
-   - ✅ **COMPLETED:** CORS configuration verified
-   - ✅ Production validation prevents localhost origins
-   - ✅ Explicit methods and headers only (no wildcards)
-   - ✅ Environment-based configuration
-   - File: `backend/src/main.py` lines 44-65
-
-**Files to Modify:**
-
-- `backend/src/config.py` - Verify no hardcoded secrets
-- `backend/src/main.py` - CORS configuration
-- `backend/src/auth.py` - JWT secret validation
-
-**Help:**
-
-- Use ChatGPT: "FastAPI security best practices"
-- Use ChatGPT: "How to implement rate limiting in FastAPI?"
+**Follow-up:** Run security audit commands before making repo public.
 
 ---
 
-### 🎬 Video Processing Enhancements (Priority: Medium)
+### 3. Test Coverage Expansion (Priority: HIGH)
 
-**Goal:** Improve video processing reliability and performance
+**Goal:** Add comprehensive test coverage for critical functionality.
 
 **Steps:**
 
-1. **Error Handling:**
+1. **Backend API Tests**
+   - Expand `backend/tests/test_api_endpoints.py`
+   - Add tests for video upload and processing
+   - Add tests for feed endpoints
+   - Add tests for community features
+   - Add tests for billing/subscription flows
 
-   - Add retry logic for FFmpeg operations
-   - Better error messages for failed renders
-   - Handle corrupted video files gracefully
-   - File: `backend/src/pipeline/editing.py`
+2. **Authentication Tests**
+   - Expand `backend/tests/test_auth.py`
+   - Test JWT token generation and validation
+   - Test refresh token flow
+   - Test role-based access control
 
-2. **Progress Tracking:**
+3. **Video Processing Tests**
+   - Add tests for highlight detection
+   - Add tests for video rendering
+   - Add tests for Celery task workflows
+   - Reference: `backend/tests/test_upload_clips_api.py`
 
-   - Enhanced progress updates during rendering
-   - WebSocket support for real-time updates (optional)
-   - Better progress granularity
-   - Files: `backend/src/tasks.py`, `backend/src/tasks_enhanced.py`
+4. **Integration Tests**
+   - Test end-to-end video processing pipeline
+   - Test file storage operations
+   - Test database migrations
 
-3. **Video Format Support:**
+5. **Set Up Test Coverage Reporting**
+   - Configure pytest-cov
+   - Set minimum coverage threshold
+   - Add coverage reports to CI/CD
 
-   - Test various input formats (.mp4, .mov, .mkv, etc.)
-   - Handle different codecs
-   - Add format validation
+**Resources:**
+- `backend/tests/` - Existing test files
+- `backend/tests/README.md` - Test documentation
 
-4. **Performance Optimization:**
-   - Profile slow operations
-   - Consider parallel processing for multiple clips
-   - Optimize FFmpeg parameters
+**Time Estimate:** 6-8 hours
 
-**Files to Modify:**
-
-- `backend/src/pipeline/preprocess.py`
-- `backend/src/pipeline/editing.py`
-- `backend/src/tasks.py`
+**Follow-up:** Aim for 80%+ coverage on critical paths.
 
 ---
 
-### 🤖 ML Model Integration (Priority: Medium)
+### 4. Feed Algorithm Implementation (Priority: HIGH)
 
-**Goal:** Enable real highlight detection model
-
-**Current Status:**
-
-- Model interface exists: `backend/src/ml/highlights/model.py`
-- Mock implementation active
-- `USE_HIGHLIGHT_MODEL=false` by default
+**Goal:** Implement the personalized feed algorithm for the social feed feature.
 
 **Steps:**
 
-1. **Model Training/Selection:**
+1. **Review Algorithm Requirements**
+   - Reference: `FEED_AND_PROFILES.md` → Algorithm Components
+   - Understand engagement scoring, recency weighting, creator reputation
 
-   - Decide on model architecture (custom? pre-trained?)
-   - Train or fine-tune model for highlight detection
-   - Evaluate model performance
+2. **Implement Algorithm Backend**
+   - Create `backend/src/services/feed_algorithm.py`
+   - Implement engagement score calculation
+   - Implement feed ranking logic
+   - Add caching for performance
 
-2. **Model Integration:**
+3. **Create Feed API Endpoints**
+   - `GET /api/v2/feed/for-you` - Algorithm-driven feed
+   - `GET /api/v2/feed/following` - Following feed
+   - `GET /api/v2/feed/trending` - Trending feed
+   - `GET /api/v2/feed/new` - Latest posts
 
-   - Replace mock in `backend/src/ml/highlights/model.py`
-   - Handle model loading/initialization
-   - Add model inference to highlight detection pipeline
-   - File: `backend/src/pipeline/highlight_detection.py`
+4. **Add Feed Preferences**
+   - Allow users to adjust feed preferences
+   - Store preferences in database
+   - Use preferences in algorithm
 
-3. **Model Serving:**
+5. **Optimize Performance**
+   - Add database indexes for feed queries
+   - Implement pagination
+   - Add Redis caching for hot content
 
-   - Consider separate model service (optional)
-   - Or load model in worker process
-   - Handle GPU/CPU inference
+**Resources:**
+- `FEED_AND_PROFILES.md` - Feed system documentation
+- `backend/src/api_feed.py` - Existing feed endpoints (if any)
 
-4. **Feature Flag:**
-   - Enable via `USE_HIGHLIGHT_MODEL=true`
-   - Test both modes (rule-based vs ML-based)
-   - Compare results
+**Time Estimate:** 8-10 hours
 
-**Files to Modify:**
-
-- `backend/src/ml/highlights/model.py` - Replace mock
-- `backend/src/pipeline/highlight_detection.py` - Use model
-- `backend/src/config.py` - Feature flag already exists
+**Follow-up:** Test feed algorithm with real user data and adjust weights based on engagement.
 
 ---
 
-### 📊 Monitoring & Observability (Priority: Medium)
+### 5. Community Features - Backend (Priority: MEDIUM)
 
-**Goal:** Add production monitoring and error tracking
+**Goal:** Implement backend API for Discord-like community features.
 
 **Steps:**
 
-1. **Error Tracking:**
+1. **Review Community Models**
+   - Check existing models in `backend/src/models_community.py`
+   - Verify all required fields are present
+   - Reference: `COMMUNITY_FEATURES.md`
 
-   - Set up Sentry (https://sentry.io) or similar
-   - Add error capture to FastAPI
-   - Track exceptions, API errors, rendering failures
-   - File: `backend/src/main.py`
+2. **Implement Server Management APIs**
+   - `POST /api/v2/communities` - Create server
+   - `GET /api/v2/communities` - List servers
+   - `PUT /api/v2/communities/{id}` - Update server
+   - `DELETE /api/v2/communities/{id}` - Delete server
 
-2. **Logging:**
+3. **Implement Channel APIs**
+   - `POST /api/v2/communities/{id}/channels` - Create channel
+   - `GET /api/v2/communities/{id}/channels` - List channels
+   - `PUT /api/v2/channels/{id}` - Update channel
+   - `DELETE /api/v2/channels/{id}` - Delete channel
 
-   - Structured logging (JSON format)
-   - Log levels configuration
-   - Log aggregation (optional: ELK, Loki, etc.)
-   - File: `backend/src/config.py` has `LOG_LEVEL`
+4. **Implement Message APIs**
+   - `POST /api/v2/channels/{id}/messages` - Send message
+   - `GET /api/v2/channels/{id}/messages` - Get messages (paginated)
+   - `PUT /api/v2/messages/{id}` - Edit message
+   - `DELETE /api/v2/messages/{id}` - Delete message
 
-3. **Metrics:**
+5. **Implement Role & Permission System**
+   - Add role-based access control to endpoints
+   - Check permissions before allowing actions
+   - Reference: `COMMUNITY_FEATURES.md` → Roles & Permissions
 
-   - Add Prometheus metrics (optional)
-   - Track: API response times, job completion rates, error rates
-   - Dashboard (Grafana if using Prometheus)
+**Resources:**
+- `COMMUNITY_FEATURES.md` - Community system documentation
+- `backend/src/models_community.py` - Community models
+- `backend/src/api_communities.py` - Community endpoints (if exists)
 
-4. **Health Checks:**
+**Time Estimate:** 10-12 hours
 
-   - ✅ **COMPLETED:** Enhanced `/health` endpoint
-   - ✅ Database connectivity check with response time
-   - ✅ Redis connectivity check with response time
-   - ✅ Storage connectivity check
-   - ✅ Celery worker status check
-   - ✅ Timestamp included in response
-   - File: `backend/src/main.py` lines 90-159
-
-5. **Performance Monitoring:**
-   - APM tool (New Relic, Datadog, etc.) - optional
-   - Database query monitoring
-   - Slow query identification
-
-**Files to Create/Modify:**
-
-- `backend/src/main.py` - Add Sentry, health check
-- `.env.production.example` - Add Sentry DSN
-
-**Help:**
-
-- Use ChatGPT: "How to set up Sentry error tracking for FastAPI?"
+**Follow-up:** Once backend is ready, coordinate with frontend for UI implementation.
 
 ---
 
-### 🔄 CI/CD Improvements (Priority: Low)
+### 6. Real-time Messaging (Priority: MEDIUM)
 
-**Goal:** Enhance continuous integration pipeline
-
-**Current Status:**
-
-- `.github/workflows/ci.yml` exists and runs
-- Backend tests job expects pytest but no tests exist yet
-- Frontend tests job runs `npm run lint` (may not exist)
+**Goal:** Implement WebSocket-based real-time messaging for communities.
 
 **Steps:**
 
-1. **Fix Test Jobs:**
+1. **Set Up WebSocket Infrastructure**
+   - Choose WebSocket library (FastAPI WebSockets or Socket.io)
+   - Set up WebSocket endpoint
+   - Configure connection management
 
-   - Add actual test files (see Testing Infrastructure above)
-   - Ensure pytest runs successfully
-   - Fix any linting errors
+2. **Implement Message Broadcasting**
+   - Broadcast new messages to channel subscribers
+   - Handle user presence (online/offline status)
+   - Implement typing indicators
 
-2. **Add Missing Scripts:**
+3. **Add Connection Management**
+   - Track active connections
+   - Handle reconnections
+   - Clean up disconnected users
 
-   - Check if `package.json` has `lint` script
-   - Add if missing: `"lint": "eslint src --ext js,jsx"`
+4. **Implement Real-time Features**
+   - Message updates
+   - Reaction updates
+   - User join/leave notifications
+   - Channel updates
 
-3. **Code Quality:**
+5. **Scale Considerations**
+   - Consider Redis pub/sub for multi-server scaling
+   - Add connection limits per user
+   - Monitor connection counts
 
-   - Add pre-commit hooks (optional)
-   - Ensure black/flake8 pass
-   - Add type checking (mypy)
+**Resources:**
+- FastAPI WebSockets documentation
+- `COMMUNITY_FEATURES.md` - Real-time messaging requirements
 
-4. **Build Optimization:**
-   - Optimize Docker build cache
-   - Multi-stage builds if needed
-   - Reduce image size
+**Time Estimate:** 8-10 hours
 
-**Files to Modify:**
-
-- `.github/workflows/ci.yml` - Fix failing jobs
-- `package.json` - Add lint script if missing
-- `backend/src/requirements.txt` - Ensure pytest dependencies
+**Follow-up:** Test with multiple concurrent users and verify message delivery.
 
 ---
 
-### 🗄️ Database Migrations (Priority: Medium)
+## 🔧 Medium Priority Tasks
 
-**Goal:** Proper database schema management
+### 7. ML Model Enhancement (Priority: MEDIUM)
 
-**Current Status:**
-
-- SQLModel handles schema automatically
-- No explicit migrations system
+**Goal:** Improve highlight detection model accuracy.
 
 **Steps:**
 
-1. **Add Alembic:**
+1. **Review Current Model Implementation**
+   - Check `backend/src/ml/highlights/model.py`
+   - Understand current detection algorithm
+   - Identify improvement opportunities
 
-   - Set up Alembic for migrations
-   - Create initial migration from current models
-   - Document migration process
+2. **Collect Training Data**
+   - Gather labeled highlight clips
+   - Create dataset with positive/negative examples
+   - Organize by game genre
 
-2. **Migration Strategy:**
+3. **Improve Model Architecture** (if needed)
+   - Experiment with different model architectures
+   - Fine-tune hyperparameters
+   - Add ensemble methods
 
-   - Version control migrations
-   - Test migrations on staging
-   - Rollback procedures
+4. **Implement Model Evaluation**
+   - Add evaluation metrics (precision, recall, F1)
+   - Create test set for validation
+   - Monitor model performance in production
 
-3. **Schema Review:**
-   - Verify all models are optimal
-   - Check indexes on frequently queried fields
-   - Add foreign key constraints where needed
+**Resources:**
+- `backend/src/pipeline/highlight_detection.py` - Detection pipeline
+- `backend/src/ml/highlights/model.py` - Model implementation
 
-**Files to Create:**
+**Time Estimate:** 12-16 hours
 
-- `backend/src/alembic.ini`
-- `backend/src/alembic/` directory
-- Migration scripts
-
-**Help:**
-
-- Use ChatGPT: "How to set up Alembic migrations with SQLModel?"
+**Follow-up:** Deploy improved model and monitor highlight detection quality.
 
 ---
 
-### 🌐 Frontend Improvements (Priority: Low)
+### 8. Video Processing Optimization (Priority: MEDIUM)
 
-**Goal:** Enhance frontend functionality and UX
+**Goal:** Optimize video processing pipeline for speed and quality.
 
 **Steps:**
 
-1. **Error Handling:**
+1. **Profile Current Pipeline**
+   - Measure processing times for each stage
+   - Identify bottlenecks
+   - Check Celery task performance
 
-   - Better error messages for users
-   - Network error handling
-   - Retry logic for failed requests
+2. **Optimize FFmpeg Operations**
+   - Review FFmpeg command efficiency
+   - Add hardware acceleration if available
+   - Optimize encoding settings
 
-2. **Loading States:**
+3. **Implement Parallel Processing**
+   - Process multiple clips in parallel
+   - Optimize Celery worker configuration
+   - Add task prioritization
 
-   - Improve loading indicators
-   - Skeleton screens for better UX
-   - Progress indicators for uploads
+4. **Add Progress Tracking**
+   - Improve job state updates
+   - Add more granular progress reporting
+   - Update frontend progress indicators
 
-3. **Responsive Design:**
+5. **Implement Caching**
+   - Cache processed clips
+   - Avoid reprocessing identical content
+   - Use Redis for cache storage
 
-   - Test on mobile devices
-   - Improve mobile navigation
-   - Touch-friendly controls
+**Resources:**
+- `backend/src/pipeline/` - Processing pipeline
+- `backend/src/tasks.py` - Celery tasks
+- `backend/src/services/job_state.py` - Job state management
 
-4. **Performance:**
-   - Code splitting
-   - Lazy loading components
-   - Image optimization
-   - Bundle size analysis
+**Time Estimate:** 6-8 hours
 
-**Files to Modify:**
-
-- `src/components/*.jsx` - Add error/loading states
-- `src/App.jsx` - Improve error boundaries
-- `vite.config.js` - Optimize build
+**Follow-up:** Monitor processing times and user feedback on video quality.
 
 ---
 
-### 📝 Documentation (Priority: Low)
+### 9. Analytics Implementation (Priority: MEDIUM)
 
-**Goal:** Improve code and API documentation
+**Goal:** Add analytics tracking for platform usage and performance.
 
 **Steps:**
 
-1. **API Documentation:**
+1. **Define Analytics Events**
+   - User actions (upload, share, like, comment)
+   - Video processing events
+   - Feature usage
+   - Error tracking
 
-   - Review FastAPI auto-generated docs (`/docs`)
-   - Add better descriptions to endpoints
-   - Add request/response examples
+2. **Implement Analytics Backend**
+   - Create analytics logging service
+   - Store events in database
+   - Add aggregation queries
 
-2. **Code Documentation:**
+3. **Create Analytics API**
+   - `GET /api/v2/analytics/overview` - Platform overview
+   - `GET /api/v2/analytics/videos` - Video analytics
+   - `GET /api/v2/analytics/users` - User analytics
+   - Add role-based access (admin only)
 
-   - Add docstrings to key functions
-   - Document complex algorithms
-   - Add inline comments where needed
+4. **Add Dashboard UI** (or provide data for frontend)
+   - Design analytics dashboard layout
+   - Create visualization components
+   - Add date range filters
 
-3. **Setup Documentation:**
-   - Verify `README.md` is up to date
-   - Add troubleshooting section
-   - Update `DEPLOYMENT.md` with actual deployment steps
+**Resources:**
+- `backend/src/api_analytics.py` - Analytics endpoints (if exists)
+- Admin dashboard requirements
 
-**Files to Modify:**
+**Time Estimate:** 8-10 hours
 
-- `backend/src/api_*.py` - Add better docstrings
-- `README.md` - Update setup instructions
-- `DEPLOYMENT.md` - Add deployment details
-
----
-
----
-
-## 🧭 Priority Order
-
-1. **High Priority (Do First):**
-
-   - Testing Infrastructure
-   - Production Deployment
-   - Security Hardening
-
-2. **Medium Priority (Do Soon):**
-
-   - ML Model Integration
-   - Monitoring & Observability
-   - Database Migrations
-   - Video Processing Enhancements
-
-3. **Low Priority (Nice to Have):**
-   - CI/CD Improvements
-   - Frontend Improvements
-   - Documentation
+**Follow-up:** Use analytics to identify popular features and optimization opportunities.
 
 ---
 
-## 📋 Quick Reference
+## 📋 Low Priority / Future Tasks
 
-### Environment Variables Needed (Production)
+### 10. AI Systems Enhancement
 
+- Improve AI content generation prompts
+- Add more AI model options
+- Implement AI model fallbacks
+- Reference: `AI_SYSTEMS.md`
+
+### 11. Background Job Monitoring
+
+- Add job queue monitoring dashboard
+- Implement job retry policies
+- Add dead letter queue handling
+- Monitor Celery worker health
+
+### 12. API Documentation
+
+- Complete OpenAPI/Swagger documentation
+- Add example requests/responses
+- Document authentication flows
+- Add rate limit documentation
+
+### 13. Performance Monitoring
+
+- Set up application performance monitoring (APM)
+- Add error tracking (Sentry)
+- Monitor database query performance
+- Set up alerts for critical issues
+
+---
+
+## 📝 Quick Reference
+
+### Important Files
+- `DEPLOYMENT.md` - Deployment guide
+- `SECURITY.md` - Security checklist
+- `backend/src/alembic/MIGRATION_GUIDE.md` - Database migrations
+- `FEED_AND_PROFILES.md` - Feed system docs
+- `COMMUNITY_FEATURES.md` - Community features docs
+
+### Common Commands
 ```bash
-# Security
-JWT_SECRET_KEY=<strong-random-key>
+# Run tests
+cd backend && pytest
 
-# Database
-POSTGRES_DSN=postgresql+psycopg://user:pass@host:5432/db
-USE_POSTGRES=true
+# Run migrations
+cd backend/src && alembic upgrade head
 
-# Storage
-S3_ENDPOINT_URL=https://...
-S3_ACCESS_KEY=...
-S3_SECRET_KEY=...
-S3_BUCKET=cosmiv-prod
-USE_OBJECT_STORAGE=true
+# Start development server
+cd backend/src && uvicorn main:app --reload
 
-# OAuth (Daan will get these)
-STEAM_API_KEY=...
-XBOX_CLIENT_ID=...
-# ... etc
-
-# Stripe (Daan will set up)
-STRIPE_SECRET_KEY=sk_live_...
-STRIPE_PUBLISHABLE_KEY=pk_live_...
-STRIPE_WEBHOOK_SECRET=whsec_...
-STRIPE_PRICE_ID_PRO=price_...
-STRIPE_PRICE_ID_CREATOR=price_...
-
-# AI Services
-OPENAI_API_KEY=...
-ANTHROPIC_API_KEY=...
-
-# Base URL
-BASE_URL=https://yourdomain.com
+# Check test coverage
+cd backend && pytest --cov=src --cov-report=html
 ```
 
-### Critical Files to Review
-
-- `backend/src/config.py` - All settings
-- `backend/src/auth.py` - JWT implementation
-- `backend/src/main.py` - CORS, middleware
-- `.github/workflows/ci.yml` - Deployment script
+### Environment Setup
+- Backend requires: Python 3.11+, PostgreSQL, Redis, S3 storage
+- Frontend requires: Node.js 18+, npm/yarn
+- See `readme.md` for full setup instructions
 
 ---
 
-## 🪜 Recent Progress
+## 📊 Progress Log
 
-- ✅ Testing infrastructure created (auth + API tests)
-- ✅ UploadForm component refactored (consolidated duplicate state)
-- ✅ Password authentication fully implemented
-- ✅ Database connectivity confirmed (PostgreSQL, Redis, storage)
-- ✅ **Rate limiting added to auth endpoints** (login: 10/min, register: 5/min) - Security Hardening #4
-- ✅ **Health check endpoint enhanced** with metrics and Celery worker status - Monitoring #4
-- ✅ **File upload validation added** to `/api/v2/jobs` endpoint (size limits, file type validation) - Security Hardening #5
-- ✅ **CORS configuration verified** with production validation - Security Hardening #6
+| Date       | Task                                  | Status | Notes                           |
+| ---------- | ------------------------------------- | ------ | ------------------------------- |
+| 2025-01-28 | Initial TODO list created             | ✅     | Structured tasks for Pedro     |
 
 ---
 
-## 📝 Notes
+**Remember:** 
+- Check `TODO_DAAN.md` regularly to coordinate on OAuth/API integrations
+- Update this file when completing tasks
+- Ask for help if anything is unclear or blocking
 
-- **Testing is critical** - CI/CD pipeline expects tests but none exist
-- **Security first** - JWT secret has dev default, must change for production
-- **Deployment ready** - Infrastructure exists, just needs deployment script
-- **Coordinate with Daan** - He's handling credentials, you handle code
-
----
-
-## 🤝 Coordination with Daan
-
-**Daan is working on:**
-
-- OAuth credential setup (Steam, Xbox, PSN, Nintendo)
-- Stripe account and webhook configuration
-- Social media API research (TikTok, YouTube, Instagram)
-- Design research
-
-**You should:**
-
-- Review OAuth implementations once Daan provides credentials
-- Test Stripe webhooks once Daan sets them up
-- Implement social posting once Daan researches APIs
-- Review design inspirations and implement UI improvements
-
-**Communication:**
-
-- Check `TODO_DAAN.md` regularly to see what Daan has completed
-- Update Daan when code changes affect his tasks (e.g., new env vars)
-- Test integrations once Daan provides credentials
-
----
-
-_Next agent run will update this file with new tasks based on progress and Daan's work._

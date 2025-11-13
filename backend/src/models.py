@@ -84,6 +84,10 @@ class User(SQLModel, table=True):
     is_online: bool = Field(default=False)  # Online presence tracking
     last_seen: datetime = Field(default_factory=datetime.utcnow)
     created_at: datetime = Field(default_factory=datetime.utcnow)
+    
+    # Security: Account lockout after failed login attempts
+    failed_login_attempts: int = Field(default=0)  # Count of consecutive failed logins
+    account_locked_until: Optional[datetime] = None  # Lockout expiration time
 
     # Profile data
     bio: Optional[str] = None
