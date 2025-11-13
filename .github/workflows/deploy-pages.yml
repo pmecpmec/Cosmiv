@@ -26,10 +26,31 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "npm"
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Upgrade npm to latest
+        run: npm install -g npm@latest
+
+      - name: Clean install dependencies
+        run: |
+          # Fix for npm optional dependency bug (https://github.com/npm/cli/issues/4828)
+          rm -f package-lock.json
+          npm cache clean --force
+          rm -rf node_modules
+          # Step 1: Install rollup first to establish dependency tree
+          npm install rollup@latest --save-dev --no-save --legacy-peer-deps
+          # Step 2: Install all other dependencies
+          npm install --include=optional --legacy-peer-deps
+          # Step 3: Force install rollup's Linux native dependency (workaround for npm bug)
+          echo "Installing rollup Linux native dependency..."
+          npm install @rollup/rollup-linux-x64-gnu@latest --save-optional --force --no-save
+          # Step 4: Verify and debug if needed
+          if [ -d "node_modules/@rollup/rollup-linux-x64-gnu" ]; then
+            echo "✓ Rollup native dependency installed successfully"
+          else
+            echo "✗ Rollup native dependency missing - attempting alternative installation"
+            npm install @rollup/rollup-linux-x64-gnu --force
+            test -d "node_modules/@rollup/rollup-linux-x64-gnu" || exit 1
+          fi
 
       - name: Build
         run: npm run build
@@ -50,6 +71,9 @@ jobs:
           path: './dist'
 
   deploy:
+    # NOTE: GitHub Pages must be enabled in repository settings:
+    # Settings > Pages > Source: GitHub Actions
+    # See: https://github.com/pmecpmec/Aiditor/settings/pages
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
