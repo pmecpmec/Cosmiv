@@ -59,7 +59,16 @@ function AppContent() {
 
 function App() {
   // Get base path for GitHub Pages deployment
-  const basename = import.meta.env.BASE_URL || '/Cosmiv/'
+  // Vite sets BASE_URL during build, or detect from current path
+  let basename = import.meta.env.BASE_URL || '/'
+  
+  // If BASE_URL is not set, try to detect from current location
+  if (basename === '/' && typeof window !== 'undefined') {
+    const pathParts = window.location.pathname.split('/').filter(p => p)
+    if (pathParts.length > 0 && pathParts[0] !== 'index.html') {
+      basename = `/${pathParts[0]}/`
+    }
+  }
   
   return (
     <ErrorBoundary>
