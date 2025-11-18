@@ -48,18 +48,23 @@ export function AuthProvider({ children }) {
       if (error.response?.data?.detail) {
         const detail = error.response.data.detail
         if (Array.isArray(detail)) {
-          // FastAPI validation errors are arrays
-          errorMessage = detail.map(err => err.msg || err.message || JSON.stringify(err)).join(', ')
+          // FastAPI validation errors are arrays with {type, loc, msg, input}
+          errorMessage = detail.map(err => {
+            const field = Array.isArray(err.loc) ? err.loc.slice(1).join('.') : 'field'
+            return `${field}: ${err.msg || err.message || 'Invalid value'}`
+          }).join(', ')
         } else if (typeof detail === 'string') {
           errorMessage = detail
         } else if (detail.message) {
           errorMessage = detail.message
         } else {
-          errorMessage = JSON.stringify(detail)
+          errorMessage = 'Validation error'
         }
       } else if (error.message) {
         errorMessage = error.message
       }
+      
+      console.error('Login error:', error.response?.status, error.response?.data || error.message)
       
       return { 
         success: false, 
@@ -97,18 +102,23 @@ export function AuthProvider({ children }) {
       if (error.response?.data?.detail) {
         const detail = error.response.data.detail
         if (Array.isArray(detail)) {
-          // FastAPI validation errors are arrays
-          errorMessage = detail.map(err => err.msg || err.message || JSON.stringify(err)).join(', ')
+          // FastAPI validation errors are arrays with {type, loc, msg, input}
+          errorMessage = detail.map(err => {
+            const field = Array.isArray(err.loc) ? err.loc.slice(1).join('.') : 'field'
+            return `${field}: ${err.msg || err.message || 'Invalid value'}`
+          }).join(', ')
         } else if (typeof detail === 'string') {
           errorMessage = detail
         } else if (detail.message) {
           errorMessage = detail.message
         } else {
-          errorMessage = JSON.stringify(detail)
+          errorMessage = 'Validation error'
         }
       } else if (error.message) {
         errorMessage = error.message
       }
+      
+      console.error('Registration error:', error.response?.status, error.response?.data || error.message)
       
       return { 
         success: false, 
