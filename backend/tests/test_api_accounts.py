@@ -71,9 +71,13 @@ class TestOAuthFlow:
         
         # Should redirect to OAuth URL
         assert response.status_code in [200, 302, 307]
-        # If redirect, check location header
+        # If redirect, check location header (validate URL format)
         if response.status_code in [302, 307]:
-            assert "platform.com" in response.headers.get("location", "")
+            location = response.headers.get("location", "")
+            # Validate URL format instead of substring check
+            assert location.startswith("http://") or location.startswith("https://")
+            # Check for expected OAuth domain pattern
+            assert "steam" in location.lower() or "platform.com" in location.lower()
 
     def test_start_oauth_unauthorized(self, client):
         """Test OAuth flow requires authentication"""

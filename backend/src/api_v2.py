@@ -8,7 +8,7 @@ from sqlmodel import select
 from tasks import render_job
 from services.storage_adapters import get_storage
 from auth import get_current_user
-from security import validate_video_file, MAX_FILE_SIZE, MAX_TOTAL_UPLOAD_SIZE, sanitize_filename
+from security import validate_video_file, MAX_FILE_SIZE, MAX_TOTAL_UPLOAD_SIZE, sanitize_filename, validate_job_id
 import os
 from config import settings
 
@@ -195,20 +195,39 @@ def job_download_v2(
 ):
     from fastapi.responses import FileResponse
     
+    # Validate job_id to prevent path traversal
+    validate_job_id(job_id)
+    
+    # Format is already validated by Query enum, but sanitize filename anyway
+    safe_format = sanitize_filename(f"highlight_{format}.mp4").replace(".mp4", "") if format else "landscape"
+    if safe_format not in ["landscape", "portrait"]:
+        safe_format = "landscape"
+    
     export_dir = job_export_dir(job_id)
-    local_path = os.path.join(export_dir, f"final_{format}.mp4")
+    local_path = os.path.join(export_dir, f"final_{safe_format}.mp4")
+    
+    # Validate path is within export directory (double-check)
+    from security import validate_file_path
+    try:
+        local_path = validate_file_path(local_path, export_dir)
+    except ValueError:
+        return JSONResponse({"error": "file not ready"}, status_code=404)
     
     # Also check for legacy filename
     if not os.path.exists(local_path):
         legacy_path = os.path.join(export_dir, "final_highlight.mp4")
-        if os.path.exists(legacy_path):
-            local_path = legacy_path
-        else:
+        try:
+            legacy_path = validate_file_path(legacy_path, export_dir)
+            if os.path.exists(legacy_path):
+                local_path = legacy_path
+            else:
+                return JSONResponse({"error": "file not ready"}, status_code=404)
+        except ValueError:
             return JSONResponse({"error": "file not ready"}, status_code=404)
 
     # Return file directly for download
     return FileResponse(
         local_path,
-        filename=f"highlight_{format}.mp4",
+        filename=f"highlight_{safe_format}.mp4",
         media_type="video/mp4"
     )

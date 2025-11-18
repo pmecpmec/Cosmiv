@@ -30,24 +30,13 @@ jobs:
       - name: Upgrade npm to latest
         run: npm install -g npm@latest
 
-      - name: Clean install dependencies
+      - name: Install dependencies
         run: |
-          # Fix for npm optional dependency bug (https://github.com/npm/cli/issues/4828)
-          rm -f package-lock.json
-          npm cache clean --force
-          rm -rf node_modules
-          # Install all dependencies (rollup comes via vite)
-          npm install --legacy-peer-deps
-          # Workaround: Explicitly install rollup's Linux native dependency (npm bug prevents auto-install)
-          echo "Installing rollup Linux native dependency..."
-          npm install @rollup/rollup-linux-x64-gnu@latest --force --no-save || true
-          # Verify installation
-          if [ -d "node_modules/@rollup/rollup-linux-x64-gnu" ]; then
-            echo "✓ Rollup native dependency installed successfully"
-          else
-            echo "✗ Rollup native dependency missing - attempting alternative installation"
-            npm install @rollup/rollup-linux-x64-gnu --force --no-save
-            test -d "node_modules/@rollup/rollup-linux-x64-gnu" || exit 1
+          npm ci --legacy-peer-deps || npm install --legacy-peer-deps
+          # Ensure rollup native dependency is available (handled by npm automatically)
+          if [ ! -d "node_modules/@rollup/rollup-linux-x64-gnu" ]; then
+            echo "Installing rollup Linux native dependency..."
+            npm install @rollup/rollup-linux-x64-gnu@latest --save-optional --force || true
           fi
 
       - name: Build

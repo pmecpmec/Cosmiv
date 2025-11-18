@@ -9,7 +9,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from db import init_db, get_session
 from models import Job, JobStatus, Render
 from storage import new_job_id, job_upload_dir, job_export_dir
+from security import validate_job_id, validate_file_path
 from sqlmodel import select, func
+import logging
+
+logger = logging.getLogger(__name__)
 from tasks import render_job
 from api_v2 import router as v2_router
 from api_accounts_v2 import router as accounts_v2_router
@@ -296,8 +300,11 @@ async def upload_zip(file: UploadFile = File(...), target_duration: int = Form(6
             background=BackgroundTask(shutil.rmtree, workdir, True),
         )
     except Exception as e:
+        from security import sanitize_log_message
+        safe_error = sanitize_log_message(str(e))
+        logger.error(f"Upload error: {safe_error}")
         shutil.rmtree(workdir, ignore_errors=True)
-        return JSONResponse({"error": str(e)}, status_code=500)
+        return JSONResponse({"error": "Internal server error"}, status_code=500)
 
 
 @app.post("/upload-clips")
@@ -322,8 +329,11 @@ async def upload_clips(
             background=BackgroundTask(shutil.rmtree, workdir, True),
         )
     except Exception as e:
+        from security import sanitize_log_message
+        safe_error = sanitize_log_message(str(e))
+        logger.error(f"Upload error: {safe_error}")
         shutil.rmtree(workdir, ignore_errors=True)
-        return JSONResponse({"error": str(e)}, status_code=500)
+        return JSONResponse({"error": "Internal server error"}, status_code=500)
 
 
 # Job endpoints
@@ -374,9 +384,19 @@ def job_status(job_id: str):
 
 @app.get("/jobs/{job_id}/download")
 def job_download(job_id: str, format: str = "landscape"):
+    # Validate job_id to prevent path traversal
+    validate_job_id(job_id)
+    
     export_dir = job_export_dir(job_id)
     # For MVP we have a single file named final_highlight.mp4
     path = os.path.join(export_dir, "final_highlight.mp4")
+    
+    # Validate path is within export directory
+    try:
+        path = validate_file_path(path, export_dir)
+    except ValueError:
+        return JSONResponse({"error": "file not ready"}, status_code=404)
+    
     if not os.path.exists(path):
         return JSONResponse({"error": "file not ready"}, status_code=404)
     return FileResponse(path, filename="highlight.mp4", media_type="video/mp4")

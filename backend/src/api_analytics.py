@@ -40,7 +40,10 @@ async def track_view(
         track_job_view(job_id, current_user.user_id if current_user else None)
         return {"success": True, "message": "View tracked"}
     except Exception as e:
-        return {"success": False, "error": str(e)}
+        from security import sanitize_log_message
+        safe_error = sanitize_log_message(str(e))
+        logger.error(f"Analytics tracking error: {safe_error}")
+        return {"success": False, "error": "Internal server error"}
 
 
 @router.post("/social/{post_id}/update")

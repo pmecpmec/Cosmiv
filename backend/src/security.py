@@ -125,6 +125,56 @@ async def optional_verify_token(
         return None
 
 
+def validate_job_id(job_id: str) -> str:
+    """
+    Validate job_id format to prevent path traversal.
+    Job IDs should be UUID hex strings (32 characters, alphanumeric only).
+    
+    Args:
+        job_id: Job ID to validate
+        
+    Returns:
+        Validated job_id
+        
+    Raises:
+        HTTPException: If job_id is invalid
+    """
+    if not job_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Job ID is required"
+        )
+    
+    # Job IDs are UUID hex strings: 32 characters, alphanumeric only
+    if not re.match(r'^[a-f0-9]{32}$', job_id.lower()):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid job ID format"
+        )
+    
+    return job_id
+
+
+def sanitize_log_message(message: str) -> str:
+    """
+    Sanitize user input before logging to prevent log injection.
+    Removes newlines and other control characters.
+    
+    Args:
+        message: Message to sanitize
+        
+    Returns:
+        Sanitized message safe for logging
+    """
+    if not isinstance(message, str):
+        message = str(message)
+    
+    # Remove newlines, carriage returns, and other control characters
+    sanitized = re.sub(r'[\r\n\t\x00-\x1f\x7f-\x9f]', '', message)
+    # Limit length to prevent log flooding
+    return sanitized[:1000]
+
+
 def sanitize_filename(filename: str) -> str:
     """
     Sanitize filename to prevent path traversal and other attacks
@@ -255,11 +305,16 @@ def log_security_event(event_type: str, user_id: Optional[str], details: dict) -
         user_id: User identifier (None for unauthenticated events)
         details: Additional event details
     """
+    # Sanitize all inputs to prevent log injection
+    safe_event_type = sanitize_log_message(str(event_type))
+    safe_user_id = sanitize_log_message(str(user_id)) if user_id else 'anonymous'
+    safe_details = sanitize_log_message(str(details)) if details else ''
+    
     security_logger.info(
-        f"SECURITY_EVENT: {event_type} | "
-        f"user={user_id or 'anonymous'} | "
+        f"SECURITY_EVENT: {safe_event_type} | "
+        f"user={safe_user_id} | "
         f"timestamp={datetime.utcnow().isoformat()} | "
-        f"details={details}"
+        f"details={safe_details}"
     )
 
 

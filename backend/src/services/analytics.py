@@ -8,6 +8,7 @@ from typing import Dict, Any, Optional, List
 from datetime import datetime, timedelta
 from sqlmodel import select, func
 from db import get_session
+from security import sanitize_log_message
 from models import (
     Job,
     JobEngagement,
@@ -32,7 +33,8 @@ def track_job_view(job_id: str, user_id: Optional[str] = None) -> None:
             # Get job details
             job = session.exec(select(Job).where(Job.job_id == job_id)).first()
             if not job:
-                logger.warning(f"Job {job_id} not found for engagement tracking")
+                safe_job_id = sanitize_log_message(str(job_id))
+                logger.warning(f"Job {safe_job_id} not found for engagement tracking")
                 return
 
             # Create engagement record
@@ -54,7 +56,8 @@ def track_job_view(job_id: str, user_id: Optional[str] = None) -> None:
             # Note: unique_viewers would require tracking viewer IDs (simplified here)
 
         session.commit()
-        logger.debug(f"Tracked view for job {job_id}")
+        safe_job_id = sanitize_log_message(str(job_id))
+        logger.debug(f"Tracked view for job {safe_job_id}")
 
 
 def update_social_engagement(
@@ -72,7 +75,8 @@ def update_social_engagement(
                 select(SocialPost).where(SocialPost.id == post_id)
             ).first()
             if not post:
-                logger.warning(f"Post {post_id} not found")
+                safe_post_id = sanitize_log_message(str(post_id))
+                logger.warning(f"Post {safe_post_id} not found")
                 return
 
             engagement = SocialPostEngagement(
@@ -115,7 +119,8 @@ def update_social_engagement(
         if engagement.job_id:
             update_job_engagement_from_social(engagement.job_id)
 
-        logger.debug(f"Updated engagement for post {post_id}")
+        safe_post_id = sanitize_log_message(str(post_id))
+        logger.debug(f"Updated engagement for post {safe_post_id}")
 
 
 def update_job_engagement_from_social(job_id: str) -> None:
@@ -244,7 +249,8 @@ def update_style_performance(style_id: str, job_id: str) -> None:
         style_perf.updated_at = datetime.utcnow()
         session.commit()
 
-        logger.debug(f"Updated style performance for {style_id}")
+        safe_style_id = sanitize_log_message(str(style_id))
+        logger.debug(f"Updated style performance for {safe_style_id}")
 
 
 def update_user_analytics(user_id: str) -> None:
@@ -329,7 +335,8 @@ def update_user_analytics(user_id: str) -> None:
         user_analytics.updated_at = datetime.utcnow()
         session.commit()
 
-        logger.debug(f"Updated analytics for user {user_id}")
+        safe_user_id = sanitize_log_message(str(user_id))
+        logger.debug(f"Updated analytics for user {safe_user_id}")
 
 
 def get_top_styles(limit: int = 10) -> List[Dict[str, Any]]:

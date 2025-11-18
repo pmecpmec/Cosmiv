@@ -106,8 +106,10 @@ async def get_patterns(
                 "skip": skip,
             }
     except Exception as e:
-        logger.error(f"Failed to get patterns: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        from security import sanitize_log_message
+        safe_error = sanitize_log_message(str(e))
+        logger.error(f"Failed to get patterns: {safe_error}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.get("/patterns/{pattern_id}")
@@ -140,8 +142,11 @@ async def get_pattern(pattern_id: str):
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Failed to get pattern {pattern_id}: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        # Sanitize error message to prevent information exposure
+        from security import sanitize_log_message
+        safe_error = sanitize_log_message(str(e))
+        logger.error(f"Failed to get pattern: {safe_error}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.get("/search")
@@ -186,8 +191,10 @@ async def search_patterns(
             "total": len(pattern_details),
         }
     except Exception as e:
-        logger.error(f"Failed to search patterns: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        from security import sanitize_log_message
+        safe_error = sanitize_log_message(str(e))
+        logger.error(f"Failed to search patterns: {safe_error}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.get("/trends")
@@ -217,8 +224,10 @@ async def get_trends(
             "pattern_count": principles.get("pattern_count", 0),
         }
     except Exception as e:
-        logger.error(f"Failed to get trends: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        from security import sanitize_log_message
+        safe_error = sanitize_log_message(str(e))
+        logger.error(f"Failed to get trends: {safe_error}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.post("/learn")
@@ -252,8 +261,10 @@ async def trigger_learning():
             "trends_detected": len(principles.get("trends", {})),
         }
     except Exception as e:
-        logger.error(f"Failed to trigger learning: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        from security import sanitize_log_message
+        safe_error = sanitize_log_message(str(e))
+        logger.error(f"Failed to trigger learning: {safe_error}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.get("/jobs")
@@ -292,6 +303,8 @@ async def get_scraping_jobs(
                 "total": len(jobs),
             }
     except Exception as e:
-        logger.error(f"Failed to get scraping jobs: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        from security import sanitize_log_message
+        safe_error = sanitize_log_message(str(e))
+        logger.error(f"Failed to get scraping jobs: {safe_error}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 

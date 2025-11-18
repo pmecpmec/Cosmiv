@@ -60,7 +60,9 @@ jobs:
         run: npm install -g npm@latest
 
       - name: Install dependencies
-        run: ${{ inputs.install-command }}
+        run: |
+          # Try npm ci first (faster, reproducible), fallback to npm install
+          npm ci --legacy-peer-deps || npm install --legacy-peer-deps
 
       - name: Fix rollup native dependency (Linux)
         if: runner.os == 'Linux'

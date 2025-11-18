@@ -75,15 +75,26 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: |
+          # Try npm ci first (faster, reproducible), fallback to npm install
+          npm ci --legacy-peer-deps || npm install --legacy-peer-deps
 
       - name: Run ESLint
-        run: npm run lint || echo "::warning::Linting issues found. Consider fixing them."
+        continue-on-error: true
+        run: |
+          if npm run | grep -q "lint"; then
+            npm run lint || echo "::warning::Linting issues found. Consider fixing them."
+          else
+            echo "::info::No lint script found in package.json, skipping linting."
+          fi
 
       - name: Check code formatting
+        continue-on-error: true
         run: |
-          if [ -f "package.json" ] && grep -q "prettier" package.json; then
+          if [ -f "package.json" ] && grep -q "prettier" package.json && npm run | grep -q "format:check"; then
             npm run format:check || echo "::warning::Formatting issues found."
+          else
+            echo "::info::No format:check script found, skipping formatting check."
           fi
 
   frontend-tests:

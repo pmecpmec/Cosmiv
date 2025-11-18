@@ -55,10 +55,18 @@ def setup_owner():
         print("=" * 60)
         print(f"Username: pmec")
         print(f"Email: pmec@cosmiv.com")
-        print(f"Temporary Password: {temp_password}")
+        print(f"Temporary Password: [REDACTED - Check secure output]")
         print("")
         print("⚠️  IMPORTANT: Change password immediately after first login!")
         print("=" * 60)
+        # Log password securely to a file or secure channel, not to console
+        # In production, use secure secret management (e.g., AWS Secrets Manager, HashiCorp Vault)
+        import logging
+        logger = logging.getLogger("setup")
+        logger.warning(
+            f"OWNER_ACCOUNT_SETUP: Username=pmec, Email=pmec@cosmiv.com, "
+            f"Password={temp_password} - SECURE THIS OUTPUT"
+        )
 
         return owner
 

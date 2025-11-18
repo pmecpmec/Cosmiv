@@ -27,11 +27,49 @@ jobs:
           (contains(github.event.pull_request.title, 'patch') || 
            contains(github.event.pull_request.title, 'minor') ||
            contains(github.event.pull_request.title, 'bump'))
-        run: |
-          gh pr merge ${{ github.event.pull_request.number }} \
-            --auto \
-            --squash \
-            --delete-branch || true
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = context.payload.pull_request.number;
+            const title = context.payload.pull_request.title.toLowerCase();
+            
+            // Only auto-merge patch and minor updates
+            if (title.includes('patch') || title.includes('minor') || title.includes('bump')) {
+              try {
+                await github.rest.pulls.merge({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: prNumber,
+                  merge_method: 'squash'
+                });
+                console.log(`✓ Auto-merged PR #${prNumber}`);
+              } catch (error) {
+                console.log(`⚠ Could not auto-merge PR #${prNumber}: ${error.message}`);
+                // Try to enable auto-merge instead
+                try {
+                  await github.graphql(`
+                    mutation enableAutoMerge($pullRequestId: ID!, $mergeMethod: PullRequestMergeMethod!) {
+                      enablePullRequestAutoMerge(input: {
+                        pullRequestId: $pullRequestId,
+                        mergeMethod: $mergeMethod
+                      }) {
+                        pullRequest {
+                          autoMergeRequest {
+                            enabledAt
+                          }
+                        }
+                      }
+                    }
+                  `, {
+                    pullRequestId: context.payload.pull_request.node_id,
+                    mergeMethod: 'SQUASH'
+                  });
+                  console.log(`✓ Enabled auto-merge for PR #${prNumber}`);
+                } catch (graphqlError) {
+                  console.log(`⚠ Could not enable auto-merge: ${graphqlError.message}`);
+                }
+              }
+            } else {
+              console.log(`⏭ Skipping PR #${prNumber} - not a patch/minor update`);
+            }
 

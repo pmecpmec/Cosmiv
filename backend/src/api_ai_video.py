@@ -55,8 +55,9 @@ async def enhance_video(
     )
 
     if not result.get("success"):
+        # Don't expose internal error details
         raise HTTPException(
-            status_code=500, detail=result.get("error", "Enhancement failed")
+            status_code=500, detail="Video enhancement failed"
         )
 
     return result

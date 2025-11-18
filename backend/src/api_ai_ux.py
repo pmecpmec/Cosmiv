@@ -55,8 +55,9 @@ async def analyze_component(
     )
 
     if not result.get("success"):
+        # Don't expose internal error details
         raise HTTPException(
-            status_code=500, detail=result.get("error", "Analysis failed")
+            status_code=500, detail="UX analysis failed"
         )
 
     return result
@@ -74,8 +75,9 @@ async def analyze_behavior(
     )
 
     if not result.get("success"):
+        # Don't expose internal error details
         raise HTTPException(
-            status_code=500, detail=result.get("error", "Analysis failed")
+            status_code=500, detail="UX analysis failed"
         )
 
     return result
@@ -112,8 +114,9 @@ async def analyze_accessibility(
     )
 
     if not result.get("success"):
+        # Don't expose internal error details
         raise HTTPException(
-            status_code=500, detail=result.get("error", "Analysis failed")
+            status_code=500, detail="UX analysis failed"
         )
 
     return result

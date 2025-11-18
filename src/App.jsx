@@ -58,9 +58,13 @@ function AppContent() {
 }
 
 function App() {
+  // Get base path for GitHub Pages deployment
+  const basename = import.meta.env.BASE_URL || '/Cosmiv/'
+  
   return (
     <ErrorBoundary>
       <Router
+        basename={basename}
         future={{
           v7_startTransition: true,
           v7_relativeSplatPath: true,
