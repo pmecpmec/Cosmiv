@@ -73,17 +73,52 @@ def new_job_id() -> str:
     return uuid4().hex
 
 
+def _validate_path_within_base(path: str, base_dir: str) -> str:
+    """
+    Validate that the resolved path is within the base directory.
+    Raises ValueError if path traversal is detected.
+    """
+    # Normalize both paths to handle any relative components
+    normalized_path = os.path.normpath(path)
+    normalized_base = os.path.normpath(base_dir)
+    
+    # Get the absolute paths to ensure proper comparison
+    abs_path = os.path.abspath(normalized_path)
+    abs_base = os.path.abspath(normalized_base)
+    
+    # Ensure base_dir ends with separator for proper containment check
+    # This prevents false positives (e.g., /app/storage vs /app/storage2)
+    base_with_sep = abs_base + os.sep
+    
+    # Check if the path is strictly within the base directory
+    # The path must start with base_dir + separator, or be exactly base_dir
+    if not (abs_path == abs_base or abs_path.startswith(base_with_sep)):
+        raise ValueError(
+            f"Path traversal detected: job_id would result in path outside base directory"
+        )
+    
+    return abs_path
+
+
 def job_upload_dir(job_id: str) -> str:
     """Get or create upload directory for a job."""
     base_dir = _get_uploads_dir()
     path = os.path.join(base_dir, job_id)
-    os.makedirs(path, exist_ok=True)
-    return path
+    
+    # Validate path is within base directory to prevent path traversal
+    validated_path = _validate_path_within_base(path, base_dir)
+    
+    os.makedirs(validated_path, exist_ok=True)
+    return validated_path
 
 
 def job_export_dir(job_id: str) -> str:
     """Get or create export directory for a job."""
     base_dir = _get_exports_dir()
     path = os.path.join(base_dir, job_id)
-    os.makedirs(path, exist_ok=True)
-    return path
+    
+    # Validate path is within base directory to prevent path traversal
+    validated_path = _validate_path_within_base(path, base_dir)
+    
+    os.makedirs(validated_path, exist_ok=True)
+    return validated_path
