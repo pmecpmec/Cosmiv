@@ -42,9 +42,28 @@ export function AuthProvider({ children }) {
       
       return { success: true }
     } catch (error) {
+      // Handle validation errors (array format) or simple error messages
+      let errorMessage = 'Login failed'
+      
+      if (error.response?.data?.detail) {
+        const detail = error.response.data.detail
+        if (Array.isArray(detail)) {
+          // FastAPI validation errors are arrays
+          errorMessage = detail.map(err => err.msg || err.message || JSON.stringify(err)).join(', ')
+        } else if (typeof detail === 'string') {
+          errorMessage = detail
+        } else if (detail.message) {
+          errorMessage = detail.message
+        } else {
+          errorMessage = JSON.stringify(detail)
+        }
+      } else if (error.message) {
+        errorMessage = error.message
+      }
+      
       return { 
         success: false, 
-        error: error.response?.data?.detail || 'Login failed' 
+        error: errorMessage
       }
     }
   }
@@ -72,9 +91,28 @@ export function AuthProvider({ children }) {
       
       return { success: true }
     } catch (error) {
+      // Handle validation errors (array format) or simple error messages
+      let errorMessage = 'Registration failed'
+      
+      if (error.response?.data?.detail) {
+        const detail = error.response.data.detail
+        if (Array.isArray(detail)) {
+          // FastAPI validation errors are arrays
+          errorMessage = detail.map(err => err.msg || err.message || JSON.stringify(err)).join(', ')
+        } else if (typeof detail === 'string') {
+          errorMessage = detail
+        } else if (detail.message) {
+          errorMessage = detail.message
+        } else {
+          errorMessage = JSON.stringify(detail)
+        }
+      } else if (error.message) {
+        errorMessage = error.message
+      }
+      
       return { 
         success: false, 
-        error: error.response?.data?.detail || 'Registration failed' 
+        error: errorMessage
       }
     }
   }

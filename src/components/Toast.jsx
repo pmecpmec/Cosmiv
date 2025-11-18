@@ -16,7 +16,9 @@ export default function Toast({ message, type = 'info', onClose }) {
       className={`glass-effect ${colors[type]} rounded-lg p-4 min-w-[300px] shadow-lg`}
     >
       <div className="flex items-center justify-between">
-        <p className="text-sm text-pure-white">{message}</p>
+        <p className="text-sm text-pure-white">
+          {typeof message === 'string' ? message : JSON.stringify(message)}
+        </p>
         <button
           onClick={onClose}
           className="ml-4 text-pure-white/60 hover:text-pure-white transition-colors text-xl leading-none"
