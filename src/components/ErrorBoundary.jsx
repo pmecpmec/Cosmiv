@@ -23,8 +23,16 @@ class ErrorBoundary extends React.Component {
               Something went wrong
             </h1>
             <p className="text-cosmic-neon-cyan">
-              {this.state.error?.message || 'An unexpected error occurred'}
+              {this.state.error?.message || String(this.state.error) || 'An unexpected error occurred'}
             </p>
+            {this.state.error?.stack && (
+              <details className="mt-4 text-left max-w-2xl">
+                <summary className="cursor-pointer text-pure-white/60 text-sm">Error Details</summary>
+                <pre className="mt-2 text-xs text-pure-white/40 overflow-auto bg-black/50 p-4 rounded">
+                  {this.state.error.stack}
+                </pre>
+              </details>
+            )}
             <button
               onClick={() => window.location.reload()}
               className="px-6 py-3 bg-cosmic-violet rounded-lg hover:glow-neon transition-all"

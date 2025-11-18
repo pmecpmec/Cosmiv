@@ -32,7 +32,18 @@ export function AuthProvider({ children }) {
 
   const login = async (email, password) => {
     try {
-      const response = await apiClient.post('/auth/login', { email, password })
+      // Validate inputs before sending
+      if (!email || !email.trim()) {
+        return { success: false, error: 'Email is required' }
+      }
+      if (!password || !password.trim()) {
+        return { success: false, error: 'Password is required' }
+      }
+      
+      const response = await apiClient.post('/auth/login', { 
+        email: email.trim().toLowerCase(), 
+        password: password 
+      })
       const { access_token, user_id } = response.data
       localStorage.setItem('token', access_token)
       
@@ -82,10 +93,18 @@ export function AuthProvider({ children }) {
         }
       }
 
+      // Validate inputs before sending
+      if (!email || !email.trim()) {
+        return { success: false, error: 'Email is required' }
+      }
+      if (!password || !password.trim()) {
+        return { success: false, error: 'Password is required' }
+      }
+      
       const response = await apiClient.post('/auth/register', { 
-        email, 
-        password, 
-        username 
+        email: email.trim().toLowerCase(), 
+        password: password,
+        username: username?.trim() || undefined
       })
       const { access_token, user_id } = response.data
       localStorage.setItem('token', access_token)

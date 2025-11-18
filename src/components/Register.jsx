@@ -52,10 +52,12 @@ export default function Register() {
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              required
               className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:border-cosmic-violet focus:glow-neon transition-all text-pure-white"
-              placeholder="username"
+              placeholder="username (optional)"
             />
+            <p className="text-xs text-pure-white/50 mt-1">
+              Leave blank to use email prefix as username
+            </p>
           </div>
 
           <div>
