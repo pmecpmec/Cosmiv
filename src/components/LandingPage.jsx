@@ -6,7 +6,7 @@ export default function LandingPage() {
   const { isAuthenticated } = useAuth()
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-pure-black">
       {/* Hero Section */}
       <section className="relative py-32 px-6 overflow-hidden">
         <div className="container mx-auto text-center">

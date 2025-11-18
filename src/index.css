@@ -7,13 +7,22 @@
     @apply border-transparent;
   }
   
-  body {
-    @apply bg-pure-black text-pure-white font-sans antialiased;
-    overflow-x: hidden;
-  }
-
   html {
     scroll-behavior: smooth;
+    background-color: #000000;
+  }
+
+  body {
+    @apply text-pure-white font-sans antialiased;
+    background-color: #000000;
+    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
+  }
+
+  #root {
+    background-color: #000000;
+    min-height: 100vh;
   }
 }
 

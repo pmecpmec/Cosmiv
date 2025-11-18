@@ -29,7 +29,7 @@ function AppContent() {
   }
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
+    <div className="min-h-screen relative overflow-hidden bg-pure-black">
       <CosmicBackground />
       <div className="relative z-10">
         <Header />
