@@ -171,12 +171,6 @@ export default {
           'from': { transform: 'rotate(0deg)' },
           'to': { transform: 'rotate(360deg)' },
         },
-        'meteor-move': {
-          '0%': { transform: 'translate(0, 0) rotate(45deg)', opacity: '0' },
-          '20%': { opacity: '1' },
-          '80%': { opacity: '1' },
-          '100%': { transform: 'translate(400px, 400px) rotate(45deg)', opacity: '0' },
-        },
         'progress-shimmer': {
           '0%': { transform: 'translateX(-100%)' },
           '100%': { transform: 'translateX(400%)' },
@@ -200,9 +194,6 @@ export default {
         'stars-rotate-20': 'stars-rotate 20s linear infinite',
         'stars-rotate-30': 'stars-rotate 30s linear infinite reverse',
         'stars-rotate-40': 'stars-rotate 40s linear infinite',
-        'meteor-move-1': 'meteor-move 3s linear infinite',
-        'meteor-move-2': 'meteor-move 4s linear infinite 2s',
-        'meteor-move-3': 'meteor-move 5s linear infinite 1s',
         'progress-shimmer': 'progress-shimmer 2s ease-in-out infinite',
       },
     },

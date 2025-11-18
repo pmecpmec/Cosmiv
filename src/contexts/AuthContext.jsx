@@ -1,180 +1,96 @@
 import { createContext, useContext, useState, useEffect } from 'react'
-import api from '../utils/apiClient'
+import { apiClient } from '../utils/apiClient'
 
 const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
-  const [token, setToken] = useState(null)
   const [loading, setLoading] = useState(true)
 
-  // Load user from localStorage on mount
   useEffect(() => {
-    const storedToken = localStorage.getItem('auth_token')
-    const storedUser = localStorage.getItem('auth_user')
-    
-    if (storedToken && storedUser) {
-      setToken(storedToken)
-      try {
-        setUser(JSON.parse(storedUser))
-      } catch (e) {
-        console.error('Failed to parse stored user', e)
-        localStorage.removeItem('auth_token')
-        localStorage.removeItem('auth_user')
-      }
-    }
-    setLoading(false)
+    checkAuth()
   }, [])
 
-  const login = async (usernameOrEmail, password) => {
+  const checkAuth = async () => {
     try {
-      if (!usernameOrEmail || !password) {
-        return { success: false, error: 'Username/email and password are required' }
+      const token = localStorage.getItem('token')
+      if (!token) {
+        setLoading(false)
+        return
       }
 
-      const formData = new FormData()
-      formData.append('username_or_email', usernameOrEmail.trim())
-      formData.append('password', password)
-
-      console.log('Attempting login for:', usernameOrEmail)
-
-      // Use api client for better error handling
-      const data = await api.post('/api/auth/login', formData, {
-        requireAuth: false,
-        headers: {}, // Don't set Content-Type for FormData
-      })
-      
-      console.log('Login response received:', { hasToken: !!data.access_token, hasUser: !!data.user })
-      
-      if (!data.access_token) {
-        return { success: false, error: 'No access token received from server' }
+      const response = await apiClient.get('/auth/me')
+      if (response.data) {
+        setUser(response.data)
       }
-      
-      // Store token and user
-      localStorage.setItem('auth_token', data.access_token)
-      if (data.refresh_token) {
-        localStorage.setItem('auth_refresh_token', data.refresh_token)
-      }
-      if (data.user) {
-        localStorage.setItem('auth_user', JSON.stringify(data.user))
-        setUser(data.user)
-      }
-      
-      setToken(data.access_token)
-      
-      return { success: true }
     } catch (error) {
-      console.error('Login error details:', {
-        message: error.message,
-        status: error.status,
-        data: error.data,
-        stack: error.stack
-      })
-      
-      // Provide more specific error messages
-      let errorMessage = 'Login failed'
-      if (error.status === 401) {
-        errorMessage = 'Invalid username/email or password'
-      } else if (error.status === 404) {
-        errorMessage = 'Login endpoint not found. Is the backend running?'
-      } else if (error.status === 0 || error.message?.includes('fetch')) {
-        errorMessage = 'Cannot connect to server. Please check if the backend is running.'
-      } else if (error.data?.detail) {
-        errorMessage = error.data.detail
-      } else if (error.message) {
-        errorMessage = error.message
-      }
-      
-      return { success: false, error: errorMessage }
+      localStorage.removeItem('token')
+    } finally {
+      setLoading(false)
     }
   }
 
-  const register = async (username, email, password) => {
+  const login = async (email, password) => {
     try {
-      const formData = new FormData()
-      formData.append('username', username)
-      formData.append('email', email)
-      formData.append('password', password)
-
-      // Use api client for better error handling
-      const data = await api.post('/api/auth/register', formData, {
-        requireAuth: false,
-        headers: {}, // Don't set Content-Type for FormData
-      })
+      const response = await apiClient.post('/auth/login', { email, password })
+      const { access_token, user_id } = response.data
+      localStorage.setItem('token', access_token)
       
-      // Store token and user
-      localStorage.setItem('auth_token', data.access_token)
-      localStorage.setItem('auth_refresh_token', data.refresh_token)
-      if (data.user) {
-        localStorage.setItem('auth_user', JSON.stringify(data.user))
-        setUser(data.user)
-      }
-      
-      setToken(data.access_token)
+      // Fetch user data
+      const userResponse = await apiClient.get('/auth/me')
+      setUser(userResponse.data)
       
       return { success: true }
     } catch (error) {
-      console.error('Registration error:', error)
-      return { success: false, error: error.message || 'Registration failed' }
+      return { 
+        success: false, 
+        error: error.response?.data?.detail || 'Login failed' 
+      }
+    }
+  }
+
+  const register = async (email, password, username) => {
+    try {
+      if (password.length < 8) {
+        return { 
+          success: false, 
+          error: 'Password must be at least 8 characters' 
+        }
+      }
+
+      const response = await apiClient.post('/auth/register', { 
+        email, 
+        password, 
+        username 
+      })
+      const { access_token, user_id } = response.data
+      localStorage.setItem('token', access_token)
+      
+      // Fetch user data
+      const userResponse = await apiClient.get('/auth/me')
+      setUser(userResponse.data)
+      
+      return { success: true }
+    } catch (error) {
+      return { 
+        success: false, 
+        error: error.response?.data?.detail || 'Registration failed' 
+      }
     }
   }
 
   const logout = () => {
-    localStorage.removeItem('auth_token')
-    localStorage.removeItem('auth_refresh_token')
-    localStorage.removeItem('auth_user')
-    setToken(null)
+    localStorage.removeItem('token')
     setUser(null)
-  }
-
-  const refreshAccessToken = async () => {
-    const refreshToken = localStorage.getItem('auth_refresh_token')
-    if (!refreshToken) {
-      logout()
-      return null
-    }
-
-    try {
-      const formData = new FormData()
-      formData.append('refresh_token', refreshToken)
-
-      const data = await api.post('/api/auth/refresh', formData, {
-        requireAuth: false,
-        headers: {},
-      })
-
-      localStorage.setItem('auth_token', data.access_token)
-      if (data.refresh_token) {
-        localStorage.setItem('auth_refresh_token', data.refresh_token)
-      }
-      setToken(data.access_token)
-      return data.access_token
-    } catch (error) {
-      console.error('Token refresh error:', error)
-      logout()
-      return null
-    }
-  }
-
-  // Get auth headers for API requests
-  const getAuthHeaders = () => {
-    if (!token) return {}
-    return {
-      'Authorization': `Bearer ${token}`,
-    }
   }
 
   const value = {
     user,
-    token,
     loading,
     login,
     register,
     logout,
-    refreshAccessToken,
-    getAuthHeaders,
-    isAuthenticated: !!user && !!token,
-    isAdmin: user?.is_admin || false,
+    isAuthenticated: !!user
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
@@ -187,4 +103,3 @@ export function useAuth() {
   }
   return context
 }
-

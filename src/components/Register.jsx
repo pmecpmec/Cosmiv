@@ -1,194 +1,111 @@
 import { useState } from 'react'
-import { motion } from 'framer-motion'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { useToast } from '../contexts/ToastContext'
-import { AnimatedForm, AnimatedContainer } from './ui/AnimatedContainer'
-import SpaceLoader from './ui/SpaceLoader'
+import { motion } from 'framer-motion'
 
-export default function Register({ onSwitchToLogin }) {
-  const [username, setUsername] = useState('')
+export default function Register() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
-  const [error, setError] = useState(null)
+  const [username, setUsername] = useState('')
   const [loading, setLoading] = useState(false)
   const { register } = useAuth()
-  const { showError, showSuccess } = useToast()
+  const { showToast } = useToast()
+  const navigate = useNavigate()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    setError(null)
-
-    if (password.length < 8) {
-      const errorMsg = 'Password must be at least 8 characters'
-      setError(errorMsg)
-      showError(errorMsg)
-      return
-    }
-
-    if (password !== confirmPassword) {
-      const errorMsg = 'Passwords do not match'
-      setError(errorMsg)
-      showError(errorMsg)
-      return
-    }
-
     setLoading(true)
 
-    const result = await register(username, email, password)
+    const result = await register(email, password, username)
+    
+    if (result.success) {
+      showToast('Account created!', 'success')
+      navigate('/dashboard')
+    } else {
+      showToast(result.error || 'Registration failed', 'error')
+    }
     
     setLoading(false)
-    
-    if (!result.success) {
-      const errorMsg = result.error || 'Registration failed'
-      setError(errorMsg)
-      showError(errorMsg)
-    } else {
-      showSuccess('Account created successfully!')
-    }
   }
 
   return (
-    <AnimatedContainer className="broken-planet-card rounded-2xl p-12 max-w-md mx-auto float">
-      <motion.h2 
-        initial={{ opacity: 0, y: -20 }}
+    <div className="min-h-screen flex items-center justify-center px-6 py-24">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="text-4xl font-black gradient-text-cosmic mb-4 text-center tracking-poppr font-display"
+        className="w-full max-w-md glass-effect p-8 rounded-2xl"
       >
-        C R E A T E   A C C O U N T
-      </motion.h2>
-      <motion.p 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
-        className="text-pure-white/70 text-center mb-8 font-bold tracking-wide"
-      >
-        Join Cosmiv today
-      </motion.p>
+        <h1 className="text-3xl font-display text-gradient-cosmic mb-2">
+          Sign Up
+        </h1>
+        <p className="text-pure-white/60 mb-8">
+          Join the cosmic experience
+        </p>
 
-      {error && (
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="alert alert-error mb-6 border-2 border-error bg-error text-base-content"
-        >
-          <span className="font-black tracking-wide">⚠️ {error}</span>
-        </motion.div>
-      )}
-
-      <AnimatedForm delay={0.3} onSubmit={handleSubmit} className="form-control space-y-4">
-        <div className="form-control">
-          <label className="label">
-            <span className="label-text text-sm font-black text-pure-white tracking-wide uppercase">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label className="block text-sm text-pure-white/80 mb-2">
               Username
-            </span>
-          </label>
-          <input
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-            className="input input-bordered w-full px-6 py-4 min-h-[44px] text-base bg-pure-black border-2 border-cosmic-neon-cyan/30 text-pure-white placeholder-pure-white/30 focus:outline-none focus:border-cosmic-neon-cyan font-bold tracking-wide disabled:opacity-50 focus:neon-glow-cyan"
-            placeholder="Choose a username"
-            disabled={loading}
-            autoComplete="username"
-          />
-        </div>
+            </label>
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:border-cosmic-violet focus:glow-neon transition-all text-pure-white"
+              placeholder="username"
+            />
+          </div>
 
-        <div className="form-control">
-          <label className="label">
-            <span className="label-text text-sm font-black text-pure-white tracking-wide uppercase">
+          <div>
+            <label className="block text-sm text-pure-white/80 mb-2">
               Email
-            </span>
-          </label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className="input input-bordered w-full px-6 py-4 min-h-[44px] text-base bg-pure-black border-2 border-cosmic-neon-cyan/30 text-pure-white placeholder-pure-white/30 focus:outline-none focus:border-cosmic-neon-cyan font-bold tracking-wide disabled:opacity-50 focus:neon-glow-cyan"
-            placeholder="Enter your email"
-            disabled={loading}
-            autoComplete="email"
-          />
-        </div>
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:border-cosmic-violet focus:glow-neon transition-all text-pure-white"
+              placeholder="your@email.com"
+            />
+          </div>
 
-        <div className="form-control">
-          <label className="label">
-            <span className="label-text text-sm font-black text-pure-white tracking-wide uppercase">
+          <div>
+            <label className="block text-sm text-pure-white/80 mb-2">
               Password
-            </span>
-          </label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            minLength={8}
-            className="input input-bordered w-full px-6 py-4 min-h-[44px] text-base bg-pure-black border-2 border-cosmic-neon-cyan/30 text-pure-white placeholder-pure-white/30 focus:outline-none focus:border-cosmic-neon-cyan font-bold tracking-wide disabled:opacity-50 focus:neon-glow-cyan"
-            placeholder="At least 8 characters"
-            disabled={loading}
-            autoComplete="new-password"
-          />
-          <label className="label">
-            <span className="label-text-alt text-xs text-pure-white/50 font-bold">Must be at least 8 characters</span>
-          </label>
-        </div>
+            </label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              minLength={8}
+              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:border-cosmic-violet focus:glow-neon transition-all text-pure-white"
+              placeholder="••••••••"
+            />
+            <p className="text-xs text-pure-white/50 mt-1">
+              Password must be at least 8 characters
+            </p>
+          </div>
 
-        <div className="form-control">
-          <label className="label">
-            <span className="label-text text-sm font-black text-pure-white tracking-wide uppercase">
-              Confirm Password
-            </span>
-          </label>
-          <input
-            type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            required
-            className="input input-bordered w-full px-6 py-4 min-h-[44px] text-base bg-pure-black border-2 border-cosmic-neon-cyan/30 text-pure-white placeholder-pure-white/30 focus:outline-none focus:border-cosmic-neon-cyan font-bold tracking-wide disabled:opacity-50 focus:neon-glow-cyan"
-            placeholder="Confirm your password"
-            disabled={loading}
-            autoComplete="new-password"
-          />
-        </div>
-
-        <div className="form-control mt-6">
           <button
             type="submit"
             disabled={loading}
-            className="btn btn-primary w-full min-h-[44px] bg-gradient-to-r from-cosmic-violet to-cosmic-deep-blue hover:from-cosmic-purple hover:to-cosmic-violet text-white font-black py-4 border-2 border-cosmic-neon-cyan/50 hover:neon-glow-cyan transition-all tracking-wide disabled:opacity-50 disabled:cursor-not-allowed neon-glow chromatic-aberration btn-magnetic btn-glow-pulse font-display"
+            className="w-full px-6 py-3 bg-cosmic-violet hover:glow-neon rounded-lg font-semibold transition-all disabled:opacity-50"
           >
-            C R E A T E   A C C O U N T
+            {loading ? 'Creating account...' : 'Sign Up'}
           </button>
-        </div>
-      </AnimatedForm>
+        </form>
 
-      {/* Space Loader Overlay */}
-      {loading && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
-        >
-          <SpaceLoader size={300} text="C R E A T I N G   A C C O U N T . . ." />
-        </motion.div>
-      )}
-
-      <div className="mt-6 text-center">
-        <p className="text-pure-white/60 text-sm font-bold">
+        <p className="mt-6 text-center text-sm text-pure-white/60">
           Already have an account?{' '}
-          <button
-            onClick={onSwitchToLogin}
-            className="text-pure-white font-black underline tracking-wide hover:opacity-75"
-          >
-            S I G N   I N   H E R E
-          </button>
+          <Link to="/login" className="text-cosmic-neon-cyan hover:underline">
+            Login
+          </Link>
         </p>
-      </div>
-    </AnimatedContainer>
+      </motion.div>
+    </div>
   )
 }
-

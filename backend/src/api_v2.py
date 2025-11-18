@@ -193,14 +193,22 @@ def job_status_v2(job_id: str):
 def job_download_v2(
     job_id: str, format: str = Query("landscape", enum=["landscape", "portrait"])
 ):
-    storage = get_storage()
+    from fastapi.responses import FileResponse
+    
     export_dir = job_export_dir(job_id)
     local_path = os.path.join(export_dir, f"final_{format}.mp4")
+    
+    # Also check for legacy filename
     if not os.path.exists(local_path):
-        return JSONResponse({"error": "file not ready"}, status_code=404)
+        legacy_path = os.path.join(export_dir, "final_highlight.mp4")
+        if os.path.exists(legacy_path):
+            local_path = legacy_path
+        else:
+            return JSONResponse({"error": "file not ready"}, status_code=404)
 
-    # If object storage was used, attempt to construct public URL; else return file path
-    try:
-        return {"url": storage.public_url(f"exports/{job_id}/final_{format}.mp4")}
-    except Exception:
-        return {"path": local_path}
+    # Return file directly for download
+    return FileResponse(
+        local_path,
+        filename=f"highlight_{format}.mp4",
+        media_type="video/mp4"
+    )

@@ -17,7 +17,6 @@ from models_ai import FrontendPattern, DesignTrend, ScrapingJob
 from services.frontend_learner.parser import PatternParser
 from services.frontend_learner.vectorizer import PatternVectorizer
 from services.frontend_learner.learner import PatternLearner
-from services.frontend_learner.scraper import FrontendScraper
 
 logger = logging.getLogger(__name__)
 
@@ -223,77 +222,32 @@ async def get_trends(
 
 
 @router.post("/learn")
-async def trigger_learning(
-    targets_only: bool = Query(False, description="Only scrape targets, don't parse"),
-):
+async def trigger_learning():
     """
     Manually trigger front-end learning process
 
     This will:
-    1. Scrape configured target websites
-    2. Parse extracted HTML/CSS
-    3. Vectorize patterns
-    4. Update design principles
+    1. Parse existing HTML/CSS snapshots
+    2. Vectorize patterns
+    3. Update design principles
+
+    Note: Scraping functionality has been removed.
     """
     try:
-        scraper = FrontendScraper()
         parser = PatternParser()
         vectorizer = PatternVectorizer()
         learner = PatternLearner()
 
-        # Step 1: Scrape
-        logger.info("Starting scraping phase...")
-        snapshots = scraper.scrape_targets()
-        logger.info(f"Scraped {len(snapshots)} pages")
+        # Note: Scraping has been removed. This endpoint now only processes existing data.
+        logger.warning("Scraping functionality has been removed. Only processing existing patterns.")
 
-        if targets_only:
-            return {
-                "status": "completed",
-                "phase": "scraping",
-                "snapshots_scraped": len(snapshots),
-                "message": "Scraping completed. Run again without targets_only to parse.",
-            }
-
-        # Step 2: Parse
-        logger.info("Starting parsing phase...")
-        patterns_parsed = 0
-        with get_session() as session:
-            for snapshot in snapshots:
-                pattern_data = parser.parse_snapshot(snapshot)
-                if pattern_data:
-                    # Save to database
-                    pattern_id = f"pattern_{uuid.uuid4().hex[:12]}"
-                    pattern = FrontendPattern(
-                        pattern_id=pattern_id,
-                        source_url=pattern_data["url"],
-                        pattern_type="layout",
-                        pattern_data=json.dumps(pattern_data),
-                        layout_type=pattern_data.get("layout"),
-                        colors=json.dumps(pattern_data.get("colors", [])),
-                        fonts=json.dumps(pattern_data.get("fonts", [])),
-                        components=json.dumps(pattern_data.get("components", [])),
-                        animations=json.dumps(pattern_data.get("animations", [])),
-                        gradients=json.dumps(pattern_data.get("gradients", [])),
-                        cosmiv_alignment_score=pattern_data.get(
-                            "cosmiv_alignment_score", 0.0
-                        ),
-                    )
-                    session.add(pattern)
-
-                    # Vectorize
-                    vectorizer.vectorize_pattern(pattern_data, pattern_id)
-                    patterns_parsed += 1
-
-            session.commit()
-
-        # Step 3: Update design principles
-        logger.info("Updating design principles...")
+        # Step 1: Update design principles from existing patterns
+        logger.info("Updating design principles from existing patterns...")
         principles = learner.generate_design_principles()
 
         return {
             "status": "completed",
-            "snapshots_scraped": len(snapshots),
-            "patterns_parsed": patterns_parsed,
+            "message": "Scraping functionality removed. Only design principles updated from existing patterns.",
             "principles_updated": True,
             "trends_detected": len(principles.get("trends", {})),
         }

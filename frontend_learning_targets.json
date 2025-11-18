@@ -88,21 +88,6 @@
         "components": true
       },
       "notes": "Landing page gallery, diverse styles"
-    },
-    {
-      "url": "https://epiminds.com",
-      "type": "saas_product",
-      "priority": "high",
-      "use_dynamic": true,
-      "selectors": {
-        "main_content": "main",
-        "hero": "section:first-of-type",
-        "colors": true,
-        "typography": true,
-        "animations": true,
-        "components": ["hero", "navigation", "features", "footer"]
-      },
-      "notes": "Target website for visual and animation recreation - premium front-end design"
     }
   ],
   "scraping_config": {
