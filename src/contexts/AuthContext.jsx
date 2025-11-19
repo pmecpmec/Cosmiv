@@ -19,11 +19,21 @@ export function AuthProvider({ children }) {
         return
       }
 
-      const response = await apiClient.get('/auth/me')
-      if (response.data) {
+      // Add timeout to prevent hanging if API is unavailable
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Timeout')), 3000)
+      )
+      
+      const response = await Promise.race([
+        apiClient.get('/auth/me'),
+        timeoutPromise
+      ])
+      
+      if (response?.data) {
         setUser(response.data)
       }
     } catch (error) {
+      // Silently fail - user can still use the app without auth
       localStorage.removeItem('token')
     } finally {
       setLoading(false)

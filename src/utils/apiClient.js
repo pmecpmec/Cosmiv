@@ -8,6 +8,7 @@ const apiClient = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
+  timeout: 5000, // 5 second timeout
 });
 
 // Add token to requests
@@ -28,10 +29,15 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
+    // Don't redirect on network errors (API unavailable)
     if (error.response?.status === 401) {
       localStorage.removeItem("token");
-      window.location.href = "/login";
+      // Only redirect if we're not already on login page
+      if (window.location.pathname !== '/login' && !window.location.pathname.includes('/login')) {
+        window.location.href = "/login";
+      }
     }
+    // For network errors or timeouts, don't block the app
     return Promise.reject(error);
   }
 );
