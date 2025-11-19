@@ -18,10 +18,10 @@ function AppContent() {
   const { user, loading } = useAuth()
 
   useEffect(() => {
-    // Reduce initial loading time
+    // Reduce initial loading time - show content quickly
     const timer = setTimeout(() => {
       setShowLoading(false)
-    }, 800)
+    }, 500)
     return () => clearTimeout(timer)
   }, [])
 
@@ -29,6 +29,11 @@ function AppContent() {
   // This prevents blank page if API is slow/unavailable
   if (showLoading) {
     return <LoadingScreen />
+  }
+  
+  // Debug logging
+  if (typeof window !== 'undefined') {
+    console.log('AppContent rendering:', { user, loading, showLoading })
   }
 
   return (
@@ -71,6 +76,15 @@ function App() {
     if (pathParts.length > 0 && pathParts[0] !== 'index.html') {
       basename = `/${pathParts[0]}/`
     }
+  }
+  
+  // Debug logging
+  if (typeof window !== 'undefined') {
+    console.log('App initializing:', { 
+      basename, 
+      BASE_URL: import.meta.env.BASE_URL,
+      pathname: window.location.pathname 
+    })
   }
   
   return (
