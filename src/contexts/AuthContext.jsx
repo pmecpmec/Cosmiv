@@ -21,7 +21,7 @@ export function AuthProvider({ children }) {
 
       // Add timeout to prevent hanging if API is unavailable
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Timeout')), 3000)
+        setTimeout(() => reject(new Error('Timeout')), 2000) // Reduced to 2s
       )
       
       const response = await Promise.race([
@@ -34,8 +34,12 @@ export function AuthProvider({ children }) {
       }
     } catch (error) {
       // Silently fail - user can still use the app without auth
-      localStorage.removeItem('token')
+      // Don't remove token on timeout - might be network issue
+      if (error.message !== 'Timeout') {
+        localStorage.removeItem('token')
+      }
     } finally {
+      // Always set loading to false, even on error
       setLoading(false)
     }
   }

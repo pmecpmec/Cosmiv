@@ -14,32 +14,27 @@ import CosmicBackground from './components/CosmicBackground'
 import './App.css'
 
 function AppContent() {
-  const [showLoading, setShowLoading] = useState(true)
   const { user, loading } = useAuth()
+  const [showLoading, setShowLoading] = useState(true)
 
   useEffect(() => {
-    // Reduce initial loading time - show content quickly
+    // Show loading screen briefly, then always show content
+    // Don't wait for auth - show landing page immediately
     const timer = setTimeout(() => {
       setShowLoading(false)
-    }, 500)
+    }, 300) // Reduced to 300ms
     return () => clearTimeout(timer)
   }, [])
 
-  // Show content even if auth is still loading (after initial delay)
-  // This prevents blank page if API is slow/unavailable
+  // Always show content after brief loading - don't block on auth
   if (showLoading) {
     return <LoadingScreen />
   }
-  
-  // Debug logging
-  if (typeof window !== 'undefined') {
-    console.log('AppContent rendering:', { user, loading, showLoading })
-  }
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-pure-black">
+    <div className="min-h-screen relative overflow-hidden bg-pure-black text-pure-white">
       <CosmicBackground />
-      <div className="relative z-10">
+      <div className="relative z-10 min-h-screen">
         <Header />
         <Routes>
           <Route path="/" element={<LandingPage />} />
