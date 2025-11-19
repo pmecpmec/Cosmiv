@@ -33,9 +33,10 @@ export default defineConfig({
       output: {
         // Manual chunk splitting for better caching and smaller initial bundle
         manualChunks: (id) => {
-          // Vendor chunks
+          // Vendor chunks - React must be first
           if (id.includes('node_modules')) {
-            if (id.includes('react') || id.includes('react-dom')) {
+            // React and React-DOM must be in the same chunk and load first
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react/jsx-runtime')) {
               return 'react-vendor'
             }
             if (id.includes('framer-motion')) {
