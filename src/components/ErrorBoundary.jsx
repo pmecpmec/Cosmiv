@@ -34,7 +34,11 @@ class ErrorBoundary extends React.Component {
               </details>
             )}
             <button
-              onClick={() => window.location.reload()}
+              onClick={() => {
+                if (typeof window !== 'undefined') {
+                  window.location.reload()
+                }
+              }}
               className="px-6 py-3 bg-cosmic-violet rounded-lg hover:glow-neon transition-all"
             >
               Reload Page
