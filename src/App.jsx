@@ -18,13 +18,16 @@ function AppContent() {
   const { user, loading } = useAuth()
 
   useEffect(() => {
+    // Reduce initial loading time
     const timer = setTimeout(() => {
       setShowLoading(false)
-    }, 1500)
+    }, 800)
     return () => clearTimeout(timer)
   }, [])
 
-  if (showLoading || loading) {
+  // Show content even if auth is still loading (after initial delay)
+  // This prevents blank page if API is slow/unavailable
+  if (showLoading) {
     return <LoadingScreen />
   }
 

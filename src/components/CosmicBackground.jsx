@@ -27,7 +27,7 @@ function CosmicScene() {
 
 export default function CosmicBackground() {
   return (
-    <div className="fixed inset-0 -z-0 opacity-30">
+    <div className="fixed inset-0 -z-0 opacity-30 pointer-events-none">
       <Canvas camera={{ position: [0, 0, 5] }}>
         <CosmicScene />
       </Canvas>
