@@ -33,12 +33,10 @@ export default defineConfig({
       output: {
         // Manual chunk splitting for better caching and smaller initial bundle
         manualChunks: (id) => {
-          // Vendor chunks - React must be first
+          // Keep React in main bundle to avoid loading order issues
+          // Only split out heavy dependencies
           if (id.includes('node_modules')) {
-            // React and React-DOM must be in the same chunk and load first
-            if (id.includes('react') || id.includes('react-dom') || id.includes('react/jsx-runtime')) {
-              return 'react-vendor'
-            }
+            // Split out heavy libraries but keep React in main
             if (id.includes('framer-motion')) {
               return 'framer-motion'
             }
@@ -48,8 +46,11 @@ export default defineConfig({
             if (id.includes('three') || id.includes('@react-three')) {
               return 'three-vendor'
             }
-            // Other node_modules
-            return 'vendor'
+            // Keep React, React-DOM, and react-router in main bundle
+            // Other node_modules go to vendor
+            if (!id.includes('react') && !id.includes('react-dom') && !id.includes('react-router')) {
+              return 'vendor'
+            }
           }
           // Component chunks
           if (id.includes('/components/Dashboard') || id.includes('/components/Analytics')) {
