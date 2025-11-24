@@ -51,7 +51,7 @@ export default {
       },
       fontFamily: {
         sans: [
-          "Chakra Petch",
+          "Space Grotesk",
           "system-ui",
           "-apple-system",
           "BlinkMacSystemFont",
@@ -60,7 +60,7 @@ export default {
         ],
         // Display and accent fonts
         display: [
-          "Chakra Petch",
+          "Space Grotesk",
           "system-ui",
           "sans-serif",
         ],
