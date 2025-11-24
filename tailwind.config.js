@@ -51,38 +51,16 @@ export default {
       },
       fontFamily: {
         sans: [
-          "Inter",
+          "Chakra Petch",
           "system-ui",
           "-apple-system",
           "BlinkMacSystemFont",
           "Segoe UI",
           "sans-serif",
         ],
-        // Space-style fonts for cosmic aesthetic
-        orbitron: [
-          "Orbitron",
-          "Inter",
-          "system-ui",
-          "sans-serif",
-        ],
-        exo: [
-          "Exo 2",
-          "Inter",
-          "system-ui",
-          "sans-serif",
-        ],
-        michroma: [
-          "Michroma",
-          "Orbitron",
-          "Inter",
-          "system-ui",
-          "sans-serif",
-        ],
-        // Hero and display text
+        // Display and accent fonts
         display: [
-          "Orbitron",
-          "Michroma",
-          "Inter",
+          "Chakra Petch",
           "system-ui",
           "sans-serif",
         ],
