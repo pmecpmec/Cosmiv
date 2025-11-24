@@ -10,19 +10,62 @@
   html {
     scroll-behavior: smooth;
     background-color: #000000;
+    /* Establish base font size for rem calculations */
+    font-size: 16px;
+    /* Smooth font rendering */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   body {
     @apply text-pure-white font-sans antialiased;
+    @apply text-body-md;
     background-color: #000000;
     overflow-x: hidden;
     margin: 0;
     padding: 0;
+    /* Consistent vertical rhythm */
+    line-height: 1.75;
   }
 
   #root {
     background-color: #000000;
     min-height: 100vh;
+  }
+
+  /* Typography hierarchy with consistent spacing */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold;
+    margin: 0;
+  }
+
+  h1 {
+    @apply text-display-xl;
+    @apply mb-6;
+  }
+
+  h2 {
+    @apply text-headline-xl;
+    @apply mb-5;
+  }
+
+  h3 {
+    @apply text-headline-lg;
+    @apply mb-4;
+  }
+
+  h4 {
+    @apply text-headline-md;
+    @apply mb-3;
+  }
+
+  p {
+    @apply mb-4;
+  }
+
+  /* Smooth transitions for interactive elements */
+  a, button {
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   }
 }
 

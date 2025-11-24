@@ -2,118 +2,164 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useAuth } from '../contexts/AuthContext'
 
+/**
+ * Premium Landing Page Component
+ * 
+ * Design Principles Applied:
+ * - Clear above-the-fold with sharp headline, clean subtext, single CTA
+ * - Strict visual hierarchy using spacing, sizing, and contrast
+ * - Consistent typography with Space Grotesk
+ * - Subtle micro-animations with natural easing
+ * - Strict spacing scale (8px base unit)
+ * - Fully responsive with mobile-first approach
+ * - Minimal clutter, confident use of white space
+ */
 export default function LandingPage() {
   const { isAuthenticated } = useAuth()
 
+  // Animation variants for consistent, premium feel
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2,
+      },
+    },
+  }
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 24 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.6,
+        ease: [0.16, 1, 0.3, 1], // Natural easing curve
+      },
+    },
+  }
+
   return (
     <div className="min-h-screen bg-pure-black">
-      {/* Hero Section */}
-      <section className="relative py-32 px-6 overflow-hidden">
-        <div className="container mx-auto text-center">
-          <motion.h1
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="text-7xl md:text-9xl font-display font-black mb-6 text-gradient-cosmic"
-          >
-            COSMIV
-          </motion.h1>
-          
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-2xl md:text-4xl text-cosmic-neon-cyan mb-8 font-light"
-          >
-            AI-Powered Gaming Montages
-          </motion.p>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            className="text-lg text-pure-white/70 mb-12 max-w-2xl mx-auto"
-          >
-            Transform your raw gameplay clips into viral, AI-edited montages automatically.
-            Upload, select style, and let AI create your next highlight reel.
-          </motion.p>
-
+      {/* Hero Section - Above the Fold */}
+      <section className="relative min-h-screen flex items-center justify-center px-6 py-24 md:py-32 overflow-hidden">
+        <div className="container mx-auto max-w-4xl">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
-            className="flex flex-col sm:flex-row gap-4 justify-center items-center"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="text-center"
           >
-            {isAuthenticated ? (
-              <Link
-                to="/upload"
-                className="px-8 py-4 bg-cosmic-violet hover:glow-neon rounded-lg text-lg font-semibold transition-all"
-              >
-                Start Creating
-              </Link>
-            ) : (
-              <>
+            {/* Main Headline - Sharp and Clear */}
+            <motion.h1
+              variants={itemVariants}
+              className="text-display-2xl md:text-display-2xl mb-6 md:mb-8 font-bold text-pure-white"
+            >
+              Transform Clips Into
+              <br />
+              <span className="text-gradient-cosmic">Viral Montages</span>
+            </motion.h1>
+            
+            {/* Subtext - Clean and Descriptive */}
+            <motion.p
+              variants={itemVariants}
+              className="text-body-lg md:text-headline-sm text-pure-white/70 mb-4 md:mb-6 max-w-2xl mx-auto font-normal leading-relaxed"
+            >
+              AI-powered editing that automatically detects highlights, applies cinematic styles, 
+              and renders professional montages—ready to share.
+            </motion.p>
+
+            {/* Single Strong CTA - No Clutter */}
+            <motion.div
+              variants={itemVariants}
+              className="flex justify-center mt-8 md:mt-12"
+            >
+              {isAuthenticated ? (
+                <Link
+                  to="/upload"
+                  className="group relative inline-flex items-center justify-center px-8 py-4 md:px-10 md:py-5 bg-cosmic-violet hover:bg-cosmic-purple rounded-lg text-body-md md:text-body-lg font-semibold text-pure-white transition-all duration-300 ease-out hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(139,92,246,0.4)] focus:outline-none focus:ring-2 focus:ring-cosmic-violet focus:ring-offset-2 focus:ring-offset-pure-black"
+                >
+                  <span className="relative z-10">Start Creating</span>
+                  <span className="absolute inset-0 rounded-lg bg-gradient-to-r from-cosmic-violet to-cosmic-purple opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </Link>
+              ) : (
                 <Link
                   to="/register"
-                  className="px-8 py-4 bg-cosmic-violet hover:glow-neon rounded-lg text-lg font-semibold transition-all"
+                  className="group relative inline-flex items-center justify-center px-8 py-4 md:px-10 md:py-5 bg-cosmic-violet hover:bg-cosmic-purple rounded-lg text-body-md md:text-body-lg font-semibold text-pure-white transition-all duration-300 ease-out hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(139,92,246,0.4)] focus:outline-none focus:ring-2 focus:ring-cosmic-violet focus:ring-offset-2 focus:ring-offset-pure-black"
                 >
-                  Get Started
+                  <span className="relative z-10">Get Started Free</span>
+                  <span className="absolute inset-0 rounded-lg bg-gradient-to-r from-cosmic-violet to-cosmic-purple opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </Link>
-                <Link
-                  to="/login"
-                  className="px-8 py-4 glass-effect border border-cosmic-violet/50 hover:border-cosmic-violet rounded-lg text-lg font-semibold transition-all"
-                >
-                  Login
-                </Link>
-              </>
-            )}
+              )}
+            </motion.div>
           </motion.div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-24 px-6">
-        <div className="container mx-auto">
-          <motion.h2
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            className="text-4xl font-display text-center mb-16 text-gradient-broken"
+      {/* Features Section - Below the Fold */}
+      <section className="relative py-section px-6">
+        <div className="container mx-auto max-w-6xl">
+          {/* Section Header */}
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-100px' }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+            className="text-center mb-16 md:mb-24"
           >
-            Features
-          </motion.h2>
+            <h2 className="text-headline-xl md:text-display-lg mb-4 text-pure-white font-semibold">
+              Everything You Need
+            </h2>
+            <p className="text-body-lg text-pure-white/60 max-w-2xl mx-auto">
+              Professional editing tools powered by AI, designed for creators who want results fast.
+            </p>
+          </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          {/* Features Grid - Responsive and Clean */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
             {[
               {
                 title: 'AI Highlight Detection',
-                description: 'Automatically finds high-action moments in your clips',
+                description: 'Automatically identifies high-action moments using motion analysis, audio peaks, and scene detection.',
                 icon: '🤖',
               },
               {
-                title: 'Multiple Styles',
-                description: 'Cinematic, gaming, energetic, and more editing styles',
+                title: 'Cinematic Styles',
+                description: 'Choose from multiple editing styles—cinematic, esports, energetic—each with unique pacing and transitions.',
                 icon: '🎨',
               },
               {
-                title: 'Auto Rendering',
-                description: 'Full pipeline from upload to finished video',
+                title: 'Instant Rendering',
+                description: 'Full pipeline from upload to finished video. No manual editing required.',
                 icon: '🚀',
               },
             ].map((feature, index) => (
               <motion.div
                 key={index}
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 0, y: 40 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="glass-effect p-8 rounded-xl hover:glow-neon transition-all"
+                viewport={{ once: true, margin: '-50px' }}
+                transition={{ 
+                  duration: 0.6, 
+                  delay: index * 0.1,
+                  ease: [0.16, 1, 0.3, 1] 
+                }}
+                className="group relative p-8 md:p-10 rounded-xl bg-bw-gray-1/50 border border-white/5 hover:border-cosmic-violet/30 transition-all duration-300 hover:bg-bw-gray-1/70"
               >
-                <div className="text-4xl mb-4">{feature.icon}</div>
-                <h3 className="text-xl font-semibold mb-2 text-cosmic-neon-cyan">
+                {/* Icon */}
+                <div className="text-4xl md:text-5xl mb-6 transform group-hover:scale-110 transition-transform duration-300">
+                  {feature.icon}
+                </div>
+                
+                {/* Content */}
+                <h3 className="text-headline-md mb-3 text-pure-white font-semibold">
                   {feature.title}
                 </h3>
-                <p className="text-pure-white/70">{feature.description}</p>
+                <p className="text-body-md text-pure-white/60 leading-relaxed">
+                  {feature.description}
+                </p>
               </motion.div>
             ))}
           </div>
@@ -122,6 +168,3 @@ export default function LandingPage() {
     </div>
   )
 }
-
-
-
